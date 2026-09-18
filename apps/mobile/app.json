@@ -1,0 +1,46 @@
+{
+  "expo": {
+    "name": "CyMetric",
+    "slug": "cyberscore",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "scheme": "cyberscore",
+    "userInterfaceStyle": "dark",
+    "newArchEnabled": false,
+    "backgroundColor": "#05060d",
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.cyberscore.app"
+    },
+    "android": {
+      "package": "com.cyberscore.app",
+      "adaptiveIcon": {
+        "backgroundColor": "#05060d"
+      },
+      "permissions": [
+        "android.permission.USE_BIOMETRIC",
+        "android.permission.USE_FINGERPRINT"
+      ]
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      "expo-local-authentication",
+      "expo-notifications",
+      "expo-font"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "extra": {
+      "apiBaseUrl": "https://cyberscore-api.vercel.app",
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "4cddb02b-7be0-47d3-8911-4df45863d418"
+      }
+    },
+    "owner": "saanviiiiiiiiiiiiii"
+  }
+}

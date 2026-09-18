@@ -1,0 +1,714 @@
+// CyMetric — production schema
+// 21 tables. cuid2 primary keys. Every mutable table has deletedAt.
+// RLS policies live in prisma/migrations/*/rls.sql (applied after migrate deploy).
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_DATABASE_URL")
+}
+
+// ============================================================
+// ENUMS
+// ============================================================
+
+enum Role {
+  EMPLOYEE
+  MANAGER
+  ADMIN
+}
+
+enum Framework {
+  EXCEL
+  NIST_CSF
+  ISO27001
+}
+
+enum Plan {
+  FREE
+  STARTER
+  GROWTH
+  ENTERPRISE
+}
+
+enum Level {
+  PEOPLE
+  PROCESS
+  COMPANY
+}
+
+enum InputType {
+  PERCENTAGE
+  DROPDOWN
+  RADIO
+}
+
+enum ProgressStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  COMPLETED
+}
+
+enum ScoreRange {
+  RED
+  AMBER
+  GREEN
+}
+
+enum SuggestionPriority {
+  HIGH
+  MEDIUM
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  TRIALING
+  PAST_DUE
+  CANCELLED
+}
+
+enum KpiStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum DevicePlatform {
+  IOS
+  ANDROID
+}
+
+// SOLO  = single-user org (existing flow, fits startups/4-5 person teams).
+// ENTERPRISE = multi-user org with admin + employees, locked framework,
+//              optional aggregated team scoring across employee-scope KPIs.
+enum OrgMode {
+  SOLO
+  ENTERPRISE
+}
+
+// How non-admin users are admitted into an ENTERPRISE org.
+//   INVITE_ONLY  — admin must explicitly invite (default for tighter control)
+//   DOMAIN_AUTO  — anyone signing up with @<emailDomain> auto-joins
+//   BOTH         — both paths accepted
+enum JoinMode {
+  INVITE_ONLY
+  DOMAIN_AUTO
+  BOTH
+}
+
+// Per-KPI answer scope:
+//   ORG       — single ground truth ("Do we have MFA?"). Admin's response is
+//               authoritative; employee responses kept as a consensus signal.
+//   EMPLOYEE  — every employee answers for themselves ("Did you complete
+//               training?"); company score is the aggregate.
+enum AnswerScope {
+  ORG
+  EMPLOYEE
+}
+
+enum InviteStatus {
+  PENDING
+  ACCEPTED
+  REVOKED
+  EXPIRED
+}
+
+// ============================================================
+// 1. CORE: organisations, users, sessions, otp
+// ============================================================
+
+model Organisation {
+  id                String    @id @default(cuid())
+  orgName           String    @db.VarChar(200)
+  industry          String    @db.VarChar(100)
+  email             String    @unique @db.VarChar(254)
+  passwordHash      String
+  isVerified        Boolean   @default(false)
+  selectedFramework Framework @default(EXCEL)
+  plan              Plan      @default(FREE)
+
+  // Enterprise-mode fields. SOLO orgs leave emailDomain null and joinMode
+  // defaults are inert for them. frameworkLocked is honoured by the API:
+  // when true, only an admin can change selectedFramework.
+  mode             OrgMode  @default(SOLO)
+  emailDomain      String?  @db.VarChar(253) // RFC 1035 max domain length
+  joinMode         JoinMode @default(INVITE_ONLY)
+  frameworkLocked  Boolean  @default(false)
+
+  deletedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  users                User[]
+  refreshTokens        RefreshToken[]
+  responses            Response[]
+  snapshots            ScorecardSnapshot[]
+  evidenceAttachments  EvidenceAttachment[]
+  progress             AssessmentProgress[]
+  subscription         Subscription?
+  apiKeys              ApiKey[]
+  webhooks             Webhook[]
+  notifications        Notification[]
+  pushTokens           PushToken[]
+  shareTokens          ShareToken[]
+  aiUsage              AiUsage[]
+  auditLogs            AuditLog[]
+  invites              Invite[]
+  chatThreads          ChatThread[]
+
+  @@unique([emailDomain])
+  @@index([email])
+  @@index([industry])
+  @@index([deletedAt])
+  @@index([mode])
+  @@map("organisations")
+}
+
+model User {
+  id           String  @id @default(cuid())
+  orgId        String
+  name         String  @db.VarChar(200)
+  email        String  @unique @db.VarChar(254)
+  passwordHash String
+  role         Role    @default(EMPLOYEE)
+  totpSecret   String? // encrypted at rest via app-layer AES-GCM
+  totpEnabled  Boolean @default(false)
+
+  // Per-user assessment access. Admins effectively have all levels regardless
+  // of column value; employees are gated to what their admin assigned. Default
+  // is all three so existing rows + SOLO orgs keep working without backfill.
+  allowedLevels Level[] @default([PEOPLE, PROCESS, COMPANY])
+
+  deletedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  org                 Organisation         @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  refreshTokens       RefreshToken[]
+  responses           Response[]
+  evidenceAttachments EvidenceAttachment[]
+  kpiVersions         KpiVersion[]
+  auditLogsAsActor    AuditLog[]           @relation("AuditLogActor")
+  pushTokens          PushToken[]
+  invitesSent         Invite[]             @relation("InviteCreator")
+  invitesAccepted     Invite[]             @relation("InviteAcceptor")
+  assessmentProgress  AssessmentProgress[]
+  chatThreads         ChatThread[]
+
+  @@index([orgId])
+  @@index([email])
+  @@index([deletedAt])
+  @@index([orgId, role])
+  @@map("users")
+}
+
+// Email-based invitations issued by an ADMIN of an ENTERPRISE org.
+// Token is returned only at creation; we store the bcrypt hash. The accept
+// endpoint takes the raw token + chosen password, verifies, creates the User.
+model Invite {
+  id          String       @id @default(cuid())
+  orgId       String
+  email       String       @db.VarChar(254)
+  role        Role         @default(EMPLOYEE)
+  tokenHash   String       @unique // bcrypt of the raw token
+  status      InviteStatus @default(PENDING)
+  invitedById String?
+  acceptedById String?
+  expiresAt   DateTime
+  acceptedAt  DateTime?
+  revokedAt   DateTime?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  // Levels the invitee will receive on accept. Admin can pre-assign at invite
+  // time; defaults to all three if not specified.
+  allowedLevels Level[] @default([PEOPLE, PROCESS, COMPANY])
+
+  org        Organisation @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  invitedBy  User?        @relation("InviteCreator", fields: [invitedById], references: [id], onDelete: SetNull)
+  acceptedBy User?        @relation("InviteAcceptor", fields: [acceptedById], references: [id], onDelete: SetNull)
+
+  // Only one PENDING invite per (org, email) — enforced at app layer with a
+  // case-insensitive lookup, since Prisma can't express partial uniques.
+  @@index([orgId])
+  @@index([email])
+  @@index([tokenHash])
+  @@index([status])
+  @@index([expiresAt])
+  @@map("invites")
+}
+
+// "Sessions / refresh_tokens" per spec §4.1.
+// Access JWTs are stateless and short-lived; only refresh tokens are tracked server-side.
+model RefreshToken {
+  id        String    @id @default(cuid())
+  orgId     String
+  userId    String
+  tokenHash String    @unique // bcrypt hash — never store the raw token
+  expiresAt DateTime
+  revokedAt DateTime?
+  userAgent String?   @db.VarChar(512)
+  ipAddress String?   @db.VarChar(64)
+  createdAt DateTime  @default(now())
+
+  org  Organisation @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  user User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([orgId])
+  @@index([userId])
+  @@index([tokenHash])
+  @@index([expiresAt])
+  @@map("refresh_tokens")
+}
+
+model OtpVerification {
+  id        String   @id @default(cuid())
+  email     String   @db.VarChar(254)
+  otpHash   String   // bcrypt hash — never plain text
+  purpose   String   @default("REGISTER") @db.VarChar(32) // REGISTER | PASSWORD_RESET | EMAIL_CHANGE
+  attempts  Int      @default(0)
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([email])
+  @@index([expiresAt])
+  @@map("otp_verifications")
+}
+
+// ============================================================
+// 2. KPI & SCORING
+// ============================================================
+
+model Kpi {
+  id             String    @id @default(cuid())
+  kpiName        String    @db.VarChar(200)
+  level          Level
+  maxScore       Int
+  weightage      Float     @default(1.0)
+  inputType      InputType
+  infoText       String    @db.Text
+  frameworkCode  Framework @default(EXCEL)
+  nistControlIds String[]  @default([])
+  isoControlIds  String[]  @default([])
+  isCustom       Boolean   @default(false)
+  isActive       Boolean   @default(true)
+  status         KpiStatus @default(PUBLISHED)
+  version        Int       @default(1)
+  displayOrder   Int       @default(0)
+
+  // ORG by default — single ground truth, admin authoritative. Flip to
+  // EMPLOYEE for KPIs that genuinely vary per user (training, behaviour,
+  // phishing exposure). Seed sets the right value per KPI.
+  answerScope    AnswerScope @default(ORG)
+
+  deletedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  tiers       ScoringTier[]
+  versions    KpiVersion[]
+  suggestions KpiSuggestion[]
+  responses   Response[]
+  benchmarks  IndustryBenchmark[]
+
+  @@index([level])
+  @@index([frameworkCode])
+  @@index([isActive, deletedAt])
+  @@index([displayOrder])
+  @@map("kpis")
+}
+
+// Immutable history — every edit to a KPI creates a new row here.
+model KpiVersion {
+  id          String   @id @default(cuid())
+  kpiId       String
+  version     Int
+  snapshot    Json     // full KPI + tiers at this version
+  changedById String?
+  changeNote  String?  @db.Text
+  createdAt   DateTime @default(now())
+
+  kpi       Kpi   @relation(fields: [kpiId], references: [id], onDelete: Cascade)
+  changedBy User? @relation(fields: [changedById], references: [id], onDelete: SetNull)
+
+  @@unique([kpiId, version])
+  @@index([kpiId])
+  @@map("kpi_versions")
+}
+
+model ScoringTier {
+  id         String @id @default(cuid())
+  kpiId      String
+  tierLabel  String @db.VarChar(200)
+  // Structured condition — never regex.
+  // Shape: { op: 'lte'|'lt'|'gte'|'gt'|'eq'|'range'|'in', value?: ..., values?: [] }
+  condition  Json
+  scoreValue Int
+  tierOrder  Int // 1 = best, higher = worse
+
+  kpi       Kpi        @relation(fields: [kpiId], references: [id], onDelete: Cascade)
+  responses Response[] @relation("ResponseMatchedTier")
+
+  @@unique([kpiId, tierOrder])
+  @@index([kpiId])
+  @@map("scoring_tiers")
+}
+
+model Response {
+  id            String   @id @default(cuid())
+  orgId         String
+  kpiId         String
+  kpiVersion    Int
+  submittedById String?
+  inputValue    String   @db.VarChar(512)
+  actualScore   Int
+  weightedScore Float
+  matchedTierId String?
+  evidenceUrl   String?  @db.VarChar(1024)
+  naJustification String? @db.Text
+  isNa          Boolean  @default(false)
+  // Idempotency — mobile sends a UUID per logical submission to de-dup offline replays.
+  idempotencyKey String? @db.Uuid
+
+  createdAt   DateTime @default(now())
+  submittedAt DateTime @default(now()) @updatedAt
+
+  org          Organisation         @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  kpi          Kpi                  @relation(fields: [kpiId], references: [id], onDelete: Restrict)
+  submittedBy  User?                @relation(fields: [submittedById], references: [id], onDelete: SetNull)
+  matchedTier  ScoringTier?         @relation("ResponseMatchedTier", fields: [matchedTierId], references: [id], onDelete: SetNull)
+  evidence     EvidenceAttachment[]
+
+  // Multi-user safe. For ORG-scope KPIs, only the admin's row is scored;
+  // employee rows are kept as a consensus signal. For EMPLOYEE-scope KPIs,
+  // every user has their own row and they're aggregated at score time.
+  // (orgId, kpiId, submittedById) is unique per Postgres semantics — NULL
+  // entries (legacy seed/system) compare distinct, which is fine.
+  @@unique([orgId, kpiId, submittedById], map: "responses_org_kpi_user_unique")
+  @@unique([orgId, idempotencyKey], map: "responses_org_idempotency_unique")
+  @@index([orgId])
+  @@index([kpiId])
+  @@index([submittedById])
+  @@index([submittedAt])
+  @@map("responses")
+}
+
+model ScorecardSnapshot {
+  id            String   @id @default(cuid())
+  orgId         String
+  peopleScore   Float
+  processScore  Float
+  companyScore  Float
+  overallScore  Float
+  completeness  Float    // 0..100
+  feedbackText  String?  @db.Text
+  // Breakdown payload used by mobile to render without re-querying responses.
+  breakdown     Json?
+  generatedAt   DateTime @default(now())
+
+  org Organisation @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  @@index([orgId, generatedAt])
+  @@map("scorecard_snapshots")
+}
+
+// ============================================================
+// 3. SUPPORTING: evidence, benchmarks, suggestions, progress
+// ============================================================
+
+model EvidenceAttachment {
+  id         String   @id @default(cuid())
+  responseId String
+  orgId      String   // denormalised for RLS
+  uploadedById String?
+  fileName   String   @db.VarChar(255)
+  fileKey    String   @db.VarChar(512) // R2/S3 object key
+  fileUrl    String   @db.VarChar(1024)
+  fileType   String   @db.VarChar(127)
+  fileSize   Int
+  createdAt  DateTime @default(now())
+
+  response   Response     @relation(fields: [responseId], references: [id], onDelete: Cascade)
+  org        Organisation @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  uploadedBy User?        @relation(fields: [uploadedById], references: [id], onDelete: SetNull)
+
+  @@index([responseId])
+  @@index([orgId])
+  @@map("evidence_attachments")
+}
+
+model IndustryBenchmark {
+  id                 String   @id @default(cuid())
+  kpiId              String
+  industry           String   @db.VarChar(100)
+  avgScore           Float
+  topPercentileScore Float
+  sampleSize         Int      // k — do NOT show aggregate until k >= 20
+  source             String   @db.VarChar(200)
+  lastUpdated        DateTime @default(now())
+  createdAt          DateTime @default(now())
+
+  kpi Kpi @relation(fields: [kpiId], references: [id], onDelete: Cascade)
+
+  @@unique([kpiId, industry])
+  @@index([industry])
+  @@map("industry_benchmarks")
+}
+
+model KpiSuggestion {
+  id             String             @id @default(cuid())
+  kpiId          String
+  scoreRange     ScoreRange
+  suggestionText String             @db.Text
+  priority       SuggestionPriority @default(MEDIUM)
+  createdAt      DateTime           @default(now())
+
+  kpi Kpi @relation(fields: [kpiId], references: [id], onDelete: Cascade)
+
+  @@index([kpiId, scoreRange])
+  @@map("kpi_suggestions")
+}
+
+model AssessmentProgress {
+  id                String         @id @default(cuid())
+  orgId             String
+  // Per-user resume index. SOLO orgs have a single user, so this is the
+  // same row pattern as before. ENTERPRISE orgs get one row per user per
+  // level — Bob's "resume at question 7" doesn't follow Alice around.
+  userId            String
+  level             Level
+  lastQuestionIndex Int            @default(0)
+  status            ProgressStatus @default(NOT_STARTED)
+  pausedAt          DateTime?
+  completedAt       DateTime?
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+
+  org  Organisation @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  user User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([orgId, userId, level])
+  @@index([orgId])
+  @@index([userId])
+  @@map("assessment_progress")
+}
+
+// Append-only. No UPDATE or DELETE permitted — enforced at RLS layer.
+model AuditLog {
+  id        String   @id @default(cuid())
+  actorId   String?
+  orgId     String?
+  action    String   @db.VarChar(100)
+  resource  String   @db.VarChar(200)
+  before    Json?
+  after     Json?
+  ipAddress String?  @db.VarChar(64)
+  userAgent String?  @db.VarChar(512)
+  traceId   String?  @db.VarChar(64)
+  createdAt DateTime @default(now())
+
+  actor User?         @relation("AuditLogActor", fields: [actorId], references: [id], onDelete: SetNull)
+  org   Organisation? @relation(fields: [orgId], references: [id], onDelete: SetNull)
+
+  @@index([orgId, createdAt])
+  @@index([actorId, createdAt])
+  @@index([action])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+// ============================================================
+// 4. BILLING & INTEGRATIONS
+// ============================================================
+
+model Subscription {
+  id                   String             @id @default(cuid())
+  orgId                String             @unique
+  plan                 Plan
+  status               SubscriptionStatus @default(ACTIVE)
+  currentPeriodEnd     DateTime
+  stripeCustomerId     String?            @db.VarChar(100)
+  stripeSubscriptionId String?            @db.VarChar(100)
+  cancelAtPeriodEnd    Boolean            @default(false)
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+
+  org Organisation @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  @@index([status])
+  @@index([stripeSubscriptionId])
+  @@map("subscriptions")
+}
+
+model ApiKey {
+  id         String    @id @default(cuid())
+  orgId      String
+  keyHash    String    @unique // bcrypt — never store raw
+  keyPrefix  String    @db.VarChar(16) // first few chars for UI display
+  name       String    @db.VarChar(100)
+  scopes     String[]  @default([])
+  lastUsedAt DateTime?
+  expiresAt  DateTime?
+  revokedAt  DateTime?
+  createdAt  DateTime  @default(now())
+
+  org Organisation @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  @@index([orgId])
+  @@index([keyHash])
+  @@map("api_keys")
+}
+
+model Webhook {
+  id        String   @id @default(cuid())
+  orgId     String
+  url       String   @db.VarChar(1024)
+  events    String[] @default([])
+  secret    String   // HMAC signing secret
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  org Organisation @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  @@index([orgId])
+  @@map("webhooks")
+}
+
+// ============================================================
+// 5. NOTIFICATIONS & DEVICES
+// ============================================================
+
+model Notification {
+  id        String   @id @default(cuid())
+  orgId     String
+  type      String   @db.VarChar(64)  // SCORE_DROPPED | REASSESSMENT_DUE | BENCHMARK_UPDATED | ...
+  title     String   @db.VarChar(200)
+  body      String   @db.Text
+  data      Json?    // deep-link payload for mobile
+  isRead    Boolean  @default(false)
+  readAt    DateTime?
+  createdAt DateTime @default(now())
+
+  org Organisation @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  @@index([orgId, createdAt])
+  @@index([orgId, isRead])
+  @@map("notifications")
+}
+
+// Expo push token registry — registered once after the user grants permission.
+model PushToken {
+  id            String         @id @default(cuid())
+  orgId         String
+  userId        String
+  expoPushToken String         @unique @db.VarChar(255)
+  deviceId      String         @db.VarChar(128)
+  platform      DevicePlatform
+  appVersion    String?        @db.VarChar(32)
+  isActive      Boolean        @default(true)
+  lastSeenAt    DateTime       @default(now())
+  createdAt     DateTime       @default(now())
+
+  org  Organisation @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  user User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, deviceId])
+  @@index([orgId])
+  @@index([isActive])
+  @@map("push_tokens")
+}
+
+// ============================================================
+// 6. VENDOR SHARE & AI TRACKING
+// ============================================================
+
+model ShareToken {
+  id        String    @id @default(cuid())
+  orgId     String
+  tokenHash String    @unique // bcrypt — raw token only ever returned once at creation
+  label     String?   @db.VarChar(200)
+  expiresAt DateTime
+  viewCount Int       @default(0)
+  lastViewedAt DateTime?
+  revokedAt DateTime?
+  createdAt DateTime  @default(now())
+
+  org Organisation @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  @@index([orgId])
+  @@index([tokenHash])
+  @@index([expiresAt])
+  @@map("share_tokens")
+}
+
+// Daily AI call budget tracking — used to enforce per-plan rate limits
+// and auto-switch from Sonnet to Haiku when daily budget is exhausted.
+model AiUsage {
+  id             String   @id @default(cuid())
+  orgId          String
+  day            DateTime @db.Date
+  model          String   @db.VarChar(64)
+  inputTokens    Int      @default(0)
+  outputTokens   Int      @default(0)
+  callCount      Int      @default(0)
+  estimatedCostUsd Float  @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  org Organisation @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  @@unique([orgId, day, model])
+  @@index([orgId, day])
+  @@map("ai_usage")
+}
+
+// Persisted AI chat threads. One thread = one conversation. ChatMessage rows
+// store the full turn-by-turn history; we replay them as the Anthropic
+// messages array on each new turn.
+model ChatThread {
+  id        String   @id @default(cuid())
+  orgId     String
+  userId    String
+  title     String   @db.VarChar(200)
+  archivedAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  org      Organisation  @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  user     User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages ChatMessage[]
+
+  @@index([orgId, userId, updatedAt(sort: Desc)])
+  @@index([archivedAt])
+  @@map("chat_threads")
+}
+
+enum ChatRole {
+  USER
+  ASSISTANT
+}
+
+model ChatMessage {
+  id        String   @id @default(cuid())
+  threadId  String
+  role      ChatRole
+  content   String   @db.Text
+  // Token accounting for analytics; nullable for user messages.
+  inputTokens  Int?
+  outputTokens Int?
+  cacheReadTokens     Int?
+  cacheCreationTokens Int?
+  createdAt DateTime @default(now())
+
+  thread ChatThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+
+  @@index([threadId, createdAt])
+  @@map("chat_messages")
+}

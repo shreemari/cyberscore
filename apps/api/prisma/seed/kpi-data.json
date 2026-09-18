@@ -1,0 +1,2798 @@
+[
+  {
+    "kpiName": "User Awareness Training Completion",
+    "level": "PEOPLE",
+    "category": "PEOPLE",
+    "maxScore": 200,
+    "weightage": 1.0,
+    "inputType": "PERCENTAGE",
+    "infoText": "Percentage of employees who have completed mandatory security awareness training.",
+    "nistControlIds": [
+      "PR.AA-01"
+    ],
+    "isoControlIds": [
+      "A.6.3"
+    ],
+    "tiers": [
+      {
+        "tierLabel": "100%",
+        "scoreValue": 200,
+        "condition": {
+          "op": "eq",
+          "value": 100.0
+        },
+        "tierOrder": 1
+      },
+      {
+        "tierLabel": "75-99%",
+        "scoreValue": 150,
+        "condition": {
+          "op": "range",
+          "min": 75,
+          "max": 99
+        },
+        "tierOrder": 2
+      },
+      {
+        "tierLabel": "51-74%",
+        "scoreValue": 100,
+        "condition": {
+          "op": "range",
+          "min": 51,
+          "max": 74
+        },
+        "tierOrder": 3
+      },
+      {
+        "tierLabel": "26-50%",
+        "scoreValue": 50,
+        "condition": {
+          "op": "range",
+          "min": 26,
+          "max": 50
+        },
+        "tierOrder": 4
+      },
+      {
+        "tierLabel": "≤25%",
+        "scoreValue": 0,
+        "condition": {
+          "op": "lte",
+          "value": 25.0
+        },
+        "tierOrder": 5
+      }
+    ]
+  },
+  {
+    "kpiName": "Phishing Click Rate",
+    "level": "PEOPLE",
+    "category": "PEOPLE",
+    "maxScore": 200,
+    "weightage": 1.0,
+    "inputType": "PERCENTAGE",
+    "infoText": "Percentage of employees who clicked on a simulated phishing email. Lower is better.",
+    "nistControlIds": [
+      "PR.AA-01"
+    ],
+    "isoControlIds": [
+      "A.6.3"
+    ],
+    "tiers": [
+      {
+        "tierLabel": "≤5%",
+        "scoreValue": 200,
+        "condition": {
+          "op": "lte",
+          "value": 5.0
+        },
+        "tierOrder": 1
+      },
+      {
+        "tierLabel": "6-10%",
+        "scoreValue": 150,
+        "condition": {
+          "op": "range",
+          "min": 6,
+          "max": 10
+        },
+        "tierOrder": 2
+      },
+      {
+        "tierLabel": "11-15%",
+        "scoreValue": 100,
+        "condition": {
+          "op": "range",
+          "min": 11,
+          "max": 15
+        },
+        "tierOrder": 3
+      },
+      {
+        "tierLabel": "16-25%",
+        "scoreValue": 50,
+        "condition": {
+          "op": "range",
+          "min": 16,
+          "max": 25
+        },
+        "tierOrder": 4
+      },
+      {
+        "tierLabel": ">25%",
+        "scoreValue": 0,
+        "condition": {
+          "op": "gt",
+          "value": 25.0
+        },
+        "tierOrder": 5
+      }
+    ]
+  },
+  {
+    "kpiName": "Security Awareness — Social Engineering Failure Rate",
+    "level": "PEOPLE",
+    "category": "PEOPLE",
+    "maxScore": 200,
+    "weightage": 1.0,
+    "inputType": "PERCENTAGE",
+    "infoText": "Percentage of employees who failed a social engineering simulation. Lower is better.",
+    "nistControlIds": [
+      "PR.AA-01"
+    ],
+    "isoControlIds": [
+      "A.6.3"
+    ],
+    "tiers": [
+      {
+        "tierLabel": "≤3%",
+        "scoreValue": 200,
+        "condition": {
+          "op": "lte",
+          "value": 3.0
+        },
+        "tierOrder": 1
+      },
+      {
+        "tierLabel": "4-6%",
+        "scoreValue": 150,
+        "condition": {
+          "op": "range",
+          "min": 4,
+          "max": 6
+        },
+        "tierOrder": 2
+      },
+      {
+        "tierLabel": "7-11%",
+        "scoreValue": 100,
+        "condition": {
+          "op": "range",
+          "min": 7,
+          "max": 11
+        },
+        "tierOrder": 3
+      },
+      {
+        "tierLabel": "12-15%",
+        "scoreValue": 50,
+        "condition": {
+          "op": "range",
+          "min": 12,
+          "max": 15
+        },
+        "tierOrder": 4
+      },
+      {
+        "tierLabel": ">15%",
+        "scoreValue": 0,
+        "condition": {
+          "op": "gt",
+          "value": 15.0
+        },
+        "tierOrder": 5
+      }
+    ]
+  },
+  {
+    "kpiName": "Security Awareness — Quiz Score (% employees passing)",
+    "level": "PEOPLE",
+    "category": "PEOPLE",
+    "maxScore": 200,
+    "weightage": 1.0,
+    "inputType": "PERCENTAGE",
+    "infoText": "Percentage of employees who passed the security awareness quiz.",
+    "nistControlIds": [
+      "PR.AA-01"
+    ],
+    "isoControlIds": [
+      "A.6.3"
+    ],
+    "tiers": [
+      {
+        "tierLabel": "100%",
+        "scoreValue": 200,
+        "condition": {
+          "op": "eq",
+          "value": 100.0
+        },
+        "tierOrder": 1
+      },
+      {
+        "tierLabel": "75-99%",
+        "scoreValue": 150,
+        "condition": {
+          "op": "range",
+          "min": 75,
+          "max": 99
+        },
+        "tierOrder": 2
+      },
+      {
+        "tierLabel": "51-74%",
+        "scoreValue": 100,
+        "condition": {
+          "op": "range",
+          "min": 51,
+          "max": 74
+        },
+        "tierOrder": 3
+      },
+      {
+        "tierLabel": "26-50%",
+        "scoreValue": 50,
+        "condition": {
+          "op": "range",
+          "min": 26,
+          "max": 50
+        },
+        "tierOrder": 4
+      },
+      {
+        "tierLabel": "≤25%",
+        "scoreValue": 0,
+        "condition": {
+          "op": "lte",
+          "value": 25.0
+        },
+        "tierOrder": 5
+      }
+    ]
+  },
+  {
+    "kpiName": "Policy Violations — Data in Personal Space",
+    "level": "PEOPLE",
+    "category": "PEOPLE",
+    "maxScore": 50,
+    "weightage": 1.0,
+    "inputType": "DROPDOWN",
+    "infoText": "Number of times per month an employee stored company data in personal cloud, email, or device.",
+    "nistControlIds": [
+      "RS.AN-01"
+    ],
+    "isoControlIds": [
+      "A.5.36"
+    ],
+    "tiers": [
+      {
+        "tierLabel": "0/none",
+        "scoreValue": 50,
+        "condition": {
+          "op": "eq",
+          "value": 0.0
+        },
+        "tierOrder": 1
+      },
+      {
+        "tierLabel": "1-2/mon",
+        "scoreValue": 40,
+        "condition": {
+          "op": "range",
+          "min": 1,
+          "max": 2
+        },
+        "tierOrder": 2
+      },
+      {
+        "tierLabel": "3-5/mon",
+        "scoreValue": 30,
+        "condition": {
+          "op": "range",
+          "min": 3,
+          "max": 5
+        },
+        "tierOrder": 3
+      },
+      {
+        "tierLabel": "5-10/mon",
+        "scoreValue": 20,
+        "condition": {
+          "op": "range",
+          "min": 5,
+          "max": 10
+        },
+        "tierOrder": 4
+      },
+      {
+        "tierLabel": ">10/mon",
+        "scoreValue": 0,
+        "condition": {
+          "op": "gt",
+          "value": 10.0
+        },
+        "tierOrder": 5
+      }
+    ]
+  },
+  {
+    "kpiName": "Policy Violations — Data Classification",
+    "level": "PEOPLE",
+    "category": "PEOPLE",
+    "maxScore": 50,
+    "weightage": 1.0,
+    "inputType": "DROPDOWN",
+    "infoText": "Number of times per month data was mis-labelled (e.g. confidential marked public).",
+    "nistControlIds": [
+      "RS.AN-01"
+    ],
+    "isoControlIds": [
+      "A.5.36"
+    ],
+    "tiers": [
+      {
+        "tierLabel": "0/none",
+        "scoreValue": 50,
+        "condition": {
+          "op": "eq",
+          "value": 0.0
+        },
+        "tierOrder": 1
+      },
+      {
+        "tierLabel": "1-2/mon",
+        "scoreValue": 40,
+        "condition": {
+          "op": "range",
+          "min": 1,
+          "max": 2
+        },
+        "tierOrder": 2
+      },
+      {
+        "tierLabel": "3-5/mon",
+        "scoreValue": 30,
+        "condition": {
+          "op": "range",
+          "min": 3,
+          "max": 5
+        },
+        "tierOrder": 3
+      },
+      {
+        "tierLabel": "5-10/mon",
+        "scoreValue": 20,
+        "condition": {
+          "op": "range",
+          "min": 5,
+          "max": 10
+        },
+        "tierOrder": 4
+      },
+      {
+        "tierLabel": ">10/mon",
+        "scoreValue": 0,
+        "condition": {
+          "op": "gt",
+          "value": 10.0
+        },
+        "tierOrder": 5
+      }
+    ]
+  },
+  {
+    "kpiName": "Policy Violations — Unauthorised Software Installs",
+    "level": "PEOPLE",
+    "category": "PEOPLE",
+    "maxScore": 50,
+    "weightage": 1.0,
+    "inputType": "DROPDOWN",
+    "infoText": "Number of unauthorised software installs detected on company devices per month.",
+    "nistControlIds": [
+      "RS.AN-01"
+    ],
+    "isoControlIds": [
+      "A.5.36"
+    ],
+    "tiers": [
+      {
+        "tierLabel": "0/none",
+        "scoreValue": 50,
+        "condition": {
+          "op": "eq",
+          "value": 0.0
+        },
+        "tierOrder": 1
+      },
+      {
+        "tierLabel": "1-2/mon",
+        "scoreValue": 40,
+        "condition": {
+          "op": "range",
+          "min": 1,
+          "max": 2
+        },
+        "tierOrder": 2
+      },
+      {
+        "tierLabel": "3-5/mon",
+        "scoreValue": 30,
+        "condition": {
+          "op": "range",
+          "min": 3,
+          "max": 5
+        },
+        "tierOrder": 3
+      },
+      {
+        "tierLabel": "5-10/mon",
+        "scoreValue": 20,
+        "condition": {
+          "op": "range",
+          "min": 5,
+          "max": 10
+        },
+        "tierOrder": 4
+      },
+      {
+        "tierLabel": ">10/mon",
+        "scoreValue": 0,
+        "condition": {
+          "op": "gt",
+          "value": 10.0
+        },
+        "tierOrder": 5
+      }
+    ]
+  },
+  {
+    "kpiName": "Policy Violations — Removable Media Usage",
+    "level": "PEOPLE",
+    "category": "PEOPLE",
+    "maxScore": 50,
+    "weightage": 1.0,
+    "inputType": "DROPDOWN",
+    "infoText": "Number of times removable media (USB, external drives) was used against policy per month.",
+    "nistControlIds": [
+      "RS.AN-01"
+    ],
+    "isoControlIds": [
+      "A.5.36",
+      "A.7.9"
+    ],
+    "tiers": [
+      {
+        "tierLabel": "0/none",
+        "scoreValue": 50,
+        "condition": {
+          "op": "eq",
+          "value": 0.0
+        },
+        "tierOrder": 1
+      },
+      {
+        "tierLabel": "1-2/mon",
+        "scoreValue": 40,
+        "condition": {
+          "op": "range",
+          "min": 1,
+          "max": 2
+        },
+        "tierOrder": 2
+      },
+      {
+        "tierLabel": "3-5/mon",
+        "scoreValue": 30,
+        "condition": {
+          "op": "range",
+          "min": 3,
+          "max": 5
+        },
+        "tierOrder": 3
+      },
+      {
+        "tierLabel": "5-10/mon",
+        "scoreValue": 20,
+        "condition": {
+          "op": "range",
+          "min": 5,
+          "max": 10
+        },
+        "tierOrder": 4
+      },
+      {
+        "tierLabel": ">10/mon",
+        "scoreValue": 0,
+        "condition": {
+          "op": "gt",
+          "value": 10.0
+        },
+        "tierOrder": 5
+      }
+    ]
+  },
+  {
+    "kpiName": "MTTD — Avg Detection Time (weekly)",
+    "level": "PROCESS",
+    "category": "PROCESS",
+    "maxScore": 75,
+    "weightage": 1.0,
+    "inputType": "DROPDOWN",
+    "infoText": "Mean time to detect a security incident, measured weekly. Lower is better.",
+    "nistControlIds": [
+      "DE.CM-01"
+    ],
+    "isoControlIds": [
+      "A.5.24"
+    ],
+    "tiers": [
+      {
+        "tierLabel": "<1 hr",
+        "scoreValue": 75,
+        "condition": {
+          "op": "lt",
+          "value": 1.0
+        },
+        "tierOrder": 1
+      },
+      {
+        "tierLabel": ">1 & <12 hrs",
+        "scoreValue": 50,
+        "condition": {
+          "op": "range",
+          "min": 1,
+          "max": 12,
+          "exclusive": true
+        },
+        "tierOrder": 2
+      },
+      {
+        "tierLabel": ">12 & <24 hrs",
+        "scoreValue": 25,
+        "condition": {
+          "op": "range",
+          "min": 12,
+          "max": 24,
+          "exclusive": true
+        },
+        "tierOrder": 3
+      },
+      {
+        "tierLabel": ">24 & <48 hrs",
+        "scoreValue": 10,
+        "condition": {
+          "op": "range",
+          "min": 24,
+          "max": 48,
+          "exclusive": true
+        },
+        "tierOrder": 4
+      },
+      {
+        "tierLabel": ">48 hrs",
+        "scoreValue": 0,
+        "condition": {
+          "op": "gt",
+          "value": 48.0
+        },
+        "tierOrder": 5
+      }
+    ]
+  },
+  {
+    "kpiName": "MTTD — Month-on-Month Trend",
+    "level": "PROCESS",
+    "category": "PROCESS",
+    "maxScore": 25,
+    "weightage": 1.0,
+    "inputType": "RADIO",
+    "infoText": "Direction of MTTD over the last month. Declining (getting faster) is best.",
+    "nistControlIds": [
+      "DE.CM-01"
+    ],
+    "isoControlIds": [
+      "A.8.16"
+    ],
+    "tiers": [
+      {
+        "tierLabel": "Declining",
+        "scoreValue": 25,
+        "condition": {
+          "op": "eq",
+          "value": "Declining"
+        },
+        "tierOrder": 1
+      },
+      {
+        "tierLabel": "Steady",
+        "scoreValue": 15,
+        "condition": {
+          "op": "eq",
+          "value": "Steady"
+        },
+        "tierOrder": 2
+      },
+      {
+        "tierLabel": "Increasing",
+        "scoreValue": -25,
+        "condition": {
+          "op": "eq",
+          "value": "Increasing"
+        },
+        "tierOrder": 4
+      }
+    ]
+  },
+  {
+    "kpiName": "MTTR — Avg Response Time (weekly)",
+    "level": "PROCESS",
+    "category": "PROCESS",
+    "maxScore": 75,
+    "weightage": 1.0,
+    "inputType": "DROPDOWN",
+    "infoText": "Mean time to respond to a detected incident, measured weekly. Lower is better.",
+    "nistControlIds": [
+      "RS.AN-01"
+    ],
+    "isoControlIds": [
+      "A.5.24"
+    ],
+    "tiers": [
+      {
+        "tierLabel": "<1 hr",
+        "scoreValue": 75,
+        "condition": {
+          "op": "lt",
+          "value": 1.0
+        },
+        "tierOrder": 1
+      },
+      {
+        "tierLabel": ">1 & <12 hrs",
+        "scoreValue": 50,
+        "condition": {
+          "op": "range",
+          "min": 1,
+          "max": 12,
+          "exclusive": true
+        },
+        "tierOrder": 2
+      },
+      {
+        "tierLabel": ">12 & <24 hrs",
+        "scoreValue": 25,
+        "condition": {
+          "op": "range",
+          "min": 12,
+          "max": 24,
+          "exclusive": true
+        },
+        "tierOrder": 3
+      },
+      {
+        "tierLabel": ">24 & <48 hrs",
+        "scoreValue": 10,
+        "condition": {
+          "op": "range",
+          "min": 24,
+          "max": 48,
+          "exclusive": true
+        },
+        "tierOrder": 4
+      },
+      {
+        "tierLabel": ">48 hrs",
+        "scoreValue": 0,
+        "condition": {
+          "op": "gt",
+          "value": 48.0
+        },
+        "tierOrder": 5
+      }
+    ]
+  },
+  {
+    "kpiName": "MTTR — Month-on-Month Trend",
+    "level": "PROCESS",
+    "category": "PROCESS",
+    "maxScore": 25,
+    "weightage": 1.0,
+    "inputType": "RADIO",
+    "infoText": "Direction of MTTR over the last month. Declining (getting faster) is best.",
+    "nistControlIds": [
+      "RS.AN-01"
+    ],
+    "isoControlIds": [
+      "A.8.16"
+    ],
+    "tiers": [
+      {
+        "tierLabel": "Declining",
+        "scoreValue": 25,
+        "condition": {
+          "op": "eq",
+          "value": "Declining"
+        },
+        "tierOrder": 1
+      },
+      {
+        "tierLabel": "Steady",
+        "scoreValue": 15,
+        "condition": {
+          "op": "eq",
+          "value": "Steady"
+        },
+        "tierOrder": 2
+      },
+      {
+        "tierLabel": "Increasing",
+        "scoreValue": -25,
+        "condition": {
+          "op": "eq",
+          "value": "Increasing"
+        },
+        "tierOrder": 4
+      }
+    ]
+  },
+  {
+    "kpiName": "MTBF — Mean Time Between Failures",
+    "level": "PROCESS",
+    "category": "PROCESS",
+    "maxScore": 100,
+    "weightage": 1.0,
+    "inputType": "DROPDOWN",
+    "infoText": "Average time between security incidents. Higher is better.",
+    "nistControlIds": [
+      "RC.RP-01"
+    ],
+    "isoControlIds": [
+      "A.5.29"
+    ],
+    "tiers": [
+      {
+        "tierLabel": ">90 days",
+        "scoreValue": 100,
+        "condition": {
+          "op": "gt",
+          "value": 90.0
+        },
+        "tierOrder": 1
+      },
+      {
+        "tierLabel": ">60 & <90 days",
+        "scoreValue": 75,
+        "condition": {
+          "op": "range",
+          "min": 60,
+          "max": 90,
+          "exclusive": true
+        },
+        "tierOrder": 2
+      },
+      {
+        "tierLabel": ">30 & <60 days",
+        "scoreValue": 50,
+        "condition": {
+          "op": "range",
+          "min": 30,
+          "max": 60,
+          "exclusive": true
+        },
+        "tierOrder": 3
+      },
+      {
+        "tierLabel": ">10 & <30 days",
+        "scoreValue": 25,
+        "condition": {
+          "op": "range",
+          "min": 10,
+          "max": 30,
+          "exclusive": true
+        },
+        "tierOrder": 4
+      },
+      {
+        "tierLabel": "<10 days",
+        "scoreValue": 0,
+        "condition": {
+          "op": "lt",
+          "value": 10.0
+        },
+        "tierOrder": 5
+      }
+    ]
+  },
+  {
+    "kpiName": "MTTC — Mean Time to Contain",
+    "level": "PROCESS",
+    "category": "PROCESS",
+    "maxScore": 100,
+    "weightage": 1.0,
+    "inputType": "DROPDOWN",
+    "infoText": "Average time from detection to full containment. Faster is better.",
+    "nistControlIds": [
+      "RS.AN-01"
+    ],
+    "isoControlIds": [
+      "A.5.24"
+    ],
+    "tiers": [
+      {
+        "tierLabel": "In seconds",
+        "scoreValue": 100,
+        "condition": {
+          "op": "eq",
+          "value": "In seconds"
+        },
+        "tierOrder": 1
+      },
+      {
+        "tierLabel": "In minutes",
+        "scoreValue": 75,
+        "condition": {
+          "op": "eq",
+          "value": "In minutes"
+        },
+        "tierOrder": 2
+      },
+      {
+        "tierLabel": "In hours",
+        "scoreValue": 50,
+        "condition": {
+          "op": "eq",
+          "value": "In hours"
+        },
+        "tierOrder": 3
+      },
+      {
+        "tierLabel": "In days",
+        "scoreValue": 25,
+        "condition": {
+          "op": "eq",
+          "value": "In days"
+        },
+        "tierOrder": 4
+      },
+      {
+        "tierLabel": "In weeks",
+        "scoreValue": -25,
+        "condition": {
+          "op": "eq",
+          "value": "In weeks"
+        },
+        "tierOrder": 5
+      }
+    ]
+  },
+  {
+    "kpiName": "Patch Compliance Rate",
+    "level": "PROCESS",
+    "category": "PROCESS",
+    "maxScore": 100,
+    "weightage": 1.0,
+    "inputType": "PERCENTAGE",
+    "infoText": "Percentage of in-scope systems with all required patches applied.",
+    "nistControlIds": [
+      "PR.AA-01"
+    ],
+    "isoControlIds": [
+      "A.8.8"
+    ],
+    "tiers": [
+      {
+        "tierLabel": "100%",
+        "scoreValue": 100,
+        "condition": {
+          "op": "eq",
+          "value": 100.0
+        },
+        "tierOrder": 1
+      },
+      {
+        "tierLabel": "75-99%",
+        "scoreValue": 75,
+        "condition": {
+          "op": "range",
+          "min": 75,
+          "max": 99
+        },
+        "tierOrder": 2
+      },
+      {
+        "tierLabel": "51-74%",
+        "scoreValue": 50,
+        "condition": {
+          "op": "range",
+          "min": 51,
+          "max": 74
+        },
+        "tierOrder": 3
+      },
+      {
+        "tierLabel": "26-50%",
+        "scoreValue": 25,
+        "condition": {
+          "op": "range",
+          "min": 26,
+          "max": 50
+        },
+        "tierOrder": 4
+      },
+      {
+        "tierLabel": "≤25%",
+        "scoreValue": 0,
+        "condition": {
+          "op": "lte",
+          "value": 25.0
+        },
+        "tierOrder": 5
+      }
+    ]
+  },
+  {
+    "kpiName": "Security Patch Deployment Time",
+    "level": "PROCESS",
+    "category": "PROCESS",
+    "maxScore": 100,
+    "weightage": 1.0,
+    "inputType": "DROPDOWN",
+    "infoText": "Time taken to deploy a critical security patch after release.",
+    "nistControlIds": [
+      "PR.AA-01"
+    ],
+    "isoControlIds": [
+      "A.8.8"
+    ],
+    "tiers": [
+      {
+        "tierLabel": "<2 days",
+        "scoreValue": 100,
+        "condition": {
+          "op": "lt",
+          "value": 2.0
+        },
+        "tierOrder": 1
+      },
+      {
+        "tierLabel": ">2 & <4 days",
+        "scoreValue": 75,
+        "condition": {
+          "op": "range",
+          "min": 2,
+          "max": 4,
+          "exclusive": true
+        },
+        "tierOrder": 2
+      },
+      {
+        "tierLabel": ">4 & <7 days",
+        "scoreValue": 50,
+        "condition": {
+          "op": "range",
+          "min": 4,
+          "max": 7,
+          "exclusive": true
+        },
+        "tierOrder": 3
+      },
+      {
+        "tierLabel": ">7 & <10 days",
+        "scoreValue": 50,
+        "condition": {
+          "op": "range",
+          "min": 7,
+          "max": 10,
+          "exclusive": true
+        },
+        "tierOrder": 4
+      },
+      {
+        "tierLabel": ">10 days",
+        "scoreValue": 0,
+        "condition": {
+          "op": "gt",
+          "value": 10.0
+        },
+        "tierOrder": 5
+      }
+    ]
+  },
+  {
+    "kpiName": "Intrusion — Malicious Login Attempts Blocked",
+    "level": "PROCESS",
+    "category": "PROCESS",
+    "maxScore": 50,
+    "weightage": 1.0,
+    "inputType": "PERCENTAGE",
+    "infoText": "Percentage of malicious login attempts that were successfully blocked.",
+    "nistControlIds": [
+      "RS.AN-01"
+    ],
+    "isoControlIds": [
+      "A.8.7"
+    ],
+    "tiers": [
+      {
+        "tierLabel": "100%",
+        "scoreValue": 50,
+        "condition": {
+          "op": "eq",
+          "value": 100.0
+        },
+        "tierOrder": 1
+      },
+      {
+        "tierLabel": "75-99%",
+        "scoreValue": 40,
+        "condition": {
+          "op": "range",
+          "min": 75,
+          "max": 99
+        },
+        "tierOrder": 2
+      },
+      {
+        "tierLabel": "51-74%",
+        "scoreValue": 30,
+        "condition": {
+          "op": "range",
+          "min": 51,
+          "max": 74
+        },
+        "tierOrder": 3
+      },
+      {
+        "tierLabel": "26-50%",
+        "scoreValue": 20,
+        "condition": {
+          "op": "range",
+          "min": 26,
+          "max": 50
+        },
+        "tierOrder": 4
+      },
+      {
+        "tierLabel": "≤25%",
+        "scoreValue": 0,
+        "condition": {
+          "op": "lte",
+          "value": 25.0
+        },
+        "tierOrder": 5
+      }
+    ]
+  },
+  {
+    "kpiName": "Intrusion — Malicious Port Scans Blocked",
+    "level": "PROCESS",
+    "category": "PROCESS",
+    "maxScore": 50,
+    "weightage": 1.0,
+    "inputType": "PERCENTAGE",
+    "infoText": "Percentage of malicious port scans that were successfully blocked.",
+    "nistControlIds": [
+      "RS.AN-01"
+    ],
+    "isoControlIds": [
+      "A.8.7"
+    ],
+    "tiers": [
+      {
+        "tierLabel": "100%",
+        "scoreValue": 50,
+        "condition": {
+          "op": "eq",
+          "value": 100.0
+        },
+        "tierOrder": 1
+      },
+      {
+        "tierLabel": "75-99%",
+        "scoreValue": 40,
+        "condition": {
+          "op": "range",
+          "min": 75,
+          "max": 99
+        },
+        "tierOrder": 2
+      },
+      {
+        "tierLabel": "51-74%",
+        "scoreValue": 30,
+        "condition": {
+          "op": "range",
+          "min": 51,
+          "max": 74
+        },
+        "tierOrder": 3
+      },
+      {
+        "tierLabel": "26-50%",
+        "scoreValue": 20,
+        "condition": {
+          "op": "range",
+          "min": 26,
+          "max": 50
+        },
+        "tierOrder": 4
+      },
+      {
+        "tierLabel": "≤25%",
+        "scoreValue": 0,
+        "condition": {
+          "op": "lte",
+          "value": 25.0
+        },
+        "tierOrder": 5
+      }
+    ]
+  },
+  {
+    "kpiName": "Intrusion — Known Exploit Payloads Blocked",
+    "level": "PROCESS",
+    "category": "PROCESS",
+    "maxScore": 50,
+    "weightage": 1.0,
+    "inputType": "PERCENTAGE",
+    "infoText": "Percentage of known exploit payloads that were successfully blocked.",
+    "nistControlIds": [
+      "RS.AN-01"
+    ],
+    "isoControlIds": [
+      "A.8.7"
+    ],
+    "tiers": [
+      {
+        "tierLabel": "100%",
+        "scoreValue": 50,
+        "condition": {
+          "op": "eq",
+          "value": 100.0
+        },
+        "tierOrder": 1
+      },
+      {
+        "tierLabel": "75-99%",
+        "scoreValue": 40,
+        "condition": {
+          "op": "range",
+          "min": 75,
+          "max": 99
+        },
+        "tierOrder": 2
+      },
+      {
+        "tierLabel": "51-74%",
+        "scoreValue": 30,
+        "condition": {
+          "op": "range",
+          "min": 51,
+          "max": 74
+        },
+        "tierOrder": 3
+      },
+      {
+        "tierLabel": "26-50%",
+        "scoreValue": 20,
+        "condition": {
+          "op": "range",
+          "min": 26,
+          "max": 50
+        },
+        "tierOrder": 4
+      },
+      {
+        "tierLabel": "≤25%",
+        "scoreValue": 0,
+        "condition": {
+          "op": "lte",
+          "value": 25.0
+        },
+        "tierOrder": 5
+      }
+    ]
+  },
+  {
+    "kpiName": "Intrusion — Viruses / Ransomware Blocked",
+    "level": "PROCESS",
+    "category": "PROCESS",
+    "maxScore": 25,
+    "weightage": 1.0,
+    "inputType": "PERCENTAGE",
+    "infoText": "Percentage of virus and ransomware attempts that were successfully blocked.",
+    "nistControlIds": [
+      "RS.AN-01"
+    ],
+    "isoControlIds": [
+      "A.8.7"
+    ],
+    "tiers": [
+      {
+        "tierLabel": "100%",
+        "scoreValue": 25,
+        "condition": {
+          "op": "eq",
+          "value": 100.0
+        },
+        "tierOrder": 1
+      },
+      {
+        "tierLabel": "75-99%",
+        "scoreValue": 20,
+        "condition": {
+          "op": "range",
+          "min": 75,
+          "max": 99
+        },
+        "tierOrder": 2
+      },
+      {
+        "tierLabel": "51-74%",
+        "scoreValue": 15,
+        "condition": {
+          "op": "range",
+          "min": 51,
+          "max": 74
+        },
+        "tierOrder": 3
+      },
+      {
+        "tierLabel": "26-50%",
+        "scoreValue": 10,
+        "condition": {
+          "op": "range",
+          "min": 26,
+          "max": 50
+        },
+        "tierOrder": 4
+      },
+      {
+        "tierLabel": "≤25%",
+        "scoreValue": 0,
+        "condition": {
+          "op": "lte",
+          "value": 25.0
+        },
+        "tierOrder": 5
+      }
+    ]
+  },
+  {
+    "kpiName": "Intrusion — False Positive Verification & Whitelist",
+    "level": "PROCESS",
+    "category": "PROCESS",
+    "maxScore": 25,
+    "weightage": 1.0,
+    "inputType": "PERCENTAGE",
+    "infoText": "Percentage of false positives correctly verified and whitelisted.",
+    "nistControlIds": [
+      "RS.AN-01"
+    ],
+    "isoControlIds": [
+      "A.8.7"
+    ],
+    "tiers": [
+      {
+        "tierLabel": "100%",
+        "scoreValue": 25,
+        "condition": {
+          "op": "eq",
+          "value": 100.0
+        },
+        "tierOrder": 1
+      },
+      {
+        "tierLabel": "75-99%",
+        "scoreValue": 20,
+        "condition": {
+          "op": "range",
+          "min": 75,
+          "max": 99
+        },
+        "tierOrder": 2
+      },
+      {
+        "tierLabel": "51-74%",
+        "scoreValue": 15,
+        "condition": {
+          "op": "range",
+          "min": 51,
+          "max": 74
+        },
+        "tierOrder": 3
+      },
+      {
+        "tierLabel": "26-50%",
+        "scoreValue": 10,
+        "condition": {
+          "op": "range",
+          "min": 26,
+          "max": 50
+        },
+        "tierOrder": 4
+      },
+      {
+        "tierLabel": "≤25%",
+        "scoreValue": 0,
+        "condition": {
+          "op": "lte",
+          "value": 25.0
+        },
+        "tierOrder": 5
+      }
+    ]
+  },
+  {
+    "kpiName": "Zero-Day Exploit Cases — % Contained",
+    "level": "PROCESS",
+    "category": "PROCESS",
+    "maxScore": 100,
+    "weightage": 0.5,
+    "inputType": "PERCENTAGE",
+    "infoText": "Percentage of zero-day exploit attempts that were contained.",
+    "nistControlIds": [
+      "DE.CM-01"
+    ],
+    "isoControlIds": [
+      "A.5.7"
+    ],
+    "tiers": [
+      {
+        "tierLabel": "100%",
+        "scoreValue": 100,
+        "condition": {
+          "op": "eq",
+          "value": 100.0
+        },
+        "tierOrder": 1
+      },
+      {
+        "tierLabel": "75-99%",
+        "scoreValue": 75,
+        "condition": {
+          "op": "range",
+          "min": 75,
+          "max": 99
+        },
+        "tierOrder": 2
+      },
+      {
+        "tierLabel": "51-74%",
+        "scoreValue": 50,
+        "condition": {
+          "op": "range",
+          "min": 51,
+          "max": 74
+        },
+        "tierOrder": 3
+      },
+      {
+        "tierLabel": "26-50%",
+        "scoreValue": 25,
+        "condition": {
+          "op": "range",
+          "min": 26,
+          "max": 50
+        },
+        "tierOrder": 4
+      },
+      {
+        "tierLabel": "≤25%",
+        "scoreValue": 0,
+        "condition": {
+          "op": "lte",
+          "value": 25.0
+        },
+        "tierOrder": 5
+      }
+    ]
+  },
+  {
+    "kpiName": "Data Exfiltration Attempts — % Contained",
+    "level": "PROCESS",
+    "category": "PROCESS",
+    "maxScore": 100,
+    "weightage": 0.5,
+    "inputType": "PERCENTAGE",
+    "infoText": "Percentage of data exfiltration attempts that were contained.",
+    "nistControlIds": [
+      "DE.CM-01"
+    ],
+    "isoControlIds": [
+      "A.5.14"
+    ],
+    "tiers": [
+      {
+        "tierLabel": "100%",
+        "scoreValue": 100,
+        "condition": {
+          "op": "eq",
+          "value": 100.0
+        },
+        "tierOrder": 1
+      },
+      {
+        "tierLabel": "75-99%",
+        "scoreValue": 75,
+        "condition": {
+          "op": "range",
+          "min": 75,
+          "max": 99
+        },
+        "tierOrder": 2
+      },
+      {
+        "tierLabel": "51-74%",
+        "scoreValue": 50,
+        "condition": {
+          "op": "range",
+          "min": 51,
+          "max": 74
+        },
+        "tierOrder": 3
+      },
+      {
+        "tierLabel": "26-50%",
+        "scoreValue": 25,
+        "condition": {
+          "op": "range",
+          "min": 26,
+          "max": 50
+        },
+        "tierOrder": 4
+      },
+      {
+        "tierLabel": "≤25%",
+        "scoreValue": 0,
+        "condition": {
+          "op": "lte",
+          "value": 25.0
+        },
+        "tierOrder": 5
+      }
+    ]
+  },
+  {
+    "kpiName": "DNS & C2 Traffic — % Identified & Prevented",
+    "level": "PROCESS",
+    "category": "PROCESS",
+    "maxScore": 100,
+    "weightage": 0.5,
+    "inputType": "PERCENTAGE",
+    "infoText": "Percentage of malicious DNS and command-and-control traffic identified and blocked.",
+    "nistControlIds": [
+      "DE.CM-01"
+    ],
+    "isoControlIds": [
+      "A.8.23"
+    ],
+    "tiers": [
+      {
+        "tierLabel": "100%",
+        "scoreValue": 100,
+        "condition": {
+          "op": "eq",
+          "value": 100.0
+        },
+        "tierOrder": 1
+      },
+      {
+        "tierLabel": "75-99%",
+        "scoreValue": 75,
+        "condition": {
+          "op": "range",
+          "min": 75,
+          "max": 99
+        },
+        "tierOrder": 2
+      },
+      {
+        "tierLabel": "51-74%",
+        "scoreValue": 50,
+        "condition": {
+          "op": "range",
+          "min": 51,
+          "max": 74
+        },
+        "tierOrder": 3
+      },
+      {
+        "tierLabel": "26-50%",
+        "scoreValue": 25,
+        "condition": {
+          "op": "range",
+          "min": 26,
+          "max": 50
+        },
+        "tierOrder": 4
+      },
+      {
+        "tierLabel": "≤25%",
+        "scoreValue": 0,
+        "condition": {
+          "op": "lte",
+          "value": 25.0
+        },
+        "tierOrder": 5
+      }
+    ]
+  },
+  {
+    "kpiName": "User Privilege Escalation — % Identified & Prevented",
+    "level": "PROCESS",
+    "category": "PROCESS",
+    "maxScore": 100,
+    "weightage": 0.5,
+    "inputType": "PERCENTAGE",
+    "infoText": "Percentage of privilege escalation attempts identified and prevented.",
+    "nistControlIds": [
+      "DE.CM-01"
+    ],
+    "isoControlIds": [
+      "A.8.2"
+    ],
+    "tiers": [
+      {
+        "tierLabel": "100%",
+        "scoreValue": 100,
+        "condition": {
+          "op": "eq",
+          "value": 100.0
+        },
+        "tierOrder": 1
+      },
+      {
+        "tierLabel": "75-99%",
+        "scoreValue": 75,
+        "condition": {
+          "op": "range",
+          "min": 75,
+          "max": 99
+        },
+        "tierOrder": 2
+      },
+      {
+        "tierLabel": "51-74%",
+        "scoreValue": 50,
+        "condition": {
+          "op": "range",
+          "min": 51,
+          "max": 74
+        },
+        "tierOrder": 3
+      },
+      {
+        "tierLabel": "26-50%",
+        "scoreValue": 25,
+        "condition": {
+          "op": "range",
+          "min": 26,
+          "max": 50
+        },
+        "tierOrder": 4
+      },
+      {
+        "tierLabel": "≤25%",
+        "scoreValue": 0,
+        "condition": {
+          "op": "lte",
+          "value": 25.0
+        },
+        "tierOrder": 5
+      }
+    ]
+  },
+  {
+    "kpiName": "Severity of Incidents (High & Critical / month)",
+    "level": "PROCESS",
+    "category": "PROCESS",
+    "maxScore": 50,
+    "weightage": 1.0,
+    "inputType": "DROPDOWN",
+    "infoText": "Number of high and critical severity incidents per month.",
+    "nistControlIds": [
+      "DE.CM-01"
+    ],
+    "isoControlIds": [
+      "A.5.24"
+    ],
+    "tiers": [
+      {
+        "tierLabel": "0/none",
+        "scoreValue": 50,
+        "condition": {
+          "op": "eq",
+          "value": 0.0
+        },
+        "tierOrder": 1
+      },
+      {
+        "tierLabel": "1-2/mon",
+        "scoreValue": 40,
+        "condition": {
+          "op": "range",
+          "min": 1,
+          "max": 2
+        },
+        "tierOrder": 2
+      },
+      {
+        "tierLabel": "3-5/mon",
+        "scoreValue": 30,
+        "condition": {
+          "op": "range",
+          "min": 3,
+          "max": 5
+        },
+        "tierOrder": 3
+      },
+      {
+        "tierLabel": "5-10/mon",
+        "scoreValue": 20,
+        "condition": {
+          "op": "range",
+          "min": 5,
+          "max": 10
+        },
+        "tierOrder": 4
+      },
+      {
+        "tierLabel": ">10/mon",
+        "scoreValue": 0,
+        "condition": {
+          "op": "gt",
+          "value": 10.0
+        },
+        "tierOrder": 5
+      }
+    ]
+  },
+  {
+    "kpiName": "Root Cause — Misconfigurations",
+    "level": "PROCESS",
+    "category": "PROCESS",
+    "maxScore": 50,
+    "weightage": 0.5,
+    "inputType": "RADIO",
+    "infoText": "Were misconfigurations the root cause, and were they contained?",
+    "nistControlIds": [
+      "RS.AN-01"
+    ],
+    "isoControlIds": [
+      "A.5.24"
+    ],
+    "tiers": [
+      {
+        "tierLabel": "Yes, contained",
+        "scoreValue": 50,
+        "condition": {
+          "op": "eq",
+          "value": "Yes, contained"
+        },
+        "tierOrder": 1
+      },
+      {
+        "tierLabel": "Yes, not contained",
+        "scoreValue": 25,
+        "condition": {
+          "op": "eq",
+          "value": "Yes, not contained"
+        },
+        "tierOrder": 2
+      },
+      {
+        "tierLabel": "Not sure",
+        "scoreValue": -50,
+        "condition": {
+          "op": "eq",
+          "value": "Not sure"
+        },
+        "tierOrder": 4
+      }
+    ]
+  },
+  {
+    "kpiName": "Root Cause — Phishing",
+    "level": "PROCESS",
+    "category": "PROCESS",
+    "maxScore": 50,
+    "weightage": 0.5,
+    "inputType": "RADIO",
+    "infoText": "Was phishing the root cause, and was the incident contained?",
+    "nistControlIds": [
+      "RS.AN-01"
+    ],
+    "isoControlIds": [
+      "A.5.24"
+    ],
+    "tiers": [
+      {
+        "tierLabel": "Yes, contained",
+        "scoreValue": 50,
+        "condition": {
+          "op": "eq",
+          "value": "Yes, contained"
+        },
+        "tierOrder": 1
+      },
+      {
+        "tierLabel": "Yes, not contained",
+        "scoreValue": 25,
+        "condition": {
+          "op": "eq",
+          "value": "Yes, not contained"
+        },
+        "tierOrder": 2
+      },
+      {
+        "tierLabel": "Not sure",
+        "scoreValue": -50,
+        "condition": {
+          "op": "eq",
+          "value": "Not sure"
+        },
+        "tierOrder": 4
+      }
+    ]
+  },
+  {
+    "kpiName": "Root Cause — Outdated Software",
+    "level": "PROCESS",
+    "category": "PROCESS",
+    "maxScore": 50,
+    "weightage": 0.5,
+    "inputType": "RADIO",
+    "infoText": "Was outdated software the root cause, and was the incident contained?",
+    "nistControlIds": [
+      "RS.AN-01"
+    ],
+    "isoControlIds": [
+      "A.5.24"
+    ],
+    "tiers": [
+      {
+        "tierLabel": "Yes, contained",
+        "scoreValue": 50,
+        "condition": {
+          "op": "eq",
+          "value": "Yes, contained"
+        },
+        "tierOrder": 1
+      },
+      {
+        "tierLabel": "Yes, not contained",
+        "scoreValue": 25,
+        "condition": {
+          "op": "eq",
+          "value": "Yes, not contained"
+        },
+        "tierOrder": 2
+      },
+      {
+        "tierLabel": "Not sure",
+        "scoreValue": -50,
+        "condition": {
+          "op": "eq",
+          "value": "Not sure"
+        },
+        "tierOrder": 4
+      }
+    ]
+  },
+  {
+    "kpiName": "Root Cause — Privileged Misuse",
+    "level": "PROCESS",
+    "category": "PROCESS",
+    "maxScore": 50,
+    "weightage": 0.5,
+    "inputType": "RADIO",
+    "infoText": "Was privileged access misuse the root cause, and was the incident contained?",
+    "nistControlIds": [
+      "RS.AN-01"
+    ],
+    "isoControlIds": [
+      "A.5.24"
+    ],
+    "tiers": [
+      {
+        "tierLabel": "Yes, contained",
+        "scoreValue": 50,
+        "condition": {
+          "op": "eq",
+          "value": "Yes, contained"
+        },
+        "tierOrder": 1
+      },
+      {
+        "tierLabel": "Yes, not contained",
+        "scoreValue": 25,
+        "condition": {
+          "op": "eq",
+          "value": "Yes, not contained"
+        },
+        "tierOrder": 2
+      },
+      {
+        "tierLabel": "Not sure",
+        "scoreValue": -50,
+        "condition": {
+          "op": "eq",
+          "value": "Not sure"
+        },
+        "tierOrder": 4
+      }
+    ]
+  },
+  {
+    "kpiName": "Root Cause — Other Issues",
+    "level": "PROCESS",
+    "category": "PROCESS",
+    "maxScore": 50,
+    "weightage": 0.5,
+    "inputType": "RADIO",
+    "infoText": "Were other root causes identified, and were the incidents contained?",
+    "nistControlIds": [
+      "RS.AN-01"
+    ],
+    "isoControlIds": [
+      "A.5.24"
+    ],
+    "tiers": [
+      {
+        "tierLabel": "Yes, contained",
+        "scoreValue": 50,
+        "condition": {
+          "op": "eq",
+          "value": "Yes, contained"
+        },
+        "tierOrder": 1
+      },
+      {
+        "tierLabel": "Yes, not contained",
+        "scoreValue": 25,
+        "condition": {
+          "op": "eq",
+          "value": "Yes, not contained"
+        },
+        "tierOrder": 2
+      },
+      {
+        "tierLabel": "Not sure",
+        "scoreValue": -50,
+        "condition": {
+          "op": "eq",
+          "value": "Not sure"
+        },
+        "tierOrder": 4
+      }
+    ]
+  },
+  {
+    "kpiName": "Failed Login Rate (weekly % of total logins)",
+    "level": "PROCESS",
+    "category": "PROCESS",
+    "maxScore": 100,
+    "weightage": 1.0,
+    "inputType": "PERCENTAGE",
+    "infoText": "Percentage of failed logins out of total login attempts, weekly.",
+    "nistControlIds": [
+      "PR.AA-01"
+    ],
+    "isoControlIds": [
+      "A.8.3"
+    ],
+    "tiers": [
+      {
+        "tierLabel": "≤3%",
+        "scoreValue": 100,
+        "condition": {
+          "op": "lte",
+          "value": 3.0
+        },
+        "tierOrder": 1
+      },
+      {
+        "tierLabel": "4-6%",
+        "scoreValue": 75,
+        "condition": {
+          "op": "range",
+          "min": 4,
+          "max": 6
+        },
+        "tierOrder": 2
+      },
+      {
+        "tierLabel": "7-11%",
+        "scoreValue": 50,
+        "condition": {
+          "op": "range",
+          "min": 7,
+          "max": 11
+        },
+        "tierOrder": 3
+      },
+      {
+        "tierLabel": "12-15%",
+        "scoreValue": 25,
+        "condition": {
+          "op": "range",
+          "min": 12,
+          "max": 15
+        },
+        "tierOrder": 4
+      },
+      {
+        "tierLabel": ">15%",
+        "scoreValue": 0,
+        "condition": {
+          "op": "gt",
+          "value": 15.0
+        },
+        "tierOrder": 5
+      }
+    ]
+  },
+  {
+    "kpiName": "Vulnerability Recurrence Rate (monthly %)",
+    "level": "PROCESS",
+    "category": "PROCESS",
+    "maxScore": 100,
+    "weightage": 1.0,
+    "inputType": "PERCENTAGE",
+    "infoText": "Percentage of vulnerabilities that recurred after being closed.",
+    "nistControlIds": [
+      "ID.AM-01"
+    ],
+    "isoControlIds": [
+      "A.8.8"
+    ],
+    "tiers": [
+      {
+        "tierLabel": "≤3%",
+        "scoreValue": 100,
+        "condition": {
+          "op": "lte",
+          "value": 3.0
+        },
+        "tierOrder": 1
+      },
+      {
+        "tierLabel": "4-6%",
+        "scoreValue": 75,
+        "condition": {
+          "op": "range",
+          "min": 4,
+          "max": 6
+        },
+        "tierOrder": 2
+      },
+      {
+        "tierLabel": "7-11%",
+        "scoreValue": 50,
+        "condition": {
+          "op": "range",
+          "min": 7,
+          "max": 11
+        },
+        "tierOrder": 3
+      },
+      {
+        "tierLabel": "12-15%",
+        "scoreValue": 25,
+        "condition": {
+          "op": "range",
+          "min": 12,
+          "max": 15
+        },
+        "tierOrder": 4
+      },
+      {
+        "tierLabel": ">15%",
+        "scoreValue": 0,
+        "condition": {
+          "op": "gt",
+          "value": 15.0
+        },
+        "tierOrder": 5
+      }
+    ]
+  },
+  {
+    "kpiName": "EDR Coverage — % Systems Covered",
+    "level": "COMPANY",
+    "category": "TECHNOLOGY",
+    "maxScore": 200,
+    "weightage": 1.0,
+    "inputType": "PERCENTAGE",
+    "infoText": "Percentage of endpoints with EDR (endpoint detection and response) agent installed.",
+    "nistControlIds": [
+      "ID.AM-01"
+    ],
+    "isoControlIds": [
+      "A.5.9"
+    ],
+    "tiers": [
+      {
+        "tierLabel": "100%",
+        "scoreValue": 200,
+        "condition": {
+          "op": "eq",
+          "value": 100.0
+        },
+        "tierOrder": 1
+      },
+      {
+        "tierLabel": "75-99%",
+        "scoreValue": 150,
+        "condition": {
+          "op": "range",
+          "min": 75,
+          "max": 99
+        },
+        "tierOrder": 2
+      },
+      {
+        "tierLabel": "51-74%",
+        "scoreValue": 100,
+        "condition": {
+          "op": "range",
+          "min": 51,
+          "max": 74
+        },
+        "tierOrder": 3
+      },
+      {
+        "tierLabel": "26-50%",
+        "scoreValue": 50,
+        "condition": {
+          "op": "range",
+          "min": 26,
+          "max": 50
+        },
+        "tierOrder": 4
+      },
+      {
+        "tierLabel": "≤25%",
+        "scoreValue": 0,
+        "condition": {
+          "op": "lte",
+          "value": 25.0
+        },
+        "tierOrder": 5
+      }
+    ]
+  },
+  {
+    "kpiName": "System Hardening Status (CIS Benchmark %)",
+    "level": "COMPANY",
+    "category": "TECHNOLOGY",
+    "maxScore": 200,
+    "weightage": 1.0,
+    "inputType": "PERCENTAGE",
+    "infoText": "Percentage compliance with CIS hardening benchmarks across systems.",
+    "nistControlIds": [
+      "PR.AA-01"
+    ],
+    "isoControlIds": [
+      "A.8.9"
+    ],
+    "tiers": [
+      {
+        "tierLabel": "100%",
+        "scoreValue": 200,
+        "condition": {
+          "op": "eq",
+          "value": 100.0
+        },
+        "tierOrder": 1
+      },
+      {
+        "tierLabel": "75-99%",
+        "scoreValue": 150,
+        "condition": {
+          "op": "range",
+          "min": 75,
+          "max": 99
+        },
+        "tierOrder": 2
+      },
+      {
+        "tierLabel": "51-74%",
+        "scoreValue": 100,
+        "condition": {
+          "op": "range",
+          "min": 51,
+          "max": 74
+        },
+        "tierOrder": 3
+      },
+      {
+        "tierLabel": "26-50%",
+        "scoreValue": 50,
+        "condition": {
+          "op": "range",
+          "min": 26,
+          "max": 50
+        },
+        "tierOrder": 4
+      },
+      {
+        "tierLabel": "≤25%",
+        "scoreValue": 0,
+        "condition": {
+          "op": "lte",
+          "value": 25.0
+        },
+        "tierOrder": 5
+      }
+    ]
+  },
+  {
+    "kpiName": "Anti-Phishing / Email Gateway Effectiveness",
+    "level": "COMPANY",
+    "category": "TECHNOLOGY",
+    "maxScore": 200,
+    "weightage": 1.0,
+    "inputType": "PERCENTAGE",
+    "infoText": "Percentage of phishing emails blocked by the email gateway.",
+    "nistControlIds": [
+      "PR.AA-01"
+    ],
+    "isoControlIds": [
+      "A.8.7"
+    ],
+    "tiers": [
+      {
+        "tierLabel": "100%",
+        "scoreValue": 200,
+        "condition": {
+          "op": "eq",
+          "value": 100.0
+        },
+        "tierOrder": 1
+      },
+      {
+        "tierLabel": "75-99%",
+        "scoreValue": 150,
+        "condition": {
+          "op": "range",
+          "min": 75,
+          "max": 99
+        },
+        "tierOrder": 2
+      },
+      {
+        "tierLabel": "51-74%",
+        "scoreValue": 100,
+        "condition": {
+          "op": "range",
+          "min": 51,
+          "max": 74
+        },
+        "tierOrder": 3
+      },
+      {
+        "tierLabel": "26-50%",
+        "scoreValue": 50,
+        "condition": {
+          "op": "range",
+          "min": 26,
+          "max": 50
+        },
+        "tierOrder": 4
+      },
+      {
+        "tierLabel": "≤25%",
+        "scoreValue": 0,
+        "condition": {
+          "op": "lte",
+          "value": 25.0
+        },
+        "tierOrder": 5
+      }
+    ]
+  },
+  {
+    "kpiName": "Browser & Application Patch Level",
+    "level": "COMPANY",
+    "category": "TECHNOLOGY",
+    "maxScore": 200,
+    "weightage": 1.0,
+    "inputType": "PERCENTAGE",
+    "infoText": "Percentage of endpoints with browsers and apps fully patched.",
+    "nistControlIds": [
+      "PR.AA-01"
+    ],
+    "isoControlIds": [
+      "A.8.34"
+    ],
+    "tiers": [
+      {
+        "tierLabel": "100%",
+        "scoreValue": 200,
+        "condition": {
+          "op": "eq",
+          "value": 100.0
+        },
+        "tierOrder": 1
+      },
+      {
+        "tierLabel": "75-99%",
+        "scoreValue": 150,
+        "condition": {
+          "op": "range",
+          "min": 75,
+          "max": 99
+        },
+        "tierOrder": 2
+      },
+      {
+        "tierLabel": "51-74%",
+        "scoreValue": 100,
+        "condition": {
+          "op": "range",
+          "min": 51,
+          "max": 74
+        },
+        "tierOrder": 3
+      },
+      {
+        "tierLabel": "26-50%",
+        "scoreValue": 50,
+        "condition": {
+          "op": "range",
+          "min": 26,
+          "max": 50
+        },
+        "tierOrder": 4
+      },
+      {
+        "tierLabel": "≤25%",
+        "scoreValue": 0,
+        "condition": {
+          "op": "lte",
+          "value": 25.0
+        },
+        "tierOrder": 5
+      }
+    ]
+  },
+  {
+    "kpiName": "Backup & Recovery Efficacy (Recovery Time)",
+    "level": "COMPANY",
+    "category": "TECHNOLOGY",
+    "maxScore": 100,
+    "weightage": 1.0,
+    "inputType": "DROPDOWN",
+    "infoText": "Time to fully restore systems from the most recent backup.",
+    "nistControlIds": [],
+    "isoControlIds": [],
+    "tiers": [
+      {
+        "tierLabel": "<1 hr",
+        "scoreValue": 100,
+        "condition": {
+          "op": "lt",
+          "value": 1.0
+        },
+        "tierOrder": 1
+      },
+      {
+        "tierLabel": ">1 & <12 hrs",
+        "scoreValue": 50,
+        "condition": {
+          "op": "range",
+          "min": 1,
+          "max": 12,
+          "exclusive": true
+        },
+        "tierOrder": 2
+      },
+      {
+        "tierLabel": ">12 & <24 hrs",
+        "scoreValue": 25,
+        "condition": {
+          "op": "range",
+          "min": 12,
+          "max": 24,
+          "exclusive": true
+        },
+        "tierOrder": 3
+      },
+      {
+        "tierLabel": ">24 & <48 hrs",
+        "scoreValue": 10,
+        "condition": {
+          "op": "range",
+          "min": 24,
+          "max": 48,
+          "exclusive": true
+        },
+        "tierOrder": 4
+      },
+      {
+        "tierLabel": ">48 hrs",
+        "scoreValue": 0,
+        "condition": {
+          "op": "gt",
+          "value": 48.0
+        },
+        "tierOrder": 5
+      }
+    ]
+  },
+  {
+    "kpiName": "Privileged Account Monitoring (% monitored)",
+    "level": "COMPANY",
+    "category": "TECHNOLOGY",
+    "maxScore": 50,
+    "weightage": 1.0,
+    "inputType": "PERCENTAGE",
+    "infoText": "Percentage of privileged accounts under active monitoring.",
+    "nistControlIds": [],
+    "isoControlIds": [],
+    "tiers": [
+      {
+        "tierLabel": "100%",
+        "scoreValue": 50,
+        "condition": {
+          "op": "eq",
+          "value": 100.0
+        },
+        "tierOrder": 1
+      },
+      {
+        "tierLabel": "75-99%",
+        "scoreValue": 40,
+        "condition": {
+          "op": "range",
+          "min": 75,
+          "max": 99
+        },
+        "tierOrder": 2
+      },
+      {
+        "tierLabel": "51-74%",
+        "scoreValue": 30,
+        "condition": {
+          "op": "range",
+          "min": 51,
+          "max": 74
+        },
+        "tierOrder": 3
+      },
+      {
+        "tierLabel": "26-50%",
+        "scoreValue": 20,
+        "condition": {
+          "op": "range",
+          "min": 26,
+          "max": 50
+        },
+        "tierOrder": 4
+      },
+      {
+        "tierLabel": "≤25%",
+        "scoreValue": 0,
+        "condition": {
+          "op": "lte",
+          "value": 25.0
+        },
+        "tierOrder": 5
+      }
+    ]
+  },
+  {
+    "kpiName": "Unresolved Critical Vulnerabilities (avg monthly CVEs)",
+    "level": "COMPANY",
+    "category": "TECHNOLOGY",
+    "maxScore": 50,
+    "weightage": 1.0,
+    "inputType": "DROPDOWN",
+    "infoText": "Average number of unresolved critical CVEs per month.",
+    "nistControlIds": [],
+    "isoControlIds": [],
+    "tiers": [
+      {
+        "tierLabel": "0/none",
+        "scoreValue": 50,
+        "condition": {
+          "op": "eq",
+          "value": 0.0
+        },
+        "tierOrder": 1
+      },
+      {
+        "tierLabel": "1-2/mon",
+        "scoreValue": 40,
+        "condition": {
+          "op": "range",
+          "min": 1,
+          "max": 2
+        },
+        "tierOrder": 2
+      },
+      {
+        "tierLabel": "3-5/mon",
+        "scoreValue": 30,
+        "condition": {
+          "op": "range",
+          "min": 3,
+          "max": 5
+        },
+        "tierOrder": 3
+      },
+      {
+        "tierLabel": "5-10/mon",
+        "scoreValue": 20,
+        "condition": {
+          "op": "range",
+          "min": 5,
+          "max": 10
+        },
+        "tierOrder": 4
+      },
+      {
+        "tierLabel": ">10/mon",
+        "scoreValue": 0,
+        "condition": {
+          "op": "gt",
+          "value": 10.0
+        },
+        "tierOrder": 5
+      }
+    ]
+  },
+  {
+    "kpiName": "Third-Party Vendor Risk Score (monthly % adherence)",
+    "level": "COMPANY",
+    "category": "TECHNOLOGY",
+    "maxScore": 50,
+    "weightage": 0.5,
+    "inputType": "PERCENTAGE",
+    "infoText": "Percentage of third-party vendors meeting security requirements.",
+    "nistControlIds": [],
+    "isoControlIds": [],
+    "tiers": [
+      {
+        "tierLabel": "≥95%",
+        "scoreValue": 50,
+        "condition": {
+          "op": "gte",
+          "value": 95.0
+        },
+        "tierOrder": 1
+      },
+      {
+        "tierLabel": "80-94%",
+        "scoreValue": 40,
+        "condition": {
+          "op": "range",
+          "min": 80,
+          "max": 94
+        },
+        "tierOrder": 2
+      },
+      {
+        "tierLabel": "65-79%",
+        "scoreValue": 30,
+        "condition": {
+          "op": "range",
+          "min": 65,
+          "max": 79
+        },
+        "tierOrder": 3
+      },
+      {
+        "tierLabel": "50-64%",
+        "scoreValue": 20,
+        "condition": {
+          "op": "range",
+          "min": 50,
+          "max": 64
+        },
+        "tierOrder": 4
+      },
+      {
+        "tierLabel": "<50%",
+        "scoreValue": 0,
+        "condition": {
+          "op": "lt",
+          "value": 50.0
+        },
+        "tierOrder": 5
+      }
+    ]
+  },
+  {
+    "kpiName": "Cloud Misconfiguration Rate",
+    "level": "COMPANY",
+    "category": "TECHNOLOGY",
+    "maxScore": 200,
+    "weightage": 1.0,
+    "inputType": "PERCENTAGE",
+    "infoText": "Percentage of cloud resources with security misconfigurations.",
+    "nistControlIds": [
+      "PR.AA-01"
+    ],
+    "isoControlIds": [
+      "A.5.23",
+      "A.8.9"
+    ],
+    "tiers": [
+      {
+        "tierLabel": "≤5%",
+        "scoreValue": 200,
+        "condition": {
+          "op": "lte",
+          "value": 5.0
+        },
+        "tierOrder": 1
+      },
+      {
+        "tierLabel": "6-10%",
+        "scoreValue": 150,
+        "condition": {
+          "op": "range",
+          "min": 6,
+          "max": 10
+        },
+        "tierOrder": 2
+      },
+      {
+        "tierLabel": "11-15%",
+        "scoreValue": 100,
+        "condition": {
+          "op": "range",
+          "min": 11,
+          "max": 15
+        },
+        "tierOrder": 3
+      },
+      {
+        "tierLabel": "16-25%",
+        "scoreValue": 50,
+        "condition": {
+          "op": "range",
+          "min": 16,
+          "max": 25
+        },
+        "tierOrder": 4
+      },
+      {
+        "tierLabel": ">25%",
+        "scoreValue": 0,
+        "condition": {
+          "op": "gt",
+          "value": 25.0
+        },
+        "tierOrder": 5
+      }
+    ]
+  },
+  {
+    "kpiName": "Security Assessment Completion Rate",
+    "level": "COMPANY",
+    "category": "MGMT REPORTING",
+    "maxScore": 200,
+    "weightage": 1.0,
+    "inputType": "PERCENTAGE",
+    "infoText": "Percentage of scheduled security assessments completed on time.",
+    "nistControlIds": [
+      "GV.OC-01"
+    ],
+    "isoControlIds": [
+      "A.5.1"
+    ],
+    "tiers": [
+      {
+        "tierLabel": "100%",
+        "scoreValue": 200,
+        "condition": {
+          "op": "eq",
+          "value": 100.0
+        },
+        "tierOrder": 1
+      },
+      {
+        "tierLabel": "75-99%",
+        "scoreValue": 150,
+        "condition": {
+          "op": "range",
+          "min": 75,
+          "max": 99
+        },
+        "tierOrder": 2
+      },
+      {
+        "tierLabel": "51-74%",
+        "scoreValue": 100,
+        "condition": {
+          "op": "range",
+          "min": 51,
+          "max": 74
+        },
+        "tierOrder": 3
+      },
+      {
+        "tierLabel": "26-50%",
+        "scoreValue": 50,
+        "condition": {
+          "op": "range",
+          "min": 26,
+          "max": 50
+        },
+        "tierOrder": 4
+      },
+      {
+        "tierLabel": "≤25%",
+        "scoreValue": 0,
+        "condition": {
+          "op": "lte",
+          "value": 25.0
+        },
+        "tierOrder": 5
+      }
+    ]
+  },
+  {
+    "kpiName": "Average Incident Cost (M2M trend)",
+    "level": "COMPANY",
+    "category": "MGMT REPORTING",
+    "maxScore": 200,
+    "weightage": 1.0,
+    "inputType": "RADIO",
+    "infoText": "Direction of average incident cost month-on-month. Declining is best.",
+    "nistControlIds": [
+      "GV.OC-01"
+    ],
+    "isoControlIds": [
+      "A.5.24"
+    ],
+    "tiers": [
+      {
+        "tierLabel": "Declining",
+        "scoreValue": 50,
+        "condition": {
+          "op": "eq",
+          "value": "Declining"
+        },
+        "tierOrder": 1
+      },
+      {
+        "tierLabel": "Steady",
+        "scoreValue": 25,
+        "condition": {
+          "op": "eq",
+          "value": "Steady"
+        },
+        "tierOrder": 2
+      },
+      {
+        "tierLabel": "Increasing",
+        "scoreValue": -25,
+        "condition": {
+          "op": "eq",
+          "value": "Increasing"
+        },
+        "tierOrder": 4
+      }
+    ]
+  },
+  {
+    "kpiName": "Budget vs Actual Spend",
+    "level": "COMPANY",
+    "category": "MGMT REPORTING",
+    "maxScore": 200,
+    "weightage": 1.0,
+    "inputType": "RADIO",
+    "infoText": "How closely actual security spend tracked the approved budget.",
+    "nistControlIds": [
+      "GV.OC-01"
+    ],
+    "isoControlIds": [
+      "A.5.36"
+    ],
+    "tiers": [
+      {
+        "tierLabel": "In line",
+        "scoreValue": 50,
+        "condition": {
+          "op": "eq",
+          "value": "In line"
+        },
+        "tierOrder": 1
+      },
+      {
+        "tierLabel": "Overrun <25%",
+        "scoreValue": 25,
+        "condition": {
+          "op": "eq",
+          "value": "Overrun <25%"
+        },
+        "tierOrder": 2
+      },
+      {
+        "tierLabel": "Overrun 26-50%",
+        "scoreValue": 25,
+        "condition": {
+          "op": "eq",
+          "value": "Overrun 26-50%"
+        },
+        "tierOrder": 3
+      },
+      {
+        "tierLabel": "Overrun >50%",
+        "scoreValue": -25,
+        "condition": {
+          "op": "eq",
+          "value": "Overrun >50%"
+        },
+        "tierOrder": 4
+      }
+    ]
+  },
+  {
+    "kpiName": "AI Impact in Security (vs peer adoption)",
+    "level": "COMPANY",
+    "category": "MGMT REPORTING",
+    "maxScore": 200,
+    "weightage": 0.5,
+    "inputType": "RADIO",
+    "infoText": "How your AI-in-security adoption compares to industry peers.",
+    "nistControlIds": [
+      "GV.OC-01"
+    ],
+    "isoControlIds": [
+      "A.5.1"
+    ],
+    "tiers": [
+      {
+        "tierLabel": "100% in line",
+        "scoreValue": 100,
+        "condition": {
+          "op": "eq",
+          "value": "100% in line"
+        },
+        "tierOrder": 1
+      },
+      {
+        "tierLabel": ">50-90% of peers",
+        "scoreValue": 50,
+        "condition": {
+          "op": "gt",
+          "value": 50.0
+        },
+        "tierOrder": 2
+      },
+      {
+        "tierLabel": "<50% but plans",
+        "scoreValue": 25,
+        "condition": {
+          "op": "lt",
+          "value": 50.0
+        },
+        "tierOrder": 3
+      },
+      {
+        "tierLabel": "No plans",
+        "scoreValue": -50,
+        "condition": {
+          "op": "eq",
+          "value": "No plans"
+        },
+        "tierOrder": 4
+      }
+    ]
+  }
+]
