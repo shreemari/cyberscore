@@ -1,0 +1,45 @@
+{
+  "name": "cymetric",
+  "version": "0.1.0",
+  "private": true,
+  "description": "CyMetric — cybersecurity health scorecard for organisations",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "db:generate": "turbo run db:generate",
+    "db:migrate": "turbo run db:migrate",
+    "db:seed": "turbo run db:seed",
+    "clean": "turbo run clean && rm -rf node_modules"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "prettier": "^3.4.2",
+    "turbo": "^2.3.0",
+    "typescript": "^5.7.2"
+  },
+  "packageManager": "npm@10.9.0",
+  "engines": {
+    "node": "22.x"
+  },
+  "overrides": {
+    "metro": "0.81.0",
+    "metro-cache": "0.81.0",
+    "metro-config": "0.81.0",
+    "metro-core": "0.81.0",
+    "metro-resolver": "0.81.0",
+    "metro-runtime": "0.81.0",
+    "metro-source-map": "0.81.0",
+    "metro-transform-plugins": "0.81.0",
+    "metro-transform-worker": "0.81.0",
+    "metro-babel-transformer": "0.81.0",
+    "nativewind": "4.1.23",
+    "react-native-css-interop": "0.1.22"
+  }
+}

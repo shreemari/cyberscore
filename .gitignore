@@ -1,0 +1,78 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Testing
+coverage/
+*.lcov
+
+# Next.js
+.next/
+out/
+next-env.d.ts
+
+# Production builds
+dist/
+build/
+
+# Turbo
+.turbo/
+
+# Environment
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env*.local
+
+# Prisma
+prisma/migrations/dev/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# TypeScript
+*.tsbuildinfo
+
+# Expo
+.expo/
+.expo-shared/
+web-build/
+dist/
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.orig.*
+
+# Sentry
+.sentryclirc
+
+# Secrets — NEVER commit
+secrets/
+*.pem
+
+# Claude Code / Cursor / per-developer tool settings
+.claude/
+.cursorrules.local
+
+# Stray empty app.json at repo root — leftover from `eas init` run at the
+# wrong path. The real one lives in apps/mobile/app.json.
+/app.json
+
