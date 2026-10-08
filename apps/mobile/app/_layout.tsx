@@ -41,7 +41,7 @@ function AuthGate() {
   useEffect(() => {
     if (status === 'unknown') return;
     const group = segments[0];
-    const route = segments[1];
+    const route = (segments as string[])[1] ?? segments[0];
     const inAuthGroup = group === '(auth)';
     const inAppGroup = group === '(app)';
 

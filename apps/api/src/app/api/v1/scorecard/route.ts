@@ -8,29 +8,32 @@ import { effectiveAllowedLevels } from '@/lib/access';
 
 // GET /api/v1/scorecard
 //
-// Live (not snapshot) scorecard for the caller's org. Cheap enough to compute
-// on each call — 46 KPIs * N responses fits comfortably in a single tx.
-//
-// Snapshots are written by a worker on a schedule so we can plot trends
-// without recomputing history from audit logs. The endpoint just returns the
-// `latestSnapshot` pointer so mobile can label the view with its age.
+// Live (not snapshot) scorecard for the caller's org.
+// ?framework=EXCEL|NIST_CSF|ISO27001 can explicitly select a framework.
+// When omitted, the organisation's selectedFramework is used.
 export async function GET(req: Request) {
   const auth = requireAuth(req);
   if ('response' in auth) return auth.response;
 
   try {
+    const url = new URL(req.url);
+    const requestedFramework = url.searchParams.get('framework')?.trim() ?? null;
+
     const payload = await withTenant(auth.orgId, async (tx) => {
-      // Caller's effective levels — for non-admin enterprise employees we
-      // narrow the scorecard inputs to just their own responses + only the
-      // KPIs in their allowed levels. Admins and SOLO see the full org view.
       const caller = await tx.user.findUnique({
         where: { id: auth.userId },
         select: {
           role: true,
           allowedLevels: true,
-          org: { select: { mode: true } },
+          org: {
+            select: {
+              mode: true,
+              selectedFramework: true,
+            },
+          },
         },
       });
+
       if (!caller) return null;
 
       const callerLevels = effectiveAllowedLevels({
@@ -38,28 +41,45 @@ export async function GET(req: Request) {
         orgMode: caller.org.mode,
         allowedLevels: caller.allowedLevels,
       });
+
       const isPersonalView =
         caller.org.mode === OrgMode.ENTERPRISE && caller.role !== Role.ADMIN;
 
-      const { kpis, responses } = await loadScorecardInputs(tx, auth.orgId);
+      const selectedFramework =
+        requestedFramework === 'NIST_CSF' ||
+        requestedFramework === 'ISO27001' ||
+        requestedFramework === 'EXCEL'
+          ? requestedFramework
+          : caller.org.selectedFramework ?? 'EXCEL';
 
-      // Personal-view scorecard: filter the KPI catalogue to allowed levels
-      // and only count this user's own responses.
+      const { kpis, responses } = await loadScorecardInputs(
+        tx,
+        auth.orgId,
+        selectedFramework,
+      );
+
       let scopedKpis = kpis;
       let scopedResponses = responses;
+
       if (isPersonalView) {
         const allowed = new Set(callerLevels);
         scopedKpis = kpis.filter((k) => allowed.has(k.level));
+
         const personal = await tx.response.findMany({
           where: { orgId: auth.orgId, submittedById: auth.userId },
-          select: { kpiId: true, actualScore: true, weightedScore: true, isNa: true },
+          select: {
+            kpiId: true,
+            actualScore: true,
+            weightedScore: true,
+            isNa: true,
+          },
         });
+
         scopedResponses = personal;
       }
 
       const agg = aggregate(scopedKpis, scopedResponses);
 
-      // Suggestions for underperforming KPIs — group by (kpiId, scoreRange).
       const suggestions =
         agg.underperforming.length === 0
           ? []
@@ -76,10 +96,19 @@ export async function GET(req: Request) {
         select: { id: true, generatedAt: true },
       });
 
-      return { agg, suggestions, latestSnapshot, isPersonalView, callerLevels };
+      return {
+        agg,
+        suggestions,
+        latestSnapshot,
+        isPersonalView,
+        callerLevels,
+        selectedFramework,
+      };
     });
 
-    if (!payload) return internalError(new Error('user not found'), { route: 'scorecard:get' });
+    if (!payload) {
+      return internalError(new Error('user not found'), { route: 'scorecard:get' });
+    }
 
     const improvementSuggestions = payload.agg.underperforming.map((u) => ({
       kpiId: u.kpiId,
@@ -88,10 +117,14 @@ export async function GET(req: Request) {
       scoreRange: u.scoreRange,
       suggestions: payload.suggestions
         .filter((s) => s.kpiId === u.kpiId && s.scoreRange === u.scoreRange)
-        .map((s) => ({ text: s.suggestionText, priority: s.priority })),
+        .map((s) => ({
+          text: s.suggestionText,
+          priority: s.priority,
+        })),
     }));
 
     return NextResponse.json({
+      framework: payload.selectedFramework,
       peopleScore: payload.agg.peopleScore,
       processScore: payload.agg.processScore,
       companyScore: payload.agg.companyScore,

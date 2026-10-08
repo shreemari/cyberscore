@@ -9,6 +9,7 @@ import {
   ActivityIndicator,
   Alert,
 } from 'react-native';
+import { useLocalSearchParams } from 'expo-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Ionicons } from '@expo/vector-icons';
 import { Screen } from '@/components/Screen';
@@ -16,23 +17,56 @@ import { TopBar } from '@/components/TopBar';
 import { ScoreRing } from '@/components/ScoreRing';
 import { Card } from '@/components/Card';
 import { Button } from '@/components/Button';
-import { api } from '@/lib/api';
+import { api, API_BASE_URL } from '@/lib/api';
+import { secureTokenStorage } from '@/lib/storage';
+import { FRAMEWORKS, type FrameworkCode } from '@/lib/frameworks';
 import { colors, scoreColorForValue } from '@/theme/colors';
 
-// Full scorecard detail — overall gauge, per-level breakdown, improvement
-// suggestions, and a Share CTA that mints a /share link. Shared via the
-// OS share sheet so the caller can paste it into Slack / email / whatever.
+// Framework-aware scorecard. The selected framework is read from the
+// Expo Router query string and sent to the backend scorecard endpoint.
 export default function Scorecard() {
   const qc = useQueryClient();
+  const { framework } = useLocalSearchParams<{ framework?: string }>();
+
+  const selectedFramework: FrameworkCode =
+    framework === 'NIST_CSF' || framework === 'ISO27001' || framework === 'EXCEL'
+      ? framework
+      : 'EXCEL';
+
+  const frameworkInfo =
+    FRAMEWORKS.find((item) => item.code === selectedFramework) ??
+    FRAMEWORKS.find((item) => item.code === 'EXCEL')!;
+
   const { data, isLoading, isRefetching } = useQuery({
-    queryKey: ['scorecard'],
-    queryFn: () => api.scorecard.current(),
+    queryKey: ['scorecard', selectedFramework],
+    queryFn: async () => {
+      const tokens = await secureTokenStorage.getTokens();
+
+      const res = await fetch(
+        `${API_BASE_URL}/api/v1/scorecard?framework=${encodeURIComponent(selectedFramework)}`,
+        {
+          headers: {
+            Accept: 'application/json',
+            ...(tokens?.accessToken
+              ? { Authorization: `Bearer ${tokens.accessToken}` }
+              : {}),
+          },
+        },
+      );
+
+      if (!res.ok) {
+        throw new Error(`Scorecard request failed: HTTP ${res.status}`);
+      }
+
+      return res.json();
+    },
   });
+
   const [sharing, setSharing] = useState(false);
 
   const onRefresh = useCallback(
-    () => qc.invalidateQueries({ queryKey: ['scorecard'] }),
-    [qc],
+    () => qc.invalidateQueries({ queryKey: ['scorecard', selectedFramework] }),
+    [qc, selectedFramework],
   );
 
   const onShare = async () => {
@@ -83,7 +117,17 @@ export default function Scorecard() {
         }
       >
         <View className="items-center mt-2 mb-6">
-          <ScoreRing score={overall} label="Overall · out of 100" />
+          <Text className="text-text-primary text-2xl font-bold text-center">
+            {frameworkInfo.label}
+          </Text>
+          <Text className="text-text-secondary text-center mt-2 px-5 leading-5">
+            {frameworkInfo.description}
+          </Text>
+
+          <View className="mt-5">
+            <ScoreRing score={overall} label="Overall · out of 100" />
+          </View>
+
           <Text className="text-text-secondary text-center mt-5 px-6 leading-5">
             {overall == null
               ? 'Answer KPIs to generate your first scorecard.'
@@ -98,7 +142,9 @@ export default function Scorecard() {
         <LevelSummary title="Company" stats={data?.levelBreakdown.company} full />
 
         <View className="mt-6">
-          <Text className="text-text-primary font-bold text-lg mb-3">Recommended actions</Text>
+          <Text className="text-text-primary font-bold text-lg mb-3">
+            Recommended actions
+          </Text>
           {(data?.improvementSuggestions ?? []).length === 0 ? (
             <Card>
               <Text className="text-text-secondary text-sm">
@@ -107,7 +153,7 @@ export default function Scorecard() {
             </Card>
           ) : (
             <View className="gap-3">
-              {(data?.improvementSuggestions ?? []).slice(0, 5).map((s) => {
+              {(data?.improvementSuggestions ?? []).slice(0, 5).map((s: any) => {
                 const colour = bandColor(s.scoreRange);
                 return (
                   <Card key={s.kpiId}>
@@ -130,12 +176,20 @@ export default function Scorecard() {
                         </Text>
                       </View>
                     </View>
-                    {s.suggestions.map((suggestion, i) => (
+                    {s.suggestions.map((suggestion: any, i: number) => (
                       <View key={i} className="flex-row mt-1">
                         <Ionicons
-                          name={suggestion.priority === 'HIGH' ? 'flash' : 'arrow-forward'}
+                          name={
+                            suggestion.priority === 'HIGH'
+                              ? 'flash'
+                              : 'arrow-forward'
+                          }
                           size={14}
-                          color={suggestion.priority === 'HIGH' ? colors.score.red : colors.brand[400]}
+                          color={
+                            suggestion.priority === 'HIGH'
+                              ? colors.score.red
+                              : colors.brand[400]
+                          }
                           style={{ marginTop: 3, marginRight: 6 }}
                         />
                         <Text className="text-text-secondary text-sm flex-1 leading-5">
@@ -179,6 +233,7 @@ function LevelSummary({
 }) {
   const score = stats?.score ?? null;
   const colour = score == null ? colors.brand[400] : scoreColorForValue(score);
+
   return (
     <Pressable className={full ? 'w-full mb-0' : 'flex-1'}>
       <Card>
@@ -191,7 +246,10 @@ function LevelSummary({
             {stats?.colorBand ?? '—'}
           </Text>
         </View>
-        <Text className="text-text-primary" style={{ fontSize: 26, fontWeight: '800' }}>
+        <Text
+          className="text-text-primary"
+          style={{ fontSize: 26, fontWeight: '800' }}
+        >
           {score == null ? '—' : Math.round(score)}
           <Text className="text-text-secondary text-base">%</Text>
         </Text>

@@ -57,12 +57,11 @@ export default function Profile() {
   };
 
   const updateFramework = async (code: FrameworkCode) => {
-    if (!me || code === me.org.selectedFramework) {
-      setPickerOpen(false);
-      return;
-    }
+    if (!me) return;
+
     setSaving(true);
     try {
+      // Save the selected framework on the organisation first.
       const tokens = await secureTokenStorage.getTokens();
       const res = await fetch(`${API_BASE_URL}/api/v1/me/profile`, {
         method: 'PATCH',
@@ -73,11 +72,18 @@ export default function Profile() {
         body: JSON.stringify({ selectedFramework: code }),
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
       const data = (await res.json()) as { org: typeof me.org };
       setMe({ ...me, org: { ...me.org, ...data.org } });
+
+      // Framework is part of the query key, so clear the old framework data.
       await qc.invalidateQueries({ queryKey: ['kpis'] });
       await qc.invalidateQueries({ queryKey: ['scorecard'] });
+
       setPickerOpen(false);
+
+      // Open the framework-specific scorecard immediately.
+      router.push(`/(app)/scorecard?framework=${code}`);
     } catch (err: any) {
       Alert.alert('Could not switch framework', err?.message ?? 'Please try again.');
     } finally {
