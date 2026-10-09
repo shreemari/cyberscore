@@ -41,5 +41,8 @@
     "metro-babel-transformer": "0.81.0",
     "nativewind": "4.1.23",
     "react-native-css-interop": "0.1.22"
+  },
+  "dependencies": {
+    "next": "^15.1.11"
   }
 }
