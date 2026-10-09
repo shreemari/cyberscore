@@ -43,6 +43,6 @@
     "react-native-css-interop": "0.1.22"
   },
   "dependencies": {
-    "next": "^15.1.11"
+    "next": "^15.5.18"
   }
 }
