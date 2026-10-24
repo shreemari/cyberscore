@@ -2,7 +2,7 @@
   "name": "cymetric",
   "version": "0.1.0",
   "private": true,
-  "description": "CyMetric — cybersecurity health scorecard for organisations",
+  "description": "CyMetric - cybersecurity health scorecard for organisations",
   "workspaces": [
     "apps/*",
     "packages/*"
@@ -29,6 +29,7 @@
     "node": "22.x"
   },
   "overrides": {
+    "next": "15.5.18",
     "metro": "0.81.0",
     "metro-cache": "0.81.0",
     "metro-config": "0.81.0",
@@ -43,6 +44,6 @@
     "react-native-css-interop": "0.1.22"
   },
   "dependencies": {
-    "next": "^15.5.18"
+    "next": "15.5.18"
   }
 }
