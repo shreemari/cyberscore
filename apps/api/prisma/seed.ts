@@ -1,3 +1,4 @@
+
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { PrismaClient, Framework, InputType, Level } from '@prisma/client';
@@ -7,15 +8,6 @@ import {
   GENERIC_SUGGESTIONS,
   type SuggestionSeed,
 } from './seed/suggestions';
-
-// Seeds the 46 canonical KPIs (tiers + suggestions) from kpi-data.json.
-//
-//   npm run db:seed
-//
-// Idempotent: re-running wipes and re-creates each KPI's tiers + suggestions
-// from scratch. Safe in dev; in prod it preserves existing Response rows
-// because Kpi rows are matched by (kpiName + frameworkCode) and only
-// updated, never deleted.
 
 interface KpiSeed {
   kpiName: string;
@@ -42,9 +34,8 @@ async function main() {
     resolve(__dirname, 'seed/kpi-data.json'),
     'utf-8',
   );
-  const kpis: KpiSeed[] = JSON.parse(raw);
 
-  console.log(`Seeding ${kpis.length} KPIs…`);
+  const kpis: KpiSeed[] = JSON.parse(raw);
 
   let created = 0;
   let updated = 0;
@@ -52,66 +43,108 @@ async function main() {
   let suggestionCount = 0;
 
   for (const [idx, seed] of kpis.entries()) {
-    const existing = await prisma.kpi.findFirst({
-      where: {
-        kpiName: seed.kpiName,
+    const frameworks = [
+      {
         frameworkCode: Framework.EXCEL,
+        nistControlIds: seed.nistControlIds,
+        isoControlIds: seed.isoControlIds,
       },
-    });
+      ...(seed.nistControlIds.length > 0
+        ? [{
+            frameworkCode: Framework.NIST_CSF,
+            nistControlIds: seed.nistControlIds,
+            isoControlIds: [],
+          }]
+        : []),
+      ...(seed.isoControlIds.length > 0
+        ? [{
+            frameworkCode: Framework.ISO27001,
+            nistControlIds: [],
+            isoControlIds: seed.isoControlIds,
+          }]
+        : []),
+    ];
 
-    const kpiData = {
-      kpiName: seed.kpiName,
-      level: seed.level,
-      maxScore: seed.maxScore,
-      weightage: seed.weightage,
-      inputType: seed.inputType,
-      infoText: seed.infoText,
-      frameworkCode: Framework.EXCEL,
-      nistControlIds: seed.nistControlIds,
-      isoControlIds: seed.isoControlIds,
-      displayOrder: idx,
-      isCustom: false,
-      isActive: true,
-    };
+    for (const framework of frameworks) {
+      const existing = await prisma.kpi.findFirst({
+        where: {
+          kpiName: seed.kpiName,
+          frameworkCode: framework.frameworkCode,
+          deletedAt: null,
+        },
+      });
 
-    const kpi = existing
-      ? await prisma.kpi.update({ where: { id: existing.id }, data: kpiData })
-      : await prisma.kpi.create({ data: kpiData });
+      const kpiData = {
+        kpiName: seed.kpiName,
+        level: seed.level,
+        maxScore: seed.maxScore,
+        weightage: seed.weightage,
+        inputType: seed.inputType,
+        infoText: seed.infoText,
+        frameworkCode: framework.frameworkCode,
+        nistControlIds: framework.nistControlIds,
+        isoControlIds: framework.isoControlIds,
+        displayOrder: idx,
+        isCustom: false,
+        isActive: true,
+      };
 
-    if (existing) updated++;
-    else created++;
+      const kpi = existing
+        ? await prisma.kpi.update({
+            where: { id: existing.id },
+            data: kpiData,
+          })
+        : await prisma.kpi.create({
+            data: kpiData,
+          });
 
-    // Replace tiers wholesale — cheaper than diffing and keeps ordering clean.
-    await prisma.scoringTier.deleteMany({ where: { kpiId: kpi.id } });
-    await prisma.scoringTier.createMany({
-      data: seed.tiers.map((t) => ({
-        kpiId: kpi.id,
-        tierLabel: t.tierLabel,
-        condition: t.condition as object,
-        scoreValue: t.scoreValue,
-        tierOrder: t.tierOrder,
-      })),
-    });
-    tierCount += seed.tiers.length;
+      if (existing) updated++;
+      else created++;
 
-    const suggestionSeeds: SuggestionSeed[] =
-      SUGGESTIONS_BY_KPI[seed.kpiName] ?? GENERIC_SUGGESTIONS;
+      // Preserve existing tiers. Create them only if none exist.
+      const existingTiers = await prisma.scoringTier.count({
+        where: { kpiId: kpi.id },
+      });
 
-    await prisma.kpiSuggestion.deleteMany({ where: { kpiId: kpi.id } });
-    await prisma.kpiSuggestion.createMany({
-      data: suggestionSeeds.map((s) => ({
-        kpiId: kpi.id,
-        scoreRange: s.scoreRange as ScoreRange,
-        suggestionText: s.suggestionText,
-        priority: s.priority as SuggestionPriority,
-      })),
-    });
-    suggestionCount += suggestionSeeds.length;
+      if (existingTiers === 0) {
+        await prisma.scoringTier.createMany({
+          data: seed.tiers.map((t) => ({
+            kpiId: kpi.id,
+            tierLabel: t.tierLabel,
+            condition: t.condition as object,
+            scoreValue: t.scoreValue,
+            tierOrder: t.tierOrder,
+          })),
+        });
+        tierCount += seed.tiers.length;
+      }
+
+      // Preserve existing suggestions. Create them only if none exist.
+      const existingSuggestions = await prisma.kpiSuggestion.count({
+        where: { kpiId: kpi.id },
+      });
+
+      if (existingSuggestions === 0) {
+        const suggestionSeeds: SuggestionSeed[] =
+          SUGGESTIONS_BY_KPI[seed.kpiName] ?? GENERIC_SUGGESTIONS;
+
+        await prisma.kpiSuggestion.createMany({
+          data: suggestionSeeds.map((s) => ({
+            kpiId: kpi.id,
+            scoreRange: s.scoreRange as ScoreRange,
+            suggestionText: s.suggestionText,
+            priority: s.priority as SuggestionPriority,
+          })),
+        });
+
+        suggestionCount += suggestionSeeds.length;
+      }
+    }
   }
 
   console.log(
-    `Done. KPIs: ${created} created, ${updated} updated. ` +
-      `Tiers: ${tierCount}. Suggestions: ${suggestionCount}.`,
+    `Done. KPI records: ${created} created, ${updated} updated. ` +
+      `New tiers: ${tierCount}. New suggestions: ${suggestionCount}.`,
   );
 }
 

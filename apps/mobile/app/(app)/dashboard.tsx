@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { View, Text, ScrollView, RefreshControl, Platform, Animated, Easing } from 'react-native';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQueries, useQuery, useQueryClient } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
@@ -10,9 +10,11 @@ import { TopBar } from '@/components/TopBar';
 import { ScoreRing } from '@/components/ScoreRing';
 import { Card } from '@/components/Card';
 import { PressableGlow } from '@/components/PressableGlow';
-import { api } from '@/lib/api';
+import { api, API_BASE_URL } from '@/lib/api';
+import { secureTokenStorage } from '@/lib/storage';
+import { FRAMEWORKS, type FrameworkCode } from '@/lib/frameworks';
 import { useAuthStore } from '@/stores/auth';
-import { colors, scoreColorForValue } from '@/theme/colors';
+import { colors } from '@/theme/colors';
 
 export default function Dashboard() {
   const qc = useQueryClient();
@@ -24,6 +26,37 @@ export default function Dashboard() {
   const { data, isLoading, isRefetching } = useQuery({
     queryKey: ['scorecard'],
     queryFn: () => api.scorecard.current(),
+  });
+
+  // Load each framework independently so every dashboard panel shows its own score.
+  const frameworkScores = useQueries({
+    queries: FRAMEWORKS.map((framework) => ({
+      queryKey: ['scorecard', framework.code],
+      queryFn: async () => {
+        const tokens = await secureTokenStorage.getTokens();
+        const response = await fetch(
+          `${API_BASE_URL}/api/v1/scorecard?framework=${encodeURIComponent(framework.code)}`,
+          {
+            headers: {
+              Accept: 'application/json',
+              ...(tokens?.accessToken
+                ? { Authorization: `Bearer ${tokens.accessToken}` }
+                : {}),
+            },
+          },
+        );
+
+        if (!response.ok) {
+          throw new Error(`Unable to load ${framework.label}: HTTP ${response.status}`);
+        }
+
+        return (await response.json()) as {
+          framework: FrameworkCode;
+          overallScore: number | null;
+          completeness: number;
+        };
+      },
+    })),
   });
   const { data: progress } = useQuery({
     queryKey: ['progress'],
@@ -116,6 +149,100 @@ export default function Dashboard() {
           )}
         </View>
 
+        {/* Three independent framework scorecards */}
+        <View style={{ marginTop: 24, marginBottom: 12 }}>
+          <Text
+            style={{
+              color: colors.text.primary,
+              fontSize: 18,
+              fontWeight: '800',
+              marginBottom: 12,
+            }}
+          >
+            Framework Scorecards
+          </Text>
+
+          {FRAMEWORKS.map((framework, index) => {
+            const result = frameworkScores[index];
+            const score = result?.data?.overallScore ?? null;
+
+            return (
+              <View key={framework.code} style={{ marginBottom: 12 }}>
+                <PressableGlow
+                  onPress={() =>
+                    router.push({
+                      pathname: '/(app)/scorecard',
+                      params: { framework: framework.code },
+                    })
+                  }
+                  glowColor={colors.brand[400]}
+                >
+                  <Card tone="brand" glow>
+                    <View
+                      style={{
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                      }}
+                    >
+                      <View style={{ flex: 1, paddingRight: 12 }}>
+                        <Text
+                          style={{
+                            color: colors.text.primary,
+                            fontSize: 16,
+                            fontWeight: '800',
+                          }}
+                        >
+                          {framework.label}
+                        </Text>
+                        <Text
+                          style={{
+                            color: colors.text.secondary,
+                            fontSize: 12,
+                            marginTop: 5,
+                            lineHeight: 17,
+                          }}
+                        >
+                          {framework.description}
+                        </Text>
+                        <Text
+                          style={{
+                            color: colors.text.muted,
+                            fontSize: 11,
+                            marginTop: 8,
+                          }}
+                        >
+                          {result?.isLoading
+                            ? 'Loading score…'
+                            : result?.isError
+                              ? 'Score unavailable — tap to open'
+                              : `${Math.round(result?.data?.completeness ?? 0)}% complete`}
+                        </Text>
+                      </View>
+                      <View style={{ alignItems: 'flex-end' }}>
+                        <Text
+                          style={{
+                            color: colors.text.primary,
+                            fontSize: 28,
+                            fontWeight: '800',
+                          }}
+                        >
+                          {score == null ? '—' : `${Math.round(score)}%`}
+                        </Text>
+                        <Ionicons
+                          name="chevron-forward"
+                          size={18}
+                          color={colors.brand[400]}
+                        />
+                      </View>
+                    </View>
+                  </Card>
+                </PressableGlow>
+              </View>
+            );
+          })}
+        </View>
+
         {/* People + Process tiles (side by side, gated by allowedLevels) */}
         {(showPeople || showProcess) && (
           <View style={{ flexDirection: 'row', gap: 12, marginBottom: 12, marginTop: 8 }}>
@@ -138,7 +265,7 @@ export default function Dashboard() {
           </View>
         )}
 
-        {/* Company card — full width, gated */}
+        {/* Company card â€” full width, gated */}
         {showCompany && (
         <PressableGlow
           onPress={() => router.push('/(app)/assessment')}
@@ -201,7 +328,7 @@ export default function Dashboard() {
               <CompanyStat label="TOTAL KPIS" value={String(company?.total ?? 0)} />
               <CompanyStat
                 label="SCORE"
-                value={company?.score != null ? `${Math.round(company.score)}%` : '—'}
+                value={company?.score != null ? `${Math.round(company.score)}%` : 'â€”'}
               />
             </View>
           </Card>
@@ -220,7 +347,7 @@ export default function Dashboard() {
 
         {isLoading && (
           <Text style={{ color: colors.text.muted, textAlign: 'center', marginTop: 40 }}>
-            Loading scorecard…
+            Loading scorecardâ€¦
           </Text>
         )}
       </ScrollView>
@@ -277,19 +404,19 @@ function LevelTile({
               : {}),
           }}
         >
-          {score == null ? '—' : Math.round(score)}
+          {score == null ? 'â€”' : Math.round(score)}
           {score != null && (
             <Text style={{ color: colors.text.secondary, fontSize: 18, fontWeight: '600' }}>%</Text>
           )}
         </Text>
-        {/* Progress bar — animates from 0 to score% on mount */}
+        {/* Progress bar â€” animates from 0 to score% on mount */}
         <AnimatedProgressBar value={score ?? 0} accent={accent} />
       </Card>
     </PressableGlow>
   );
 }
 
-// ─── Animated progress bar with a slow sheen sweep ───────────────────────
+// â”€â”€â”€ Animated progress bar with a slow sheen sweep â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function AnimatedProgressBar({ value, accent }: { value: number; accent: string }) {
   const widthAnim = useRef(new Animated.Value(0)).current;
   const sheen = useRef(new Animated.Value(0)).current;
@@ -375,7 +502,7 @@ function AnimatedProgressBar({ value, accent }: { value: number; accent: string 
   );
 }
 
-// ─── RESUME button with a sheen sweep across its inner surface ──────────
+// â”€â”€â”€ RESUME button with a sheen sweep across its inner surface â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function ResumeButton({ label }: { label: string }) {
   const sheen = useRef(new Animated.Value(0)).current;
   useEffect(() => {
@@ -472,7 +599,7 @@ function TeamRollupBanner({
 }) {
   const accent = colors.brand[400];
   const scoreLabel =
-    overallScore == null ? '—' : `${Math.round(overallScore)}%`;
+    overallScore == null ? 'â€”' : `${Math.round(overallScore)}%`;
 
   return (
     <PressableGlow onPress={onPressManage} glowColor={accent}>
@@ -546,7 +673,7 @@ function TeamRollupBanner({
           <RollupStat label="TEAM SCORE" value={scoreLabel} accent={accent} />
           <RollupStat
             label="MEMBERS"
-            value={memberCount == null ? '—' : `${activeAnswerers ?? 0}/${memberCount}`}
+            value={memberCount == null ? 'â€”' : `${activeAnswerers ?? 0}/${memberCount}`}
             sub="active"
           />
           <RollupStat

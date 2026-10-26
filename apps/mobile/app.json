@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "CyMetric",
-    "slug": "cyberscore",
+    "slug": "cymetric",
     "version": "0.1.0",
     "orientation": "portrait",
     "scheme": "cyberscore",
@@ -19,6 +19,8 @@
       },
       "permissions": [
         "android.permission.USE_BIOMETRIC",
+        "android.permission.USE_FINGERPRINT",
+        "android.permission.USE_BIOMETRIC",
         "android.permission.USE_FINGERPRINT"
       ]
     },
@@ -33,10 +35,20 @@
       "typedRoutes": true
     },
     "extra": {
-  "apiBaseUrl": "https://cyberscore-api.vercel.app",
-  "router": {
-    "origin": false
+      "apiBaseUrl": "https://cyberscore-main.vercel.app",
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "099ac785-4853-4f81-8b50-642dd3940fe3"
+      }
+    },
+    "owner": "fisst",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/099ac785-4853-4f81-8b50-642dd3940fe3"
+    }
   }
-  },
-  "owner": "fisst"
 }

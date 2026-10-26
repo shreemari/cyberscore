@@ -11,8 +11,9 @@
         "gradleCommand": ":app:assembleRelease"
       },
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://cyberscore-api.vercel.app"
-      }
+        "EXPO_PUBLIC_API_URL": "https://cyberscore-main.vercel.app"
+      },
+      "channel": "preview"
     },
     "production": {
       "android": {
@@ -20,7 +21,8 @@
       },
       "env": {
         "EXPO_PUBLIC_API_URL": "https://cyberscore-api.vercel.app"
-      }
+      },
+      "channel": "production"
     }
   },
   "submit": {
