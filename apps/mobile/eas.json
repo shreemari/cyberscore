@@ -15,15 +15,16 @@
       },
       "channel": "preview"
     },
-    "production": {
-      "android": {
-        "buildType": "app-bundle"
-      },
-      "env": {
-        "EXPO_PUBLIC_API_URL": "https://cyberscore-api.vercel.app"
-      },
-      "channel": "production"
-    }
+   
+"production": {
+  "android": {
+    "buildType": "app-bundle"
+  },
+  "env": {
+    "EXPO_PUBLIC_API_URL": "https://cyberscore-main.vercel.app"
+  },
+  "channel": "production"
+}
   },
   "submit": {
     "production": {}
