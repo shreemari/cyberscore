@@ -91,6 +91,8 @@ export function aggregate(
   kpis: KpiLite[],
   responses: ResponseLite[],
 ): AggregatedScorecard {
+  // Use a single response per KPI for score calculations. Duplicate response
+  // rows must not increase completeness beyond the number of KPIs in scope.
   const byId = new Map(responses.map((r) => [r.kpiId, r]));
 
   const byLevel = {
@@ -104,23 +106,32 @@ export function aggregate(
   const company = computeLevel(byLevel.company, byId);
   const all = computeLevel(kpis, byId);
 
-  const answeredCount = responses.filter((r) => !r.isNa).length;
-  const completeness =
-    kpis.length === 0 ? 0 : (answeredCount / kpis.length) * 100;
+  // Count unique, answered KPI IDs that belong to this framework's KPI list.
+  // This prevents unrelated-framework and duplicate responses from inflating
+  // completeness. N/A answers are not counted as answered for completeness.
+  const kpiIds = new Set(kpis.map((k) => k.id));
+  const answeredCount = new Set(
+    responses
+      .filter((r) => kpiIds.has(r.kpiId) && !r.isNa)
+      .map((r) => r.kpiId),
+  ).size;
 
-  const kpiNameById = new Map(kpis.map((k) => [k.id, k.kpiName]));
+  const completeness =
+    kpis.length === 0
+      ? 0
+      : Math.min(100, (answeredCount / kpis.length) * 100);
 
   const underperforming = responses
-    .filter((r) => !r.isNa)
+    .filter((r) => !r.isNa && kpiIds.has(r.kpiId))
     .map((r) => {
       const kpi = kpis.find((k) => k.id === r.kpiId);
       if (!kpi) return null;
 
-      const pct = (r.actualScore / kpi.maxScore) * 100;
+      const pct = kpi.maxScore === 0 ? 0 : (r.actualScore / kpi.maxScore) * 100;
 
       return {
         kpiId: r.kpiId,
-        kpiName: kpiNameById.get(r.kpiId) ?? 'Unknown',
+        kpiName: kpi.kpiName,
         currentScore: round2(pct),
         scoreRange: scoreRangeFor(pct),
       };
@@ -218,9 +229,13 @@ export function rollupResponses(args: {
   adminId: string | null;
 }): ResponseLite[] {
   if (!args.isEnterprise) {
+    const kpiIds = new Set(args.kpis.map((k) => k.id));
     const byKpi = new Map<string, ResponseLite>();
 
     for (const r of args.rawResponses) {
+      // Ignore response rows for KPIs outside the selected framework.
+      if (!kpiIds.has(r.kpiId)) continue;
+
       if (!byKpi.has(r.kpiId)) {
         byKpi.set(r.kpiId, {
           kpiId: r.kpiId,
@@ -241,6 +256,9 @@ export function rollupResponses(args: {
   const grouped = new Map<string, RawResponse[]>();
 
   for (const r of args.rawResponses) {
+    // Ignore response rows for KPIs outside the selected framework.
+    if (!scopeByKpi.has(r.kpiId)) continue;
+
     const arr = grouped.get(r.kpiId) ?? [];
     arr.push(r);
     grouped.set(r.kpiId, arr);
