@@ -157,6 +157,7 @@ export function aggregate(kpis: KpiLite[], responses: ResponseLite[]): Aggregate
 export async function loadScorecardInputs(
   tx: Prisma.TransactionClient,
   orgId: string,
+  framework?: 'EXCEL' | 'NIST_CSF' | 'ISO27001' | null,
 ): Promise<{ kpis: KpiLite[]; responses: ResponseLite[] }> {
   const org = await tx.organisation.findUnique({
     where: { id: orgId },
@@ -176,7 +177,12 @@ export async function loadScorecardInputs(
 
   const [kpis, rawResponses] = await Promise.all([
     tx.kpi.findMany({
-      where: { isActive: true, deletedAt: null, status: 'PUBLISHED' },
+      where: {
+        isActive: true,
+        deletedAt: null,
+        status: 'PUBLISHED',
+        ...(framework ? { frameworkCode: framework } : {}),
+      },
       select: {
         id: true,
         kpiName: true,

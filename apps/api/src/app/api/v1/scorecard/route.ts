@@ -15,6 +15,26 @@ import { effectiveAllowedLevels } from '@/lib/access';
 // without recomputing history from audit logs. The endpoint just returns the
 // `latestSnapshot` pointer so mobile can label the view with its age.
 export async function GET(req: Request) {
+  const requestedFramework =
+    new URL(req.url).searchParams.get('framework')?.trim() ?? null;
+  const validFrameworks = ['EXCEL', 'NIST_CSF', 'ISO27001'] as const;
+
+  if (
+    requestedFramework &&
+    !validFrameworks.includes(
+      requestedFramework as (typeof validFrameworks)[number],
+    )
+  ) {
+    return NextResponse.json(
+      { error: 'Invalid framework parameter' },
+      { status: 400 },
+    );
+  }
+
+  const framework = requestedFramework as
+    | (typeof validFrameworks)[number]
+    | null;
+
   const auth = requireAuth(req);
   if ('response' in auth) return auth.response;
 
@@ -41,7 +61,11 @@ export async function GET(req: Request) {
       const isPersonalView =
         caller.org.mode === OrgMode.ENTERPRISE && caller.role !== Role.ADMIN;
 
-      const { kpis, responses } = await loadScorecardInputs(tx, auth.orgId);
+      const { kpis, responses } = await loadScorecardInputs(
+        tx,
+        auth.orgId,
+        framework,
+      );
 
       // Personal-view scorecard: filter the KPI catalogue to allowed levels
       // and only count this user's own responses.
@@ -92,6 +116,7 @@ export async function GET(req: Request) {
     }));
 
     return NextResponse.json({
+      framework,
       peopleScore: payload.agg.peopleScore,
       processScore: payload.agg.processScore,
       companyScore: payload.agg.companyScore,
