@@ -113,8 +113,17 @@ export function aggregate(kpis: KpiLite[], responses: ResponseLite[]): Aggregate
 
   const all = computeLevel(kpis, byId);
 
-  const answeredCount = responses.filter((r) => !r.isNa).length;
-  const completeness = kpis.length === 0 ? 0 : (answeredCount / kpis.length) * 100;
+  // Count only answered KPIs that belong to this scorecard's catalogue.
+  // The response list may contain rows from other frameworks in the same org.
+  // Use a Set so duplicate response rows cannot push completeness above 100%.
+  const kpiIds = new Set(kpis.map((k) => k.id));
+  const answeredKpiIds = new Set(
+    responses
+      .filter((r) => kpiIds.has(r.kpiId) && !r.isNa)
+      .map((r) => r.kpiId),
+  );
+  const completeness =
+    kpis.length === 0 ? 0 : (answeredKpiIds.size / kpis.length) * 100;
 
   const kpiNameById = new Map(kpis.map((k) => [k.id, k.kpiName]));
   const underperforming = responses
