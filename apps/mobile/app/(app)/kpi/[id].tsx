@@ -20,7 +20,7 @@ import { PressableGlow } from '@/components/PressableGlow';
 import { api } from '@/lib/api';
 import { frameworkLabel } from '@/lib/frameworks';
 import { colors } from '@/theme/colors';
-import type { Kpi, Level, TierCondition } from '@cymetric/types';
+import type { Framework, Kpi, Level, TierCondition } from '@cymetric/types';
 
 // Per-KPI question screen — matches mock screenshot 2.
 // Routed as /(app)/kpi/[id]?level=PEOPLE&index=3
@@ -49,15 +49,21 @@ function stripDirectionalHint(text: string | null | undefined): string {
 }
 
 export default function KpiQuestion() {
-  const params = useLocalSearchParams<{ id: string; level?: Level; index?: string }>();
+  const params = useLocalSearchParams<{
+    id: string;
+    level?: Level;
+    index?: string;
+    framework?: string;
+  }>();
   const kpiId = params.id;
   const level = (params.level as Level | undefined) ?? 'PEOPLE';
   const index = Number(params.index ?? '0');
+  const framework = (params.framework ?? 'EXCEL') as Framework;
   const qc = useQueryClient();
 
   const { data: kpis, isLoading } = useQuery({
-    queryKey: ['kpis', 'all'],
-    queryFn: () => api.kpis.list(),
+    queryKey: ['kpis', framework],
+    queryFn: () => api.kpis.list({ framework }),
   });
 
   const byLevel = useMemo(() => {
@@ -107,8 +113,17 @@ export default function KpiQuestion() {
       // Cuts the click-to-next latency roughly in half on warm Vercel and
       // makes a much bigger difference under cold-start.
       await Promise.all([
-        api.kpis.submit({ kpiId: kpi.id, inputValue }),
-        api.progress.save({ level, lastQuestionIndex: nextIndex, status }),
+        api.kpis.submit({
+          kpiId: kpi.id,
+          inputValue,
+          frameworkCode: framework,
+        }),
+        api.progress.save({
+          level,
+          lastQuestionIndex: nextIndex,
+          status,
+          frameworkCode: framework,
+        }),
       ]);
       return { nextIndex, status };
     },
@@ -117,19 +132,21 @@ export default function KpiQuestion() {
       // fresh data via its own queries when it mounts; we don't need to
       // block this navigation on the invalidation round-trip.
       void qc.invalidateQueries({ queryKey: ['scorecard'] });
-      void qc.invalidateQueries({ queryKey: ['progress'] });
+      void qc.invalidateQueries({ queryKey: ['progress', framework] });
 
       if (!vars.advance) {
         router.replace('/(app)/assessment');
         return;
       }
       if (status === 'COMPLETED' || nextIndex >= byLevel.length) {
-        router.replace('/(app)/results');
+        router.replace(`/(app)/results?framework=${framework}`);
         return;
       }
       const nextKpi = byLevel[nextIndex];
       if (nextKpi) {
-        router.replace(`/(app)/kpi/${nextKpi.id}?level=${level}&index=${nextIndex}`);
+        router.replace(
+          `/(app)/kpi/${nextKpi.id}?level=${level}&index=${nextIndex}&framework=${framework}`,
+        );
       }
     },
     onError: (err: any) => {

@@ -74,10 +74,22 @@ export async function GET(req: Request) {
       if (isPersonalView) {
         const allowed = new Set(callerLevels);
         scopedKpis = kpis.filter((k) => allowed.has(k.level));
-        const personal = await tx.response.findMany({
-          where: { orgId: auth.orgId, submittedById: auth.userId },
-          select: { kpiId: true, actualScore: true, weightedScore: true, isNa: true },
-        });
+        const personal =
+          scopedKpis.length === 0
+            ? []
+            : await tx.response.findMany({
+                where: {
+                  orgId: auth.orgId,
+                  submittedById: auth.userId,
+                  kpiId: { in: scopedKpis.map((k) => k.id) },
+                },
+                select: {
+                  kpiId: true,
+                  actualScore: true,
+                  weightedScore: true,
+                  isNa: true,
+                },
+              });
         scopedResponses = personal;
       }
 

@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { Level, ProgressStatus, ScoreRange, SuggestionPriority } from './enums';
+import { Framework, Level, ProgressStatus, ScoreRange, SuggestionPriority } from './enums';
 
 // ---------- Scorecard (live) ----------
 export const ScorecardResponse = z.object({
@@ -89,6 +89,8 @@ export const ProgressResponse = z.object({
 export type ProgressResponse = z.infer<typeof ProgressResponse>;
 
 export const SaveProgressRequest = z.object({
+  // Defaults to the existing KPI workbook so older clients remain compatible.
+  frameworkCode: z.nativeEnum(Framework).default(Framework.EXCEL),
   level: z.nativeEnum(Level),
   lastQuestionIndex: z.number().int().nonnegative(),
   status: z.nativeEnum(ProgressStatus),

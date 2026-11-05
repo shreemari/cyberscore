@@ -184,34 +184,42 @@ export async function loadScorecardInputs(
         )?.id ?? null
       : null;
 
-  const [kpis, rawResponses] = await Promise.all([
-    tx.kpi.findMany({
-      where: {
-        isActive: true,
-        deletedAt: null,
-        status: 'PUBLISHED',
-        ...(framework ? { frameworkCode: framework } : {}),
-      },
-      select: {
-        id: true,
-        kpiName: true,
-        level: true,
-        maxScore: true,
-        weightage: true,
-        answerScope: true,
-      },
-    }),
-    tx.response.findMany({
-      where: { orgId },
-      select: {
-        kpiId: true,
-        actualScore: true,
-        weightedScore: true,
-        isNa: true,
-        submittedById: true,
-      },
-    }),
-  ]);
+  // Load the published KPI catalogue for the requested framework first.
+  const kpis = await tx.kpi.findMany({
+    where: {
+      isActive: true,
+      deletedAt: null,
+      status: 'PUBLISHED',
+      ...(framework ? { frameworkCode: framework } : {}),
+    },
+    select: {
+      id: true,
+      kpiName: true,
+      level: true,
+      maxScore: true,
+      weightage: true,
+      answerScope: true,
+    },
+  });
+
+  // Restrict response rows to KPIs in this catalogue so other frameworks'
+  // answers cannot enter this scorecard's aggregation.
+  const rawResponses =
+    kpis.length === 0
+      ? []
+      : await tx.response.findMany({
+          where: {
+            orgId,
+            kpiId: { in: kpis.map((k) => k.id) },
+          },
+          select: {
+            kpiId: true,
+            actualScore: true,
+            weightedScore: true,
+            isNa: true,
+            submittedById: true,
+          },
+        });
 
   const responses = rollupResponses({
     kpis,

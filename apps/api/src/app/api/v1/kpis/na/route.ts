@@ -8,23 +8,28 @@ import { audit, AuditActions } from '@/lib/audit';
 // POST /api/v1/kpis/na
 //
 // Marks a KPI as Not Applicable with a mandatory justification.
-// N/A responses contribute zero weight to the scorecard — they neither
-// help nor hurt the score, but the justification text is retained for
-// auditors and for manager review. Upserts so a user can flip between
-// answered and N/A freely.
+// The selected framework is checked against the KPI catalogue before
+// the N/A response is written.
 export async function POST(req: Request) {
   const auth = requireAuth(req);
   if ('response' in auth) return auth.response;
 
   const parsed = await parseJson(req, MarkNaRequest);
   if (!parsed.ok) return parsed.response;
-  const { kpiId, justification } = parsed.data;
+  const { kpiId, justification, frameworkCode } = parsed.data;
 
   try {
     const kpi = await prisma.kpi.findFirst({
-      where: { id: kpiId, isActive: true, deletedAt: null },
+      where: {
+        id: kpiId,
+        frameworkCode,
+        isActive: true,
+        deletedAt: null,
+      },
       select: { id: true, version: true },
     });
+    // A framework mismatch is reported as KPI_NOT_FOUND, just like an
+    // unknown or inactive KPI.
     if (!kpi) return problem(ErrorCodes.KPI_NOT_FOUND);
 
     const response = await withTenant(auth.orgId, (tx) =>

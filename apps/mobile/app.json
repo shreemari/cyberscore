@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "CyMetric",
-    "slug": "cyberscore",
+    "slug": "cymetric",
     "version": "0.1.0",
     "orientation": "portrait",
     "scheme": "cyberscore",
@@ -33,14 +33,14 @@
       "typedRoutes": true
     },
     "extra": {
-      "apiBaseUrl": "https://cyberscore-api.vercel.app",
+      "apiBaseUrl": "https://cyberscore-main.vercel.app",
       "router": {
         "origin": false
       },
       "eas": {
-        "projectId": "4cddb02b-7be0-47d3-8911-4df45863d418"
+        "projectId": "099ac785-4853-4f81-8b50-642dd3940fe3"
       }
     },
-    "owner": "saanviiiiiiiiiiiiii"
+    "owner": "fisst"
   }
 }

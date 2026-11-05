@@ -55,6 +55,8 @@ export type KpiListResponse = z.infer<typeof KpiListResponse>;
 export const SubmitKpiRequest = z.object({
   kpiId: z.string(),
   inputValue: z.string().min(1).max(512),
+  // Defaults to the existing KPI workbook for older clients.
+  frameworkCode: z.nativeEnum(Framework).default(Framework.EXCEL),
   // Optional — client-generated idempotency key for offline queue replay
   idempotencyKey: z.string().uuid().optional(),
 });
@@ -98,6 +100,8 @@ export type EvidenceConfirmRequest = z.infer<typeof EvidenceConfirmRequest>;
 export const MarkNaRequest = z.object({
   kpiId: z.string(),
   justification: z.string().min(10).max(2000),
+  // Defaults to the existing KPI workbook for older clients.
+  frameworkCode: z.nativeEnum(Framework).default(Framework.EXCEL),
 });
 export type MarkNaRequest = z.infer<typeof MarkNaRequest>;
 

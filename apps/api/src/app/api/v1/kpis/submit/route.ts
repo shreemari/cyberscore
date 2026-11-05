@@ -11,26 +11,28 @@ import { canAssessLevel } from '@/lib/access';
 
 // POST /api/v1/kpis/submit
 //
-// Submits an answer for a single KPI. Flow:
-//   1. Load KPI + tiers (global — no RLS needed; KPIs are shared catalogue).
-//   2. Match the input against tiers to compute actualScore + weightedScore.
-//   3. Upsert a Response row keyed by (orgId, kpiId) inside withTenant so
-//      RLS catches any orgId drift.
-//   4. If the client sent an idempotencyKey, replay returns the existing row
-//      unchanged — mobile can safely retry the call after a network blip.
+// Submits an answer for a single KPI. The selected framework is checked
+// against the KPI catalogue before any response is written.
 export async function POST(req: Request) {
   const auth = requireAuth(req);
   if ('response' in auth) return auth.response;
 
   const parsed = await parseJson(req, SubmitKpiRequest);
   if (!parsed.ok) return parsed.response;
-  const { kpiId, inputValue, idempotencyKey } = parsed.data;
+  const { kpiId, inputValue, idempotencyKey, frameworkCode } = parsed.data;
 
   try {
     const kpi = await prisma.kpi.findFirst({
-      where: { id: kpiId, isActive: true, deletedAt: null },
+      where: {
+        id: kpiId,
+        frameworkCode,
+        isActive: true,
+        deletedAt: null,
+      },
       include: { tiers: true },
     });
+    // Treat a framework mismatch the same as an unknown KPI. This prevents
+    // a client from submitting a KPI under a different framework.
     if (!kpi) return problem(ErrorCodes.KPI_NOT_FOUND);
 
     // Per-user level gate: employees can only submit for levels their admin
@@ -67,7 +69,7 @@ export async function POST(req: Request) {
         if (existing) return existing;
       }
       // Per-user uniqueness: each submitter has their own row. Same shape
-      // works for SOLO (single user → single row) and ENTERPRISE (admin row
+      // works for SOLO (single user -> single row) and ENTERPRISE (admin row
       // + employee rows aggregated at score time by loadScorecardInputs).
       return tx.response.upsert({
         where: {
@@ -116,9 +118,7 @@ export async function POST(req: Request) {
       req,
     });
 
-    // Debounced snapshot enqueue — the helper uses a deterministic jobId per
-    // org so a burst of submits only writes one snapshot, and the trend chart
-    // picks it up without waiting for the nightly scheduler.
+    // Debounced snapshot enqueue.
     enqueueSnapshot({ orgId: auth.orgId, reason: 'KPI_SUBMITTED' }).catch((err) => {
       logger.warn({ err, orgId: auth.orgId }, 'snapshot enqueue failed');
     });

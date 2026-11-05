@@ -136,31 +136,31 @@ model Organisation {
   // Enterprise-mode fields. SOLO orgs leave emailDomain null and joinMode
   // defaults are inert for them. frameworkLocked is honoured by the API:
   // when true, only an admin can change selectedFramework.
-  mode             OrgMode  @default(SOLO)
-  emailDomain      String?  @db.VarChar(253) // RFC 1035 max domain length
-  joinMode         JoinMode @default(INVITE_ONLY)
-  frameworkLocked  Boolean  @default(false)
+  mode            OrgMode  @default(SOLO)
+  emailDomain     String?  @db.VarChar(253) // RFC 1035 max domain length
+  joinMode        JoinMode @default(INVITE_ONLY)
+  frameworkLocked Boolean  @default(false)
 
   deletedAt DateTime?
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 
-  users                User[]
-  refreshTokens        RefreshToken[]
-  responses            Response[]
-  snapshots            ScorecardSnapshot[]
-  evidenceAttachments  EvidenceAttachment[]
-  progress             AssessmentProgress[]
-  subscription         Subscription?
-  apiKeys              ApiKey[]
-  webhooks             Webhook[]
-  notifications        Notification[]
-  pushTokens           PushToken[]
-  shareTokens          ShareToken[]
-  aiUsage              AiUsage[]
-  auditLogs            AuditLog[]
-  invites              Invite[]
-  chatThreads          ChatThread[]
+  users               User[]
+  refreshTokens       RefreshToken[]
+  responses           Response[]
+  snapshots           ScorecardSnapshot[]
+  evidenceAttachments EvidenceAttachment[]
+  progress            AssessmentProgress[]
+  subscription        Subscription?
+  apiKeys             ApiKey[]
+  webhooks            Webhook[]
+  notifications       Notification[]
+  pushTokens          PushToken[]
+  shareTokens         ShareToken[]
+  aiUsage             AiUsage[]
+  auditLogs           AuditLog[]
+  invites             Invite[]
+  chatThreads         ChatThread[]
 
   @@unique([emailDomain])
   @@index([email])
@@ -212,19 +212,19 @@ model User {
 // Token is returned only at creation; we store the bcrypt hash. The accept
 // endpoint takes the raw token + chosen password, verifies, creates the User.
 model Invite {
-  id          String       @id @default(cuid())
-  orgId       String
-  email       String       @db.VarChar(254)
-  role        Role         @default(EMPLOYEE)
-  tokenHash   String       @unique // bcrypt of the raw token
-  status      InviteStatus @default(PENDING)
-  invitedById String?
+  id           String       @id @default(cuid())
+  orgId        String
+  email        String       @db.VarChar(254)
+  role         Role         @default(EMPLOYEE)
+  tokenHash    String       @unique // bcrypt of the raw token
+  status       InviteStatus @default(PENDING)
+  invitedById  String?
   acceptedById String?
-  expiresAt   DateTime
-  acceptedAt  DateTime?
-  revokedAt   DateTime?
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
+  expiresAt    DateTime
+  acceptedAt   DateTime?
+  revokedAt    DateTime?
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
 
   // Levels the invitee will receive on accept. Admin can pre-assign at invite
   // time; defaults to all three if not specified.
@@ -270,7 +270,7 @@ model RefreshToken {
 model OtpVerification {
   id        String   @id @default(cuid())
   email     String   @db.VarChar(254)
-  otpHash   String   // bcrypt hash — never plain text
+  otpHash   String // bcrypt hash — never plain text
   purpose   String   @default("REGISTER") @db.VarChar(32) // REGISTER | PASSWORD_RESET | EMAIL_CHANGE
   attempts  Int      @default(0)
   expiresAt DateTime
@@ -306,7 +306,7 @@ model Kpi {
   // ORG by default — single ground truth, admin authoritative. Flip to
   // EMPLOYEE for KPIs that genuinely vary per user (training, behaviour,
   // phishing exposure). Seed sets the right value per KPI.
-  answerScope    AnswerScope @default(ORG)
+  answerScope AnswerScope @default(ORG)
 
   deletedAt DateTime?
   createdAt DateTime  @default(now())
@@ -330,7 +330,7 @@ model KpiVersion {
   id          String   @id @default(cuid())
   kpiId       String
   version     Int
-  snapshot    Json     // full KPI + tiers at this version
+  snapshot    Json // full KPI + tiers at this version
   changedById String?
   changeNote  String?  @db.Text
   createdAt   DateTime @default(now())
@@ -362,29 +362,29 @@ model ScoringTier {
 }
 
 model Response {
-  id            String   @id @default(cuid())
-  orgId         String
-  kpiId         String
-  kpiVersion    Int
-  submittedById String?
-  inputValue    String   @db.VarChar(512)
-  actualScore   Int
-  weightedScore Float
-  matchedTierId String?
-  evidenceUrl   String?  @db.VarChar(1024)
+  id              String  @id @default(cuid())
+  orgId           String
+  kpiId           String
+  kpiVersion      Int
+  submittedById   String?
+  inputValue      String  @db.VarChar(512)
+  actualScore     Int
+  weightedScore   Float
+  matchedTierId   String?
+  evidenceUrl     String? @db.VarChar(1024)
   naJustification String? @db.Text
-  isNa          Boolean  @default(false)
+  isNa            Boolean @default(false)
   // Idempotency — mobile sends a UUID per logical submission to de-dup offline replays.
-  idempotencyKey String? @db.Uuid
+  idempotencyKey  String? @db.Uuid
 
   createdAt   DateTime @default(now())
   submittedAt DateTime @default(now()) @updatedAt
 
-  org          Organisation         @relation(fields: [orgId], references: [id], onDelete: Cascade)
-  kpi          Kpi                  @relation(fields: [kpiId], references: [id], onDelete: Restrict)
-  submittedBy  User?                @relation(fields: [submittedById], references: [id], onDelete: SetNull)
-  matchedTier  ScoringTier?         @relation("ResponseMatchedTier", fields: [matchedTierId], references: [id], onDelete: SetNull)
-  evidence     EvidenceAttachment[]
+  org         Organisation         @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  kpi         Kpi                  @relation(fields: [kpiId], references: [id], onDelete: Restrict)
+  submittedBy User?                @relation(fields: [submittedById], references: [id], onDelete: SetNull)
+  matchedTier ScoringTier?         @relation("ResponseMatchedTier", fields: [matchedTierId], references: [id], onDelete: SetNull)
+  evidence    EvidenceAttachment[]
 
   // Multi-user safe. For ORG-scope KPIs, only the admin's row is scored;
   // employee rows are kept as a consensus signal. For EMPLOYEE-scope KPIs,
@@ -401,17 +401,17 @@ model Response {
 }
 
 model ScorecardSnapshot {
-  id            String   @id @default(cuid())
-  orgId         String
-  peopleScore   Float
-  processScore  Float
-  companyScore  Float
-  overallScore  Float
-  completeness  Float    // 0..100
-  feedbackText  String?  @db.Text
+  id           String   @id @default(cuid())
+  orgId        String
+  peopleScore  Float
+  processScore Float
+  companyScore Float
+  overallScore Float
+  completeness Float // 0..100
+  feedbackText String?  @db.Text
   // Breakdown payload used by mobile to render without re-querying responses.
-  breakdown     Json?
-  generatedAt   DateTime @default(now())
+  breakdown    Json?
+  generatedAt  DateTime @default(now())
 
   org Organisation @relation(fields: [orgId], references: [id], onDelete: Cascade)
 
@@ -424,16 +424,16 @@ model ScorecardSnapshot {
 // ============================================================
 
 model EvidenceAttachment {
-  id         String   @id @default(cuid())
-  responseId String
-  orgId      String   // denormalised for RLS
+  id           String   @id @default(cuid())
+  responseId   String
+  orgId        String // denormalised for RLS
   uploadedById String?
-  fileName   String   @db.VarChar(255)
-  fileKey    String   @db.VarChar(512) // R2/S3 object key
-  fileUrl    String   @db.VarChar(1024)
-  fileType   String   @db.VarChar(127)
-  fileSize   Int
-  createdAt  DateTime @default(now())
+  fileName     String   @db.VarChar(255)
+  fileKey      String   @db.VarChar(512) // R2/S3 object key
+  fileUrl      String   @db.VarChar(1024)
+  fileType     String   @db.VarChar(127)
+  fileSize     Int
+  createdAt    DateTime @default(now())
 
   response   Response     @relation(fields: [responseId], references: [id], onDelete: Cascade)
   org        Organisation @relation(fields: [orgId], references: [id], onDelete: Cascade)
@@ -450,7 +450,7 @@ model IndustryBenchmark {
   industry           String   @db.VarChar(100)
   avgScore           Float
   topPercentileScore Float
-  sampleSize         Int      // k — do NOT show aggregate until k >= 20
+  sampleSize         Int // k — do NOT show aggregate until k >= 20
   source             String   @db.VarChar(200)
   lastUpdated        DateTime @default(now())
   createdAt          DateTime @default(now())
@@ -484,6 +484,9 @@ model AssessmentProgress {
   // level — Bob's "resume at question 7" doesn't follow Alice around.
   userId            String
   level             Level
+  // Keep assessment resume state independent for each framework.
+  // Existing rows default to EXCEL when the migration is applied.
+  frameworkCode     Framework      @default(EXCEL)
   lastQuestionIndex Int            @default(0)
   status            ProgressStatus @default(NOT_STARTED)
   pausedAt          DateTime?
@@ -494,7 +497,7 @@ model AssessmentProgress {
   org  Organisation @relation(fields: [orgId], references: [id], onDelete: Cascade)
   user User         @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@unique([orgId, userId, level])
+  @@unique([orgId, userId, level, frameworkCode])
   @@index([orgId])
   @@index([userId])
   @@map("assessment_progress")
@@ -571,7 +574,7 @@ model Webhook {
   orgId     String
   url       String   @db.VarChar(1024)
   events    String[] @default([])
-  secret    String   // HMAC signing secret
+  secret    String // HMAC signing secret
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -587,15 +590,15 @@ model Webhook {
 // ============================================================
 
 model Notification {
-  id        String   @id @default(cuid())
+  id        String    @id @default(cuid())
   orgId     String
-  type      String   @db.VarChar(64)  // SCORE_DROPPED | REASSESSMENT_DUE | BENCHMARK_UPDATED | ...
-  title     String   @db.VarChar(200)
-  body      String   @db.Text
-  data      Json?    // deep-link payload for mobile
-  isRead    Boolean  @default(false)
+  type      String    @db.VarChar(64) // SCORE_DROPPED | REASSESSMENT_DUE | BENCHMARK_UPDATED | ...
+  title     String    @db.VarChar(200)
+  body      String    @db.Text
+  data      Json? // deep-link payload for mobile
+  isRead    Boolean   @default(false)
   readAt    DateTime?
-  createdAt DateTime @default(now())
+  createdAt DateTime  @default(now())
 
   org Organisation @relation(fields: [orgId], references: [id], onDelete: Cascade)
 
@@ -631,15 +634,15 @@ model PushToken {
 // ============================================================
 
 model ShareToken {
-  id        String    @id @default(cuid())
-  orgId     String
-  tokenHash String    @unique // bcrypt — raw token only ever returned once at creation
-  label     String?   @db.VarChar(200)
-  expiresAt DateTime
-  viewCount Int       @default(0)
+  id           String    @id @default(cuid())
+  orgId        String
+  tokenHash    String    @unique // bcrypt — raw token only ever returned once at creation
+  label        String?   @db.VarChar(200)
+  expiresAt    DateTime
+  viewCount    Int       @default(0)
   lastViewedAt DateTime?
-  revokedAt DateTime?
-  createdAt DateTime  @default(now())
+  revokedAt    DateTime?
+  createdAt    DateTime  @default(now())
 
   org Organisation @relation(fields: [orgId], references: [id], onDelete: Cascade)
 
@@ -652,16 +655,16 @@ model ShareToken {
 // Daily AI call budget tracking — used to enforce per-plan rate limits
 // and auto-switch from Sonnet to Haiku when daily budget is exhausted.
 model AiUsage {
-  id             String   @id @default(cuid())
-  orgId          String
-  day            DateTime @db.Date
-  model          String   @db.VarChar(64)
-  inputTokens    Int      @default(0)
-  outputTokens   Int      @default(0)
-  callCount      Int      @default(0)
-  estimatedCostUsd Float  @default(0)
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  id               String   @id @default(cuid())
+  orgId            String
+  day              DateTime @db.Date
+  model            String   @db.VarChar(64)
+  inputTokens      Int      @default(0)
+  outputTokens     Int      @default(0)
+  callCount        Int      @default(0)
+  estimatedCostUsd Float    @default(0)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 
   org Organisation @relation(fields: [orgId], references: [id], onDelete: Cascade)
 
@@ -674,13 +677,13 @@ model AiUsage {
 // store the full turn-by-turn history; we replay them as the Anthropic
 // messages array on each new turn.
 model ChatThread {
-  id        String   @id @default(cuid())
-  orgId     String
-  userId    String
-  title     String   @db.VarChar(200)
+  id         String    @id @default(cuid())
+  orgId      String
+  userId     String
+  title      String    @db.VarChar(200)
   archivedAt DateTime?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
 
   org      Organisation  @relation(fields: [orgId], references: [id], onDelete: Cascade)
   user     User          @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -697,16 +700,16 @@ enum ChatRole {
 }
 
 model ChatMessage {
-  id        String   @id @default(cuid())
-  threadId  String
-  role      ChatRole
-  content   String   @db.Text
+  id                  String   @id @default(cuid())
+  threadId            String
+  role                ChatRole
+  content             String   @db.Text
   // Token accounting for analytics; nullable for user messages.
-  inputTokens  Int?
-  outputTokens Int?
+  inputTokens         Int?
+  outputTokens        Int?
   cacheReadTokens     Int?
   cacheCreationTokens Int?
-  createdAt DateTime @default(now())
+  createdAt           DateTime @default(now())
 
   thread ChatThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
 

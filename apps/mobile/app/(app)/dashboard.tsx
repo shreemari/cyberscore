@@ -58,9 +58,11 @@ export default function Dashboard() {
       },
     })),
   });
+  // Resume state belongs to the framework currently selected for assessment.
+  const selectedFramework = me?.org.selectedFramework ?? 'EXCEL';
   const { data: progress } = useQuery({
-    queryKey: ['progress'],
-    queryFn: () => api.progress.get(),
+    queryKey: ['progress', selectedFramework],
+    queryFn: () => api.progress.get(selectedFramework),
   });
   // Admin-only: aggregated team scorecard + member count.
   const { data: teamScorecard } = useQuery({
@@ -746,4 +748,3 @@ function CompanyStat({ label, value }: { label: string; value: string }) {
     </View>
   );
 }
-PS C:\Users\admin\Desktop\office\cyberscore-main\cyberscore-main> 

@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react';
+import { useLocalSearchParams } from 'expo-router';
 import {
   View,
   Text,
@@ -11,12 +12,16 @@ import {
 } from 'react-native';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Ionicons } from '@expo/vector-icons';
+import type { ScorecardResponse } from '@cymetric/types';
 import { Screen } from '@/components/Screen';
 import { TopBar } from '@/components/TopBar';
 import { ScoreRing } from '@/components/ScoreRing';
 import { Card } from '@/components/Card';
 import { Button } from '@/components/Button';
-import { api } from '@/lib/api';
+import { api, API_BASE_URL } from '@/lib/api';
+import { secureTokenStorage } from '@/lib/storage';
+import { useAuthStore } from '@/stores/auth';
+import { FRAMEWORKS, type FrameworkCode } from '@/lib/frameworks';
 import { colors, scoreColorForValue } from '@/theme/colors';
 
 // Full scorecard detail — overall gauge, per-level breakdown, improvement
@@ -24,15 +29,47 @@ import { colors, scoreColorForValue } from '@/theme/colors';
 // OS share sheet so the caller can paste it into Slack / email / whatever.
 export default function Scorecard() {
   const qc = useQueryClient();
+  const params = useLocalSearchParams<{ framework?: string }>();
+  const me = useAuthStore((s) => s.me);
+
+  // Resolve the requested framework, falling back to the organisation setting.
+  const requestedFramework = params.framework;
+  const selectedFramework: FrameworkCode = FRAMEWORKS.some(
+    (item) => item.code === requestedFramework,
+  )
+    ? (requestedFramework as FrameworkCode)
+    : ((me?.org.selectedFramework ?? 'EXCEL') as FrameworkCode);
+  const selectedFrameworkLabel =
+    FRAMEWORKS.find((item) => item.code === selectedFramework)?.label ?? 'KPI Scorecard';
+
   const { data, isLoading, isRefetching } = useQuery({
-    queryKey: ['scorecard'],
-    queryFn: () => api.scorecard.current(),
+    queryKey: ['scorecard', selectedFramework],
+    queryFn: async () => {
+      const tokens = await secureTokenStorage.getTokens();
+      const response = await fetch(
+        `${API_BASE_URL}/api/v1/scorecard?framework=${encodeURIComponent(selectedFramework)}`,
+        {
+          headers: {
+            Accept: 'application/json',
+            ...(tokens?.accessToken
+              ? { Authorization: `Bearer ${tokens.accessToken}` }
+              : {}),
+          },
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error(`Unable to load ${selectedFrameworkLabel}: HTTP ${response.status}`);
+      }
+
+      return response.json();
+    },
   });
   const [sharing, setSharing] = useState(false);
 
   const onRefresh = useCallback(
-    () => qc.invalidateQueries({ queryKey: ['scorecard'] }),
-    [qc],
+    () => qc.invalidateQueries({ queryKey: ['scorecard', selectedFramework] }),
+    [qc, selectedFramework],
   );
 
   const onShare = async () => {
@@ -54,7 +91,7 @@ export default function Scorecard() {
   if (isLoading) {
     return (
       <Screen glow>
-        <TopBar title="SCORECARD" showBack />
+        <TopBar title={`${selectedFrameworkLabel.toUpperCase()} SCORECARD`} showBack />
         <View className="flex-1 items-center justify-center">
           <ActivityIndicator color={colors.brand[400]} />
           <Text className="text-text-muted mt-3">Computing scorecard…</Text>
@@ -68,7 +105,7 @@ export default function Scorecard() {
 
   return (
     <Screen glow>
-      <TopBar title="SCORECARD" showBack />
+      <TopBar title={`${selectedFrameworkLabel.toUpperCase()} SCORECARD`} showBack />
       <ScrollView
         style={{ flex: 1 }}
         contentContainerStyle={{ flexGrow: 1, padding: 20, paddingBottom: 140 }}
@@ -83,6 +120,7 @@ export default function Scorecard() {
         }
       >
         <View className="items-center mt-2 mb-6">
+          <Text className="text-text-secondary text-xs font-bold tracking-widest mb-3">{selectedFrameworkLabel}</Text>
           <ScoreRing score={overall} label="Overall · out of 100" />
           <Text className="text-text-secondary text-center mt-5 px-6 leading-5">
             {overall == null
@@ -107,7 +145,7 @@ export default function Scorecard() {
             </Card>
           ) : (
             <View className="gap-3">
-              {(data?.improvementSuggestions ?? []).slice(0, 5).map((s) => {
+              {(data?.improvementSuggestions ?? []).slice(0, 5).map((s: ScorecardResponse['improvementSuggestions'][number]) => {
                 const colour = bandColor(s.scoreRange);
                 return (
                   <Card key={s.kpiId}>
@@ -130,7 +168,7 @@ export default function Scorecard() {
                         </Text>
                       </View>
                     </View>
-                    {s.suggestions.map((suggestion, i) => (
+                    {s.suggestions.map((suggestion: ScorecardResponse['improvementSuggestions'][number]['suggestions'][number], i: number) => (
                       <View key={i} className="flex-row mt-1">
                         <Ionicons
                           name={suggestion.priority === 'HIGH' ? 'flash' : 'arrow-forward'}

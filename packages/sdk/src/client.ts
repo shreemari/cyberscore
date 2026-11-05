@@ -380,9 +380,16 @@ export class CyMetricClient {
   };
 
   progress = {
-    get: () => this.request<ProgressResponse>('/api/v1/progress'),
+    get: (framework?: string) =>
+      this.request<ProgressResponse>('/api/v1/progress', {
+        query: { framework },
+      }),
+
     save: (body: SaveProgressRequest) =>
-      this.request<{ ok: true }>('/api/v1/progress', { method: 'POST', body }),
+      this.request<{ ok: true }>('/api/v1/progress', {
+        method: 'POST',
+        body,
+      }),
   };
 
   // ------------------------------------------------------------

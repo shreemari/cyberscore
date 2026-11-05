@@ -14,10 +14,7 @@ import { colors, scoreColorForValue } from '@/theme/colors';
 import { OrgMode, Role, type Level } from '@cymetric/types';
 
 // Level picker — three tiles that fan into the per-KPI question screen.
-// We need two queries:
-//   • /progress — percent complete + resume index per level
-//   • /kpis      — total KPI list, so we can pick the next unanswered id
-// The "Continue" button on each card deep-links to /kpi/[id] at the right index.
+// Progress and KPI catalogues are loaded separately for the selected framework.
 const LEVELS: Array<{
   key: Level;
   title: string;
@@ -52,14 +49,18 @@ export default function Assessment() {
   const visibleLevels = LEVELS.filter((l) => allowed.has(l.key));
   const restricted = visibleLevels.length < LEVELS.length;
 
+  // Use the framework selected in Profile (or the default KPI workbook).
+  const selectedFramework = me?.org.selectedFramework ?? 'EXCEL';
+
+  // Progress is independent for each framework; avoid mixing saved progress.
   const { data: progress, isLoading: progressLoading } = useQuery({
-    queryKey: ['progress'],
-    queryFn: () => api.progress.get(),
+    queryKey: ['progress', selectedFramework],
+    queryFn: () => api.progress.get(selectedFramework),
   });
 
   const { data: kpis, isLoading: kpisLoading } = useQuery({
-    queryKey: ['kpis', 'all'],
-    queryFn: () => api.kpis.list(),
+    queryKey: ['kpis', selectedFramework],
+    queryFn: () => api.kpis.list({ framework: selectedFramework }),
   });
 
   const loading = progressLoading || kpisLoading;
@@ -78,7 +79,11 @@ export default function Assessment() {
     const resume = progress?.levels.find((l) => l.level === level);
     const idx = resume && resume.lastQuestionIndex < ids.length ? resume.lastQuestionIndex : 0;
     const target = ids[idx] ?? ids[0];
-    if (target) router.push(`/(app)/kpi/${target}?level=${level}&index=${idx}`);
+    if (target) {
+      router.push(
+        `/(app)/kpi/${target}?level=${level}&index=${idx}&framework=${selectedFramework}`,
+      );
+    }
   };
 
   return (
@@ -187,8 +192,16 @@ export default function Assessment() {
             const ids = perLevel?.[meta.key] ?? [];
             const total = ids.length;
             const levelProg = progress?.levels.find((l) => l.level === meta.key);
-            const pct = Math.round(levelProg?.completionPct ?? 0);
-            const status = levelProg?.status ?? 'NOT_STARTED';
+            const rawCompletionPct = levelProg?.completionPct ?? 0;
+            const pct = Math.max(0, Math.min(100, Math.round(rawCompletionPct)));
+
+            // Derive status from completion percentage, not a possibly stale API status.
+            const status =
+              total > 0 && rawCompletionPct >= 100
+                ? 'COMPLETED'
+                : rawCompletionPct > 0
+                  ? 'IN_PROGRESS'
+                  : 'NOT_STARTED';
             const statusLabel =
               status === 'COMPLETED' ? 'COMPLETE' : status === 'IN_PROGRESS' ? 'IN PROGRESS' : 'NOT STARTED';
             const statusColor =
@@ -275,14 +288,12 @@ export default function Assessment() {
           onPress={() => router.push('/(app)/scorecard')}
           style={{ alignSelf: 'center', marginTop: 16 }}
         >
-        <View
-          className="flex-row items-center px-5 py-3 rounded-full bg-bg-elevated border border-border-subtle"
-        >
-          <Ionicons name="document-text-outline" size={16} color={colors.brand[400]} />
-          <Text className="text-text-primary font-bold tracking-widest ml-2 text-xs">
-            VIEW FULL SCORECARD
-          </Text>
-        </View>
+          <View className="flex-row items-center px-5 py-3 rounded-full bg-bg-elevated border border-border-subtle">
+            <Ionicons name="document-text-outline" size={16} color={colors.brand[400]} />
+            <Text className="text-text-primary font-bold tracking-widest ml-2 text-xs">
+              VIEW FULL SCORECARD
+            </Text>
+          </View>
         </PressableGlow>
       </ScrollView>
     </Screen>
