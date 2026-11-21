@@ -365,7 +365,10 @@ export class CyMetricClient {
   // Scorecard & progress
   // ------------------------------------------------------------
   scorecard = {
-    current: () => this.request<ScorecardResponse>('/api/v1/scorecard'),
+    current: (framework: string = 'EXCEL') =>
+  this.request<ScorecardResponse>('/api/v1/scorecard', {
+    query: { framework },
+  }),
     history: () => this.request<HistoryResponse>('/api/v1/scorecard/history'),
     createShare: (body: CreateShareRequest) =>
       this.request<CreateShareResponse>('/api/v1/share', {
