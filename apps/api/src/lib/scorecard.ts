@@ -119,7 +119,8 @@ export function aggregate(kpis: KpiLite[], responses: ResponseLite[]): Aggregate
   const kpiIds = new Set(kpis.map((k) => k.id));
   const answeredKpiIds = new Set(
     responses
-      .filter((r) => kpiIds.has(r.kpiId) && !r.isNa)
+      
+      .filter((r) => kpiIds.has(r.kpiId))
       .map((r) => r.kpiId),
   );
   const completeness =
