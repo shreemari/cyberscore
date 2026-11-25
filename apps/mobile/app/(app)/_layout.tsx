@@ -76,6 +76,7 @@ export default function AppLayout() {
           dashboard's "Manage team" CTA which renders only for ADMIN of an
           ENTERPRISE org. */}
       <Tabs.Screen name="team" options={{ href: null }} />
+      <Tabs.Screen name="risks" options={{ href: null }} />
     </Tabs>
   );
 }
