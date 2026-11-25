@@ -1,20 +1,38 @@
-import { View, Text, ScrollView, Pressable, Platform } from 'react-native';
-import { router } from 'expo-router';
+import { View, Text, ScrollView, Pressable, Platform, Alert, Linking, Share } from 'react-native';
+import { router, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useQuery } from '@tanstack/react-query';
 import { Screen } from '@/components/Screen';
 import { Card } from '@/components/Card';
 import { Button } from '@/components/Button';
-import { api } from '@/lib/api';
+import { api, API_BASE_URL } from '@/lib/api';
 import { colors, scoreColorForValue } from '@/theme/colors';
 
 // Assessment Complete — big score cards for People / Process / Company,
 // download PDF + share CTA. Navigated to when the user finishes a KPI level.
 export default function Results() {
+  const { framework } = useLocalSearchParams<{ framework?: string }>();
+  const currentFramework = ['EXCEL', 'NIST_CSF', 'ISO27001'].includes(framework ?? '') ? framework! : 'EXCEL';
   const { data } = useQuery({
-    queryKey: ['scorecard'],
-    queryFn: () => api.scorecard.current(),
+    queryKey: ['scorecard', currentFramework],
+    queryFn: () => api.scorecard.current(currentFramework),
   });
+  const exportSummary = async (format: 'pdf' | 'xlsx') => {
+    try {
+      const link = await api.scorecard.createShare({ expiresInDays: 1 });
+      await Linking.openURL(`${API_BASE_URL}/api/v1/share/public/${encodeURIComponent(link.token)}/export?format=${format}`);
+    } catch (error: any) {
+      Alert.alert('Report export failed', error?.message ?? 'Please try again.');
+    }
+  };
+  const shareScorecard = async () => {
+    try {
+      const link = await api.scorecard.createShare({ expiresInDays: 1 });
+      await Share.share({ message: `CyMetric Scorecard: ${link.shareUrl}`, url: link.shareUrl });
+    } catch (error: any) {
+      Alert.alert('Share failed', error?.message ?? 'Please try again.');
+    }
+  };
 
   const people = data?.levelBreakdown?.people;
   const proc = data?.levelBreakdown?.process;
@@ -156,29 +174,19 @@ export default function Results() {
           <Button
             label="Download Executive PDF"
             icon="document-text"
-            onPress={() => {
-              // PDF generation — to be wired up to API endpoint
-            }}
+            onPress={() => exportSummary('pdf')}
           />
           <Button
             variant="outline"
             label="Share with Board"
             icon="share-social"
-            onPress={() => {
-              // Share flow
-            }}
+            onPress={shareScorecard}
           />
         </View>
 
-        <Text
-          style={{
-            color: colors.text.muted,
-            fontSize: 11,
-            textAlign: 'center',
-            marginTop: 16,
-          }}
-        >
-          🔒 Generates a secure, 24-hour restricted link
+        <Button variant="outline" label="Download Excel Report" icon="grid-outline" onPress={() => exportSummary('xlsx')} />
+        <Text style={{ color: colors.text.muted, fontSize: 11, textAlign: 'center', marginTop: 16 }}>
+          Exports contain scorecard summary data and use a 24-hour expiring sharing link.
         </Text>
 
         <Pressable
@@ -286,7 +294,7 @@ function ScoreCard({
             }}
           >
             <Text style={{ fontSize: 11, fontWeight: '700', color: accent }}>
-              {scoreVal == null ? 'PENDING' : scoreVal >= 75 ? 'GOOD' : scoreVal >= 50 ? 'FAIR' : 'NEEDS FOCUS'}
+              {scoreVal == null ? 'PENDING' : scoreVal >= 80 ? 'GOOD' : scoreVal >= 50 ? 'FAIR' : 'NEEDS FOCUS'}
             </Text>
           </View>
         )}
