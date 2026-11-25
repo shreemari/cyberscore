@@ -8,6 +8,7 @@ import {
   TextInput,
   Alert,
   ActivityIndicator,
+  Linking,
 } from 'react-native';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { router, useLocalSearchParams } from 'expo-router';
@@ -173,6 +174,34 @@ export default function KpiQuestion() {
     },
     onError: (err: any) => Alert.alert('Could not mark N/A', err?.message ?? 'Please try again.'),
   });
+
+  const [uploadingEvidence, setUploadingEvidence] = useState(false);
+  const onUploadEvidence = async () => {
+    if (!kpi || uploadingEvidence) return;
+    setUploadingEvidence(true);
+    try {
+      let inputValue: string;
+      if (kpi.inputType === 'PERCENTAGE') {
+        const n = Number(percentValue);
+        if (!percentValue.trim() || !Number.isInteger(n) || n < 0 || n > 100) {
+          throw new Error('Enter a percentage between 0 and 100 first.');
+        }
+        inputValue = String(n);
+      } else {
+        const tier = tiersSorted.find((t) => t.id === selectedTierId);
+        if (!tier) throw new Error('Select an answer before attaching evidence.');
+        inputValue = inputValueForTier(tier.condition, tier.tierLabel);
+      }
+      await api.kpis.submit({ kpiId: kpi.id, frameworkCode: framework, inputValue });
+      void qc.invalidateQueries({ queryKey: ['scorecard'] });
+      const upload = await api.kpis.evidenceBrowserLink(kpi.id);
+      await Linking.openURL(upload.url);
+    } catch (err: any) {
+      Alert.alert('Evidence upload unavailable', err?.message ?? 'Try again.');
+    } finally {
+      setUploadingEvidence(false);
+    }
+  };
 
   const canSubmit =
     !!kpi &&
@@ -423,6 +452,17 @@ export default function KpiQuestion() {
       >
         <Text style={{ color: colors.text.secondary, textDecorationLine: 'underline' }}>
           Not applicable? Add justification
+        </Text>
+      </Pressable>
+
+      <Pressable
+        accessibilityRole="button"
+        onPress={onUploadEvidence}
+        disabled={!canSubmit || uploadingEvidence}
+        style={{ alignItems: 'center', paddingVertical: 9 }}
+      >
+        <Text style={{ color: canSubmit ? colors.brand[400] : colors.text.muted, fontWeight: '700' }}>
+          {uploadingEvidence ? 'Preparing evidence upload…' : 'Attach evidence (save answer first)'}
         </Text>
       </Pressable>
 
