@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { Framework, InputType, Level, TierCondition } from '@cymetric/types';
 import { prisma } from '@/lib/prisma';
-import { requireAdmin } from '@/lib/require-admin';
+import { requirePlatformAdmin } from '@/lib/require-admin';
 import { parseJson, internalError } from '@/lib/problem';
 import { audit, AuditActions } from '@/lib/audit';
 import { invalidateKpiCache } from '../../kpis/route';
@@ -38,7 +38,7 @@ const CreateKpiRequest = z.object({
 });
 
 export async function POST(req: Request) {
-  const auth = requireAdmin(req);
+  const auth = requirePlatformAdmin(req);
   if ('response' in auth) return auth.response;
 
   const parsed = await parseJson(req, CreateKpiRequest);
