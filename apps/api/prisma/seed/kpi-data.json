@@ -1692,7 +1692,7 @@
       },
       {
         "tierLabel": "Not sure",
-        "scoreValue": -50,
+        "scoreValue": 0,
         "condition": {
           "op": "eq",
           "value": "Not sure"
@@ -1736,7 +1736,7 @@
       },
       {
         "tierLabel": "Not sure",
-        "scoreValue": -50,
+        "scoreValue": 0,
         "condition": {
           "op": "eq",
           "value": "Not sure"
@@ -1780,7 +1780,7 @@
       },
       {
         "tierLabel": "Not sure",
-        "scoreValue": -50,
+        "scoreValue": 0,
         "condition": {
           "op": "eq",
           "value": "Not sure"
@@ -1824,7 +1824,7 @@
       },
       {
         "tierLabel": "Not sure",
-        "scoreValue": -50,
+        "scoreValue": 0,
         "condition": {
           "op": "eq",
           "value": "Not sure"
@@ -1868,7 +1868,7 @@
       },
       {
         "tierLabel": "Not sure",
-        "scoreValue": -50,
+        "scoreValue": 0,
         "condition": {
           "op": "eq",
           "value": "Not sure"
