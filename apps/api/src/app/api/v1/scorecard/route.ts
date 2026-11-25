@@ -136,6 +136,7 @@ export async function GET(req: Request) {
       completeness: payload.agg.completeness,
       colorBand: payload.agg.colorBand,
       criticalGateFailures: payload.agg.criticalGateFailures,
+      domainBreakdown: payload.agg.domainBreakdown,
       levelBreakdown: payload.agg.levelBreakdown,
       improvementSuggestions,
       latestSnapshot: payload.latestSnapshot
