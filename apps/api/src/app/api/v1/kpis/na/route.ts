@@ -32,7 +32,7 @@ export async function POST(req: Request) {
     const kpi = await prisma.kpi.findFirst({
       where: {
         id: kpiId,
-        ...frameworkKpiFilter(frameworkCode),
+        ...frameworkKpiFilter(frameworkCode ?? 'EXCEL'),
         isActive: true,
         deletedAt: null,
       },
