@@ -72,7 +72,7 @@ export default function Scorecard() {
   if (isLoading) {
     return (
       <Screen glow>
-        <TopBar title={`${selectedFrameworkLabel.toUpperCase()} SCORECARD`} showBack />
+        <TopBar title="SCORECARD" showBack />
         <View className="flex-1 items-center justify-center">
           <ActivityIndicator color={colors.brand[400]} />
           <Text className="text-text-muted mt-3">Computing scorecard…</Text>
@@ -83,6 +83,11 @@ export default function Scorecard() {
 
   const overall = data?.overallScore ?? null;
   const completeness = Math.round(data?.completeness ?? 0);
+  const levelStats = data?.levelBreakdown;
+  const totalKpis = (levelStats?.people.total ?? 0) + (levelStats?.process.total ?? 0) + (levelStats?.company.total ?? 0);
+  const answeredKpis = (levelStats?.people.answered ?? 0) + (levelStats?.process.answered ?? 0) + (levelStats?.company.answered ?? 0);
+  const pendingKpis = Math.max(0, totalKpis - answeredKpis);
+  const totalWeight = (levelStats?.people.maxPossible ?? 0) + (levelStats?.process.maxPossible ?? 0) + (levelStats?.company.maxPossible ?? 0);
   const actions = [...(data?.improvementSuggestions ?? [])].sort((a, b) => {
     if (a.scoreRange === b.scoreRange) return a.currentScore - b.currentScore;
     return a.scoreRange === 'RED' ? -1 : 1;
@@ -116,7 +121,7 @@ export default function Scorecard() {
 
         <View className="items-center mt-2 mb-6">
           <Text className="text-text-secondary text-xs font-bold tracking-widest mb-3">{selectedFrameworkLabel}</Text>
-          <ScoreRing score={overall} label="Overall · out of 100" />
+          <ScoreRing score={overall} label="KPI performance · out of 100" />
           <Text className="text-text-secondary text-center mt-5 px-6 leading-5">
             {overall == null
               ? 'Answer KPIs to generate your first scorecard.'
@@ -124,11 +129,27 @@ export default function Scorecard() {
           </Text>
         </View>
 
-        <View className="flex-row gap-3 mb-3">
-          <LevelSummary title="People" stats={data?.levelBreakdown.people} />
-          <LevelSummary title="Process" stats={data?.levelBreakdown.process} />
+        <Card>
+          <Text className="text-text-primary font-bold mb-3">Assessment completeness</Text>
+          <Text className="text-text-primary text-xl font-bold">{completeness}% completed</Text>
+          <View className="flex-row justify-between mt-2">
+            <Text className="text-text-secondary text-sm">{answeredKpis} answered</Text>
+            <Text className="text-text-secondary text-sm">{pendingKpis} pending</Text>
+          </View>
+          <Text className="text-text-muted text-xs mt-2">
+            Completeness measures questions answered, not security performance. N/A counts as answered but does not contribute to score.
+          </Text>
+        </Card>
+
+        <View className="mt-5 mb-3">
+          <Text className="text-text-primary font-bold text-lg">Category performance and weights</Text>
+          <Text className="text-text-muted text-xs mt-1">Weights show each category's share of applicable maximum weighted points.</Text>
         </View>
-        <LevelSummary title="Company" stats={data?.levelBreakdown.company} full />
+        <View className="flex-row gap-3 mb-3">
+          <LevelSummary title="People" stats={data?.levelBreakdown.people} totalWeight={totalWeight} />
+          <LevelSummary title="Process" stats={data?.levelBreakdown.process} totalWeight={totalWeight} />
+        </View>
+        <LevelSummary title="Company" stats={data?.levelBreakdown.company} totalWeight={totalWeight} full />
 
         <View className="mt-6">
           <Text className="text-text-primary font-bold text-lg mb-3">Recommended actions ({actions.length})</Text>
@@ -204,15 +225,18 @@ function LevelSummary({
   title,
   stats,
   full,
+  totalWeight,
 }: {
   title: string;
   stats?: {
     score: number;
+    maxPossible: number;
     answered: number;
     total: number;
     colorBand: 'GREEN' | 'AMBER' | 'RED';
   };
   full?: boolean;
+  totalWeight: number;
 }) {
   const score = stats?.score ?? null;
   const colour = score == null ? colors.brand[400] : scoreColorForValue(score);
@@ -233,7 +257,10 @@ function LevelSummary({
           <Text className="text-text-secondary text-base">%</Text>
         </Text>
         <Text className="text-text-muted text-xs mt-1">
-          {stats ? `${stats.answered} of ${stats.total} answered` : 'No data'}
+          {stats ? `${stats.answered} answered · ${Math.max(0, stats.total - stats.answered)} pending` : 'No data'}
+        </Text>
+        <Text className="text-text-muted text-xs mt-1">
+          {stats && totalWeight > 0 ? `Scoring weight: ${Math.round((stats.maxPossible / totalWeight) * 100)}% · ${stats.maxPossible.toFixed(1)} weighted points` : 'Weight unavailable'}
         </Text>
         <View className="h-1.5 bg-bg-elevated rounded-full mt-3 overflow-hidden">
           <View
