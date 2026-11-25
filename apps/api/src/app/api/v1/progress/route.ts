@@ -5,6 +5,7 @@ import { withTenant } from '@/lib/prisma';
 import { requireAuth } from '@/lib/require-auth';
 import { parseJson, problem, internalError } from '@/lib/problem';
 import { canAssessLevel, effectiveAllowedLevels } from '@/lib/access';
+import { frameworkKpiFilter } from '@/lib/framework-kpis';
 
 // GET /api/v1/progress
 // POST /api/v1/progress
@@ -52,7 +53,7 @@ export async function GET(req: Request) {
             isActive: true,
             deletedAt: null,
             status: 'PUBLISHED',
-            frameworkCode,
+            ...frameworkKpiFilter(frameworkCode),
           },
           select: { id: true, level: true },
         }),
