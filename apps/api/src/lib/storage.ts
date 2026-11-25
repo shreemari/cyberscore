@@ -3,6 +3,7 @@ import {
   PutObjectCommand,
   DeleteObjectCommand,
   GetObjectCommand,
+  HeadObjectCommand,
 } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { randomUUID } from 'node:crypto';
@@ -101,4 +102,18 @@ export async function deleteObject(key: string): Promise<void> {
 export function publicUrlFor(key: string): string {
   if (env.R2_PUBLIC_URL) return `${env.R2_PUBLIC_URL.replace(/\/$/, '')}/${key}`;
   return `${env.R2_ENDPOINT?.replace(/\/$/, '')}/${env.R2_BUCKET}/${key}`;
+}
+
+/**
+ * Validate evidence against the object that actually reached R2. Never accept
+ * a client-provided key as proof of upload.
+ */
+export async function verifyEvidenceObject(key: string, mime: string): Promise<number> {
+  const result = await s3().send(new HeadObjectCommand({ Bucket: env.R2_BUCKET, Key: key }));
+  const size = result.ContentLength ?? 0;
+  const type = result.ContentType ?? '';
+  if (size <= 0 || size > 20 * 1024 * 1024 || type.toLowerCase() !== mime.toLowerCase()) {
+    throw new Error('Evidence file size or MIME type does not match the uploaded object');
+  }
+  return size;
 }
