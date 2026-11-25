@@ -119,23 +119,24 @@ export function aggregate(kpis: KpiLite[], responses: ResponseLite[]): Aggregate
   const kpiIds = new Set(kpis.map((k) => k.id));
   const answeredKpiIds = new Set(
     responses
-      
       .filter((r) => kpiIds.has(r.kpiId))
       .map((r) => r.kpiId),
   );
   const completeness =
     kpis.length === 0 ? 0 : (answeredKpiIds.size / kpis.length) * 100;
 
-  const kpiNameById = new Map(kpis.map((k) => [k.id, k.kpiName]));
-  const underperforming = responses
+  const kpiById = new Map(kpis.map((k) => [k.id, k]));
+  // The score aggregation already deduplicates by KPI. Recommendations must
+  // use that same set, otherwise stale duplicate rows repeat advice.
+  const underperforming = [...byId.values()]
     .filter((r) => !r.isNa)
     .map((r) => {
-      const kpi = kpis.find((k) => k.id === r.kpiId);
-      if (!kpi) return null;
+      const kpi = kpiById.get(r.kpiId);
+      if (!kpi || kpi.maxScore <= 0) return null;
       const pct = (r.actualScore / kpi.maxScore) * 100;
       return {
         kpiId: r.kpiId,
-        kpiName: kpiNameById.get(r.kpiId) ?? 'Unknown',
+        kpiName: kpi.kpiName,
         currentScore: round2(pct),
         scoreRange: scoreRangeFor(pct),
       };
