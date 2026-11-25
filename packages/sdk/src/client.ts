@@ -355,6 +355,12 @@ export class CyMetricClient {
         body,
       }),
 
+    evidenceBrowserLink: (kpiId: string) =>
+      this.request<{ url: string; expiresInSeconds: number }>('/api/v1/evidence/browser-link', {
+        method: 'POST',
+        body: { kpiId },
+      }),
+
     markNa: (body: MarkNaRequest) =>
       this.request<{ ok: true }>('/api/v1/kpis/na', {
         method: 'POST',
