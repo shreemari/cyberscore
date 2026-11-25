@@ -394,6 +394,7 @@ model Response {
   evidenceUrl     String? @db.VarChar(1024)
   naJustification String? @db.Text
   isNa            Boolean @default(false)
+  isUnknown       Boolean @default(false) // separately tracks uncertain data-quality answers
   // Idempotency — mobile sends a UUID per logical submission to de-dup offline replays.
   idempotencyKey  String? @db.Uuid
 
