@@ -3,7 +3,7 @@ import { EvidenceConfirmRequest, ErrorCodes } from '@cymetric/types';
 import { withTenant } from '@/lib/prisma';
 import { parseJson, problem, internalError } from '@/lib/problem';
 import { requireAuth } from '@/lib/require-auth';
-import { isAllowedMime, publicUrlFor } from '@/lib/storage';
+import { isAllowedMime, publicUrlFor, verifyEvidenceObject } from '@/lib/storage';
 import { audit, AuditActions } from '@/lib/audit';
 
 // POST /api/v1/evidence/confirm
@@ -37,6 +37,7 @@ export async function POST(req: Request) {
   }
 
   try {
+    const uploadedSize = await verifyEvidenceObject(fileKey, fileType);
     const result = await withTenant(auth.orgId, async (tx) => {
       const response = await tx.response.findFirst({
         where: { orgId: auth.orgId, kpiId, submittedById: auth.userId },
@@ -54,7 +55,7 @@ export async function POST(req: Request) {
           fileType,
           // R2 confirmed the upload via the signed PUT; we trust the client's
           // size only for display. If we need exact bytes later we can HEAD it.
-          fileSize: 0,
+          fileSize: uploadedSize,
         },
       });
 
