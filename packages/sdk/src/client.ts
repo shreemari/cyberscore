@@ -362,6 +362,32 @@ export class CyMetricClient {
   };
 
   // ------------------------------------------------------------
+  // Corrective action tracking — owner, due date, status
+  // ------------------------------------------------------------
+  actions = {
+    list: () => this.request<{
+      items: Array<{
+        kpiId: string;
+        ownerEmail: string | null;
+        ownerName: string | null;
+        dueDate: string | null;
+        status: 'OPEN' | 'IN_PROGRESS' | 'COMPLETED';
+        notes: string | null;
+      }>;
+    }>('/api/v1/actions'),
+    update: (body: {
+      kpiId: string;
+      ownerEmail: string | null;
+      dueDate: string | null;
+      status: 'OPEN' | 'IN_PROGRESS' | 'COMPLETED';
+      notes?: string | null;
+    }) => this.request<{ ok: true; kpiId: string; status: string }>('/api/v1/actions', {
+      method: 'PUT',
+      body,
+    }),
+  };
+
+  // ------------------------------------------------------------
   // Scorecard & progress
   // ------------------------------------------------------------
   scorecard = {
