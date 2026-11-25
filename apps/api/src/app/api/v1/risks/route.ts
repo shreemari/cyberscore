@@ -4,7 +4,7 @@ import { Role } from '@cymetric/types';
 import { requireAuth } from '@/lib/require-auth';
 import { withTenant } from '@/lib/prisma';
 import { internalError } from '@/lib/problem';
-import { audit } from '@/lib/audit';
+import { audit, AuditActions } from '@/lib/audit';
 
 // Risk owners and approval remain within the caller's organisation.
 const RiskFields = z.object({
@@ -71,7 +71,7 @@ async function upsert(req: Request, method: 'POST' | 'PATCH') {
     return NextResponse.json({ error: 'Invalid risk details', details: parsed.error.flatten() }, { status: 400 });
   }
   const fields = parsed.data;
-  const id = 'id' in fields ? fields.id : undefined;
+  const id: string | undefined = 'id' in fields ? fields.id as string : undefined;
   const acceptedUntil = fields.acceptedUntil ? new Date(fields.acceptedUntil) : null;
   const dueDate = fields.dueDate ? new Date(fields.dueDate) : null;
   if (fields.treatment === 'ACCEPT' && (!acceptedUntil || acceptedUntil <= new Date())) {
@@ -120,7 +120,7 @@ async function upsert(req: Request, method: 'POST' | 'PATCH') {
     });
     if ('error' in saved) return NextResponse.json({ error: 'Risk operation not allowed' }, { status: saved.error });
     await audit({
-      action: method === 'POST' ? 'RISK_CREATED' : 'RISK_UPDATED',
+      action: method === 'POST' ? AuditActions.RISK_CREATED : AuditActions.RISK_UPDATED,
       resource: `risk:${saved.record.id}`,
       orgId: auth.orgId,
       actorId: auth.userId,
