@@ -3,8 +3,8 @@ import { logger } from './logger';
 import { clientIp } from './rate-limit';
 
 // Audit log writer. Every security-relevant action flows through here.
-// Writes happen outside the tenant transaction (the audit_logs table
-// has its own RLS policy that permits orgId inserts + NULL system events).
+// Tenant events are written inside withTenant() so audit RLS permits them.
+// Anonymous / system audit events preserve the existing non-tenant path.
 //
 // We swallow write failures — an audit write failure must not break the
 // original request path, but we log it loudly.
@@ -69,22 +69,6 @@ export async function audit(args: AuditArgs): Promise<void> {
     } else {
       await prisma.auditLog.create({ data: record });
     }
-    /* original create payload follows */
-    /*
-    await prisma.auditLog.create({
-      data: {
-        actorId: args.actorId ?? null,
-        orgId: args.orgId ?? null,
-        action: args.action,
-        resource: args.resource.slice(0, 200),
-        before: args.before as never,
-        after: args.after as never,
-        ipAddress: args.req ? clientIp(args.req) : null,
-        userAgent: args.req?.headers.get('user-agent')?.slice(0, 512) ?? null,
-        traceId: args.traceId ?? null,
-      },
-    });
-    */
   } catch (err) {
     logger.error({ err, action: args.action }, 'audit write failed');
   }
