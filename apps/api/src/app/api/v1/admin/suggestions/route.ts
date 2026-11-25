@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { ScoreRange, SuggestionPriority, ErrorCodes } from '@cymetric/types';
 import { prisma } from '@/lib/prisma';
-import { requireAdmin } from '@/lib/require-admin';
+import { requirePlatformAdmin } from '@/lib/require-admin';
 import { parseJson, problem, internalError } from '@/lib/problem';
 
 // POST /api/v1/admin/suggestions — append a KpiSuggestion row.
@@ -19,7 +19,7 @@ const CreateSuggestionRequest = z.object({
 });
 
 export async function POST(req: Request) {
-  const auth = requireAdmin(req);
+  const auth = requirePlatformAdmin(req);
   if ('response' in auth) return auth.response;
 
   const parsed = await parseJson(req, CreateSuggestionRequest);
