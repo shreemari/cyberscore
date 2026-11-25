@@ -547,6 +547,18 @@ export default function KpiQuestion() {
                 <Text className="text-text-primary font-bold ml-2 text-lg">About this KPI</Text>
               </View>
               <Text className="text-text-secondary leading-5 mb-4">{kpi.infoText}</Text>
+              <View style={{ marginBottom: 12 }}>
+                <Text style={{ color: colors.text.secondary, fontSize: 12, lineHeight: 21 }}>
+                  Measure owner: {kpi.measureOwner || 'Not configured'}{'\n'}
+                  Data source: {kpi.measureSource || 'Not configured'}{'\n'}
+                  Frequency: {kpi.measureFrequency || 'Not configured'}{'\n'}
+                  Target: {kpi.measureTarget || 'Not configured'}{'\n'}
+                  Formula: {kpi.measureFormula || 'Not configured'}{'\n'}
+                  Critical gate: {kpi.criticalGateMinScorePct == null
+                    ? 'Not enabled'
+                    : `Requires ≥${kpi.criticalGateMinScorePct}%`}
+                </Text>
+              </View>
               {(kpi.nistControlIds.length > 0 || kpi.isoControlIds.length > 0) && (
                 <View className="flex-row flex-wrap gap-2 mb-4">
                   {kpi.nistControlIds.map((c) => (
