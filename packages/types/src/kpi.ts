@@ -9,7 +9,14 @@ export const TierCondition = z.discriminatedUnion('op', [
   z.object({ op: z.literal('gte'), value: z.number() }),
   z.object({ op: z.literal('gt'), value: z.number() }),
   z.object({ op: z.literal('eq'), value: z.union([z.number(), z.string(), z.boolean()]) }),
-  z.object({ op: z.literal('range'), min: z.number(), max: z.number() }),
+  z.object({
+    op: z.literal('range'),
+    min: z.number(),
+    max: z.number(),
+    exclusive: z.boolean().optional(),
+    exclusiveMin: z.boolean().optional(),
+    exclusiveMax: z.boolean().optional(),
+  }),
   z.object({ op: z.literal('in'), values: z.array(z.union([z.string(), z.number()])) }),
 ]);
 export type TierCondition = z.infer<typeof TierCondition>;
@@ -37,7 +44,8 @@ export const Kpi = z.object({
       id: z.string(),
       tierLabel: z.string(),
       condition: TierCondition,
-      scoreValue: z.number().int().nonnegative(),
+      // The canonical workbook has intentional negative penalty tiers.
+      scoreValue: z.number().int(),
       tierOrder: z.number().int().positive(),
     }),
   ),
