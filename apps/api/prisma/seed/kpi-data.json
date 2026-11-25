@@ -304,11 +304,11 @@
         "tierOrder": 3
       },
       {
-        "tierLabel": "5-10/mon",
+        "tierLabel": "6-10/mon",
         "scoreValue": 20,
         "condition": {
           "op": "range",
-          "min": 5,
+          "min": 6,
           "max": 10
         },
         "tierOrder": 4
@@ -369,11 +369,11 @@
         "tierOrder": 3
       },
       {
-        "tierLabel": "5-10/mon",
+        "tierLabel": "6-10/mon",
         "scoreValue": 20,
         "condition": {
           "op": "range",
-          "min": 5,
+          "min": 6,
           "max": 10
         },
         "tierOrder": 4
@@ -434,11 +434,11 @@
         "tierOrder": 3
       },
       {
-        "tierLabel": "5-10/mon",
+        "tierLabel": "6-10/mon",
         "scoreValue": 20,
         "condition": {
           "op": "range",
-          "min": 5,
+          "min": 6,
           "max": 10
         },
         "tierOrder": 4
@@ -500,11 +500,11 @@
         "tierOrder": 3
       },
       {
-        "tierLabel": "5-10/mon",
+        "tierLabel": "6-10/mon",
         "scoreValue": 20,
         "condition": {
           "op": "range",
-          "min": 5,
+          "min": 6,
           "max": 10
         },
         "tierOrder": 4
@@ -545,43 +545,43 @@
         "tierOrder": 1
       },
       {
-        "tierLabel": ">1 & <12 hrs",
+        "tierLabel": "≥1 & <12 hrs",
         "scoreValue": 50,
         "condition": {
           "op": "range",
           "min": 1,
           "max": 12,
-          "exclusive": true
+          "exclusiveMax": true
         },
         "tierOrder": 2
       },
       {
-        "tierLabel": ">12 & <24 hrs",
+        "tierLabel": "≥12 & <24 hrs",
         "scoreValue": 25,
         "condition": {
           "op": "range",
           "min": 12,
           "max": 24,
-          "exclusive": true
+          "exclusiveMax": true
         },
         "tierOrder": 3
       },
       {
-        "tierLabel": ">24 & <48 hrs",
+        "tierLabel": "≥24 & <48 hrs",
         "scoreValue": 10,
         "condition": {
           "op": "range",
           "min": 24,
           "max": 48,
-          "exclusive": true
+          "exclusiveMax": true
         },
         "tierOrder": 4
       },
       {
-        "tierLabel": ">48 hrs",
+        "tierLabel": "≥48 hrs",
         "scoreValue": 0,
         "condition": {
-          "op": "gt",
+          "op": "gte",
           "value": 48
         },
         "tierOrder": 5
@@ -657,43 +657,43 @@
         "tierOrder": 1
       },
       {
-        "tierLabel": ">1 & <12 hrs",
+        "tierLabel": "≥1 & <12 hrs",
         "scoreValue": 50,
         "condition": {
           "op": "range",
           "min": 1,
           "max": 12,
-          "exclusive": true
+          "exclusiveMax": true
         },
         "tierOrder": 2
       },
       {
-        "tierLabel": ">12 & <24 hrs",
+        "tierLabel": "≥12 & <24 hrs",
         "scoreValue": 25,
         "condition": {
           "op": "range",
           "min": 12,
           "max": 24,
-          "exclusive": true
+          "exclusiveMax": true
         },
         "tierOrder": 3
       },
       {
-        "tierLabel": ">24 & <48 hrs",
+        "tierLabel": "≥24 & <48 hrs",
         "scoreValue": 10,
         "condition": {
           "op": "range",
           "min": 24,
           "max": 48,
-          "exclusive": true
+          "exclusiveMax": true
         },
         "tierOrder": 4
       },
       {
-        "tierLabel": ">48 hrs",
+        "tierLabel": "≥48 hrs",
         "scoreValue": 0,
         "condition": {
-          "op": "gt",
+          "op": "gte",
           "value": 48
         },
         "tierOrder": 5
@@ -769,43 +769,43 @@
         "tierOrder": 1
       },
       {
-        "tierLabel": ">60 & <90 days",
+        "tierLabel": ">60 & ≤90 days",
         "scoreValue": 75,
         "condition": {
           "op": "range",
           "min": 60,
           "max": 90,
-          "exclusive": true
+          "exclusiveMin": true
         },
         "tierOrder": 2
       },
       {
-        "tierLabel": ">30 & <60 days",
+        "tierLabel": ">30 & ≤60 days",
         "scoreValue": 50,
         "condition": {
           "op": "range",
           "min": 30,
           "max": 60,
-          "exclusive": true
+          "exclusiveMin": true
         },
         "tierOrder": 3
       },
       {
-        "tierLabel": ">10 & <30 days",
+        "tierLabel": ">10 & ≤30 days",
         "scoreValue": 25,
         "condition": {
           "op": "range",
           "min": 10,
           "max": 30,
-          "exclusive": true
+          "exclusiveMin": true
         },
         "tierOrder": 4
       },
       {
-        "tierLabel": "<10 days",
+        "tierLabel": "≤10 days",
         "scoreValue": 0,
         "condition": {
-          "op": "lt",
+          "op": "lte",
           "value": 10
         },
         "tierOrder": 5
@@ -964,43 +964,43 @@
         "tierOrder": 1
       },
       {
-        "tierLabel": ">2 & <4 days",
+        "tierLabel": "≥2 & <4 days",
         "scoreValue": 75,
         "condition": {
           "op": "range",
           "min": 2,
           "max": 4,
-          "exclusive": true
+          "exclusiveMax": true
         },
         "tierOrder": 2
       },
       {
-        "tierLabel": ">4 & <7 days",
+        "tierLabel": "≥4 & <7 days",
         "scoreValue": 50,
         "condition": {
           "op": "range",
           "min": 4,
           "max": 7,
-          "exclusive": true
+          "exclusiveMax": true
         },
         "tierOrder": 3
       },
       {
-        "tierLabel": ">7 & <10 days",
+        "tierLabel": "≥7 & <10 days",
         "scoreValue": 50,
         "condition": {
           "op": "range",
           "min": 7,
           "max": 10,
-          "exclusive": true
+          "exclusiveMax": true
         },
         "tierOrder": 4
       },
       {
-        "tierLabel": ">10 days",
+        "tierLabel": "≥10 days",
         "scoreValue": 0,
         "condition": {
-          "op": "gt",
+          "op": "gte",
           "value": 10
         },
         "tierOrder": 5
@@ -1637,11 +1637,11 @@
         "tierOrder": 3
       },
       {
-        "tierLabel": "5-10/mon",
+        "tierLabel": "6-10/mon",
         "scoreValue": 20,
         "condition": {
           "op": "range",
-          "min": 5,
+          "min": 6,
           "max": 10
         },
         "tierOrder": 4
@@ -2292,43 +2292,43 @@
         "tierOrder": 1
       },
       {
-        "tierLabel": ">1 & <12 hrs",
+        "tierLabel": "≥1 & <12 hrs",
         "scoreValue": 50,
         "condition": {
           "op": "range",
           "min": 1,
           "max": 12,
-          "exclusive": true
+          "exclusiveMax": true
         },
         "tierOrder": 2
       },
       {
-        "tierLabel": ">12 & <24 hrs",
+        "tierLabel": "≥12 & <24 hrs",
         "scoreValue": 25,
         "condition": {
           "op": "range",
           "min": 12,
           "max": 24,
-          "exclusive": true
+          "exclusiveMax": true
         },
         "tierOrder": 3
       },
       {
-        "tierLabel": ">24 & <48 hrs",
+        "tierLabel": "≥24 & <48 hrs",
         "scoreValue": 10,
         "condition": {
           "op": "range",
           "min": 24,
           "max": 48,
-          "exclusive": true
+          "exclusiveMax": true
         },
         "tierOrder": 4
       },
       {
-        "tierLabel": ">48 hrs",
+        "tierLabel": "≥48 hrs",
         "scoreValue": 0,
         "condition": {
-          "op": "gt",
+          "op": "gte",
           "value": 48
         },
         "tierOrder": 5
@@ -2446,11 +2446,11 @@
         "tierOrder": 3
       },
       {
-        "tierLabel": "5-10/mon",
+        "tierLabel": "6-10/mon",
         "scoreValue": 20,
         "condition": {
           "op": "range",
-          "min": 5,
+          "min": 6,
           "max": 10
         },
         "tierOrder": 4
@@ -2787,8 +2787,8 @@
         "tierLabel": ">50-90% of peers",
         "scoreValue": 50,
         "condition": {
-          "op": "gt",
-          "value": 50
+          "op": "eq",
+          "value": ">50-90% of peers"
         },
         "tierOrder": 2
       },
@@ -2796,8 +2796,8 @@
         "tierLabel": "<50% but plans",
         "scoreValue": 25,
         "condition": {
-          "op": "lt",
-          "value": 50
+          "op": "eq",
+          "value": "<50% but plans"
         },
         "tierOrder": 3
       },
