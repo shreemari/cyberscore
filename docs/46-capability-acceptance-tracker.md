@@ -68,3 +68,11 @@
 ## Additional capability items
 
 The original file has **49** entries. Items 47–49 (team analytics, web dashboard, localisation/theming) remain outside the requested 1–46 scope unless explicitly included.
+
+## Security migration rollout notes (2026-11-25)
+
+- Apply `20261125150000_token_lookup_indexes` on a staging database first. Both lookup columns are nullable for compatibility with existing records, but old token records lack lookup keys; existing refresh sessions will need to **sign in again**, and existing public share links must be recreated.
+- Configure `PLATFORM_ADMIN_USER_IDS` as a comma-separated list of approved organisation ADMIN user IDs before using global routes. Empty configuration deliberately denies cross-tenant admin access. Provision each platform admin's TOTP before enabling login enforcement or they may be locked out.
+- Configure `CORS_ALLOWED_ORIGINS` as an exact comma-separated list of browser origins; native Expo mobile applications do not need browser CORS.
+- Confirm login throttling and refresh reuse responses with integration tests before allowing production traffic. Concurrent refresh races require device-level testing.
+- The platform's penetration test, privacy documents, hosting regions and third-party SSO require external work; do not label those requirements complete based on repository changes.
