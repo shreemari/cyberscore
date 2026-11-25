@@ -8,7 +8,7 @@
 |---:|---|---|---|---|
 | 1 | 46-KPI catalogue | Implement new - required | Partial | 46 existing KPI records present; independent New_KPIs workbook comparison not yet done |
 | 2 | Tier scoring engine | Fix existing | Code updated, unverified | Scoring tier data and validation corrected for 46 KPIs, 212 options; CI pending |
-| 3 | 'Unknown / not sure' handling | Fix existing | Partial | Unknown choices now score zero; separate unknown quality flag missing |
+| 3 | 'Unknown / not sure' handling | Fix existing | Code updated, unverified | Unknown/Not sure stored separately as isUnknown quality flag (zero-score, not N/A); scorecard shows uncertain answer count; migration and tests pending |
 | 4 | Critical-control gating | Implement new - required | Code updated, unverified | Must-pass gate now configurable per KPI; failure or unverified answer caps GREEN at AMBER and is visible on mobile. Defaults disabled until owner approves thresholds; tests and migrations pending |
 | 5 | Risk-based weights and CSF-function (domain) view | Implement new - required | Partial | Govern-to-Recover function scores added via mapped NIST controls and displayed on mobile; risk-adjusted domain weights still require approved policy |
 | 6 | Measure metadata (owner, source, frequency, target, formula) | Implement new - required | Code updated, unverified | Measure owner, source, frequency, target and formula persisted on KPI model, API/admin configuration and mobile info screen; actual metadata requires user configuration |
