@@ -9,9 +9,9 @@
 | 1 | 46-KPI catalogue | Implement new - required | Partial | 46 existing KPI records present; independent New_KPIs workbook comparison not yet done |
 | 2 | Tier scoring engine | Fix existing | Code updated, unverified | Scoring tier data and validation corrected for 46 KPIs, 212 options; CI pending |
 | 3 | 'Unknown / not sure' handling | Fix existing | Partial | Unknown choices now score zero; separate unknown quality flag missing |
-| 4 | Critical-control gating | Implement new - required | Not completed | Must-pass gates cap the band at AMBER/RED (S05) |
-| 5 | Risk-based weights and CSF-function (domain) view | Implement new - required | Partial | Scorecard category weights displayed; CSF function risk weighting missing |
-| 6 | Measure metadata (owner, source, frequency, target, formula) | Implement new - required | Not completed | Add fields to Kpi model and show in app (S13; NIST SP 800-55 Vol.2) |
+| 4 | Critical-control gating | Implement new - required | Code updated, unverified | Must-pass gate now configurable per KPI; failure or unverified answer caps GREEN at AMBER and is visible on mobile. Defaults disabled until owner approves thresholds; tests and migrations pending |
+| 5 | Risk-based weights and CSF-function (domain) view | Implement new - required | Partial | Govern-to-Recover function scores added via mapped NIST controls and displayed on mobile; risk-adjusted domain weights still require approved policy |
+| 6 | Measure metadata (owner, source, frequency, target, formula) | Implement new - required | Code updated, unverified | Measure owner, source, frequency, target and formula persisted on KPI model, API/admin configuration and mobile info screen; actual metadata requires user configuration |
 | 7 | Evidence-linked answers, as-of date and expiry | Implement new - required | Partial | R2 evidence flow present; expiry/attestation missing |
 | 8 | Maturity levels and Current vs Target Profile | Good to have | Not completed | Map score to CSF Tiers/CMMI-style level; target profile per org (S09) |
 | 9 | Automated measurement (EDR, IdP, scanner, CSPM, SIEM connectors) | Good to have | Not completed — external/infrastructure | Pull evidence-grade values instead of self-reporting; start with IdP (MFA) and vulnerability scanner |
@@ -21,7 +21,7 @@
 | 13 | Control-ID mapping integrity | Fix existing | Partial | Missing mappings populated, official full mapping validator missing |
 | 14 | CIS v8.1, SOC 2 TSC, DPDP mapping lenses | Good to have | Not completed | Add CIS IG1-3 view and SOC 2 criteria view (useful for FISST audit work) |
 | 15 | Compliance report templates (roadmap M4) | Good to have | Not completed | Generate filled SOC 2 / ISO / NIST checklists from the scorecard |
-| 16 | Risk register, treatment plans, risk acceptance and exceptions | Implement new - required | Not completed | New module; basis for ISO clause 6.1.2 and CSF GV.RM / ID.RA |
+| 16 | Risk register, treatment plans, risk acceptance and exceptions | Implement new - required | Code updated, unverified | Tenant-isolated risk register model/API/mobile added: likelihood, impact, treatment, acceptance rationale/expiry and status; ownership UI, approvals and tests still needed |
 | 17 | Remediation action tracker (owner, due date, status) | Implement new - required | Code updated, unverified | Action owner/deadline/status UI/API added; deployment unverified |
 | 18 | Policy and legal/contractual obligations registers | Good to have | Not completed | Registers with review dates and control links |
 | 19 | Board / executive reporting pack (PDF export, roadmap F2) | Implement new - required | Partial | Summary PDF/XLSX exports implemented; full board pack missing |
@@ -76,3 +76,13 @@ The original file has **49** entries. Items 47–49 (team analytics, web dashboa
 - Configure `CORS_ALLOWED_ORIGINS` as an exact comma-separated list of browser origins; native Expo mobile applications do not need browser CORS.
 - Confirm login throttling and refresh reuse responses with integration tests before allowing production traffic. Concurrent refresh races require device-level testing.
 - The platform's penetration test, privacy documents, hosting regions and third-party SSO require external work; do not label those requirements complete based on repository changes.
+
+## New capabilities in this draft revision
+
+- **S05 (item 4):** a configurable `criticalGateMinScorePct` per KPI. Failed/unverified configured gates cap GREEN to AMBER. No controls are arbitrarily enabled by the default seed; a security owner must approve thresholds.
+- **S06/S14 (item 5):** independent NIST CSF 2.0 functions Govern, Identify, Protect, Detect, Respond and Recover, with unit tests to prevent multi-mapping from inflating the overall score.
+- **S13 (item 6):** optional KPI measurement owner, evidence/source, frequency, target and formula, visible in the mobile question information panel and editable by platform admins.
+- **Governance (item 16):** risk-register records, score = likelihood × impact (1–25), treatment selection, acceptance justification and time-bound expiry, RLS policy and risk audit entries, mobile creation/status interface.
+- **Migrations:** `20261125170000_kpi_measurement_governance` and `20261125180000_risk_register` must be applied to staging first. Do not apply production migrations before the current PR CI and tenant-isolation tests pass.
+
+**Not yet complete:** these implementations still need CI, staging DB migration checks, role/risk-acceptance integration tests, manual device QA and policy approval. Original items 7–9, 14–15, 18–19, 21–22, 27–32, 35–37, 39–46 also have outstanding acceptance requirements; see the table above. 
