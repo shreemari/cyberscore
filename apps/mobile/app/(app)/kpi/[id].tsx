@@ -500,7 +500,7 @@ function inputValueForTier(cond: TierCondition, fallbackLabel: string): string {
     case 'gt':
       return String(cond.value + 1);
     case 'range':
-      return String(Math.floor((cond.min + cond.max) / 2));
+      return String((cond.min + cond.max) / 2);
     case 'in': {
       const first = cond.values[0];
       return first === undefined ? fallbackLabel : String(first);
@@ -519,7 +519,7 @@ function describeCondition(cond: Kpi['tiers'][number]['condition']): string {
     case 'gt':
       return `> ${cond.value}`;
     case 'range':
-      return `${cond.min} – ${cond.max}`;
+      return `${cond.exclusive || cond.exclusiveMin ? '>' : '≥'} ${cond.min} and ${cond.exclusive || cond.exclusiveMax ? '<' : '≤'} ${cond.max}`;
     case 'eq':
       return String(cond.value);
     case 'in':
