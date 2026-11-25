@@ -112,7 +112,7 @@ export async function PUT(req: Request) {
 
     if ('error' in saved) {
       const statuses = { forbidden: 403, kpi: 404, owner: 400, date: 400 };
-      return NextResponse.json({ error: saved.error }, { status: statuses[saved.error] });
+      return NextResponse.json({ error: saved.error }, { status: saved.error === 'forbidden' ? 403 : saved.error === 'kpi' ? 404 : 400 });
     }
     await audit({
       action: 'ACTION_UPDATED',
