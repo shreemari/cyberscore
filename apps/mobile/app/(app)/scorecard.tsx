@@ -10,6 +10,7 @@ import {
   ActivityIndicator,
   Alert,
   TextInput,
+  Linking,
 } from 'react-native';
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 import { Ionicons } from '@expo/vector-icons';
@@ -19,7 +20,7 @@ import { TopBar } from '@/components/TopBar';
 import { ScoreRing } from '@/components/ScoreRing';
 import { Card } from '@/components/Card';
 import { Button } from '@/components/Button';
-import { api } from '@/lib/api';
+import { api, API_BASE_URL } from '@/lib/api';
 import { useAuthStore } from '@/stores/auth';
 import { FRAMEWORKS, type FrameworkCode } from '@/lib/frameworks';
 import { colors, scoreColorForValue } from '@/theme/colors';
@@ -48,6 +49,7 @@ export default function Scorecard() {
     queryFn: () => api.scorecard.current(selectedFramework),
   });
   const [sharing, setSharing] = useState(false);
+  const [exporting, setExporting] = useState<'pdf' | 'xlsx' | null>(null);
   const canManageActions = me?.user.role === Role.ADMIN; 
   const { data: actionData } = useQuery({
     queryKey: ['corrective-actions'],
@@ -72,6 +74,20 @@ export default function Scorecard() {
       Alert.alert('Share failed', err?.message ?? 'Please try again.');
     } finally {
       setSharing(false);
+    }
+  };
+
+  const onExport = async (format: 'pdf' | 'xlsx') => {
+    setExporting(format);
+    try {
+      // Use a 1-day expiring share token so Android's external browser can
+      // download the summary report without exposing the user's login token.
+      const res = await api.scorecard.createShare({ expiresInDays: 1 });
+      await Linking.openURL(`${API_BASE_URL}/api/v1/share/public/${encodeURIComponent(res.token)}/export?format=${format}`);
+    } catch (err: any) {
+      Alert.alert('Export failed', err?.message ?? 'Please try again.');
+    } finally {
+      setExporting(null);
     }
   };
 
@@ -219,7 +235,10 @@ export default function Scorecard() {
           )}
         </View>
 
-        <View className="mt-8">
+        <View className="mt-8" style={{ gap: 10 }}>
+          <Text className="text-text-secondary text-xs">PDF and Excel downloads use a 24-hour summary-only sharing link. Detailed KPI exports require authenticated API access.</Text>
+          <Button label="Download PDF" icon="document-text-outline" onPress={() => onExport('pdf')} loading={exporting === 'pdf'} disabled={exporting !== null} />
+          <Button label="Download Excel" icon="grid-outline" onPress={() => onExport('xlsx')} loading={exporting === 'xlsx'} disabled={exporting !== null} />
           <Button
             label="Share Scorecard"
             icon="share-outline"
