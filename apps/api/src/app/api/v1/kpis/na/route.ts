@@ -83,6 +83,7 @@ export async function POST(req: Request) {
           weightedScore: 0,
           matchedTierId: null,
           isNa: true,
+          isUnknown: false,
           naJustification: justification,
         },
         update: {
@@ -92,6 +93,7 @@ export async function POST(req: Request) {
           weightedScore: 0,
           matchedTierId: null,
           isNa: true,
+          isUnknown: false,
           naJustification: justification,
         },
       });
