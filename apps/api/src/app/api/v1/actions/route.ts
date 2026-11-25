@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { Role } from '@cymetric/types';
+import { effectiveAllowedLevels } from '@/lib/access';
 import { withTenant } from '@/lib/prisma';
 import { requireAuth } from '@/lib/require-auth';
 import { internalError } from '@/lib/problem';
@@ -18,13 +19,22 @@ export async function GET(req: Request) {
   const auth = requireAuth(req);
   if ('response' in auth) return auth.response;
   try {
-    const items = await withTenant(auth.orgId, (tx) =>
-      tx.improvementAction.findMany({
-        where: { orgId: auth.orgId },
+    const items = await withTenant(auth.orgId, async tx => {
+      const caller = await tx.user.findUnique({
+        where: { id: auth.userId },
+        select: { role: true, allowedLevels: true, org: { select: { mode: true } } },
+      });
+      if (!caller) return null;
+      const allowed = effectiveAllowedLevels({
+        role: caller.role, allowedLevels: caller.allowedLevels, orgMode: caller.org.mode,
+      });
+      return tx.improvementAction.findMany({
+        where: { orgId: auth.orgId, kpi: { level: { in: allowed } } },
         include: { owner: { select: { id: true, name: true, email: true } } },
         orderBy: { updatedAt: 'desc' },
-      }),
-    );
+      });
+    });
+    if (!items) return NextResponse.json({ error: 'Account not found' }, { status: 401 });
     return NextResponse.json({
       items: items.map((item) => ({
         kpiId: item.kpiId,
