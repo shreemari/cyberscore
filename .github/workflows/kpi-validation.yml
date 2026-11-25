@@ -1,0 +1,30 @@
+name: Validate CyMetric KPI workflows
+on:
+  pull_request:
+  push:
+    branches:
+      - fix/46-kpi-scorecard-improvements
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - name: Generate Prisma client
+        run: npm run db:generate
+      - name: Type-check all workspaces
+        run: npm run typecheck
+      - name: Run API regression tests (including all 46 KPIs)
+        run: npm run test
+      - name: Check Expo Android JavaScript bundle
+        working-directory: apps/mobile
+        env:
+          CI: '1'
+          EXPO_PUBLIC_API_URL: https://cyberscore-main.vercel.app
+        run: npx expo export --platform android --output-dir dist
