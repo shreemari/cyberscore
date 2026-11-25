@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { ErrorCodes, Role } from '@cymetric/types';
 import { prisma } from '@/lib/prisma';
-import { requireAdmin } from '@/lib/require-admin';
+import { requirePlatformAdmin } from '@/lib/require-admin';
 import { problem, internalError } from '@/lib/problem';
 import { signAccessToken } from '@/lib/auth';
 import { audit, AuditActions } from '@/lib/audit';
@@ -19,7 +19,7 @@ export async function POST(
   req: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  const auth = requireAdmin(req);
+  const auth = requirePlatformAdmin(req);
   if ('response' in auth) return auth.response;
 
   const { id: targetOrgId } = await params;
