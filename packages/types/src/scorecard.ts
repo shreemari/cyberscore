@@ -9,6 +9,12 @@ export const ScorecardResponse = z.object({
   overallScore: z.number(),
   completeness: z.number(), // 0..100 — how many KPIs answered
   colorBand: z.nativeEnum(ScoreRange),
+  criticalGateFailures: z.array(z.object({
+    kpiId: z.string(),
+    kpiName: z.string(),
+    minimumScorePct: z.number(),
+    actualScorePct: z.number().nullable(),
+  })).optional(),
   levelBreakdown: z.object({
     people: z.object({
       score: z.number(),
