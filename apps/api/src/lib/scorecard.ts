@@ -23,6 +23,7 @@ export interface KpiLite {
   level: Level;
   maxScore: number;
   weightage: number;
+  criticalGateMinScorePct?: number | null;
   // Optional — defaults to ORG for backwards-compat with callers that
   // haven't been refreshed past the enterprise-mode migration.
   answerScope?: AnswerScope;
@@ -50,6 +51,13 @@ export interface AggregatedScorecard {
   overallScore: number;
   completeness: number;
   colorBand: ScoreRange;
+  // Must-pass controls are independent of the numerical weighted score.
+  criticalGateFailures: Array<{
+    kpiId: string;
+    kpiName: string;
+    minimumScorePct: number;
+    actualScorePct: number | null;
+  }>;
   levelBreakdown: {
     people: LevelBreakdown;
     process: LevelBreakdown;
@@ -128,6 +136,24 @@ export function aggregate(kpis: KpiLite[], responses: ResponseLite[]): Aggregate
   const completeness =
     kpis.length === 0 ? 0 : (answeredKpiIds.size / kpis.length) * 100;
 
+  // A must-pass control is not considered passed until it has a valid
+  // applicable answer at or above its configured threshold.
+  const criticalGateFailures = kpis
+    .filter(k => k.criticalGateMinScorePct != null)
+    .flatMap(k => {
+      const response = byId.get(k.id);
+      const actual = response && !response.isNa && k.maxScore > 0
+        ? round2(Math.max(0, Math.min(100, (response.actualScore / k.maxScore) * 100)))
+        : null;
+      const minimum = k.criticalGateMinScorePct!;
+      return actual !== null && actual >= minimum ? [] : [{
+        kpiId: k.id,
+        kpiName: k.kpiName,
+        minimumScorePct: minimum,
+        actualScorePct: actual,
+      }];
+    });
+
   const kpiById = new Map(kpis.map((k) => [k.id, k]));
   // The score aggregation already deduplicates by KPI. Recommendations must
   // use that same set, otherwise stale duplicate rows repeat advice.
@@ -152,7 +178,10 @@ export function aggregate(kpis: KpiLite[], responses: ResponseLite[]): Aggregate
     companyScore: company.score,
     overallScore: all.score,
     completeness: round2(completeness),
-    colorBand: scoreRangeFor(all.score),
+    colorBand: criticalGateFailures.length && scoreRangeFor(all.score) === ScoreRange.GREEN
+      ? ScoreRange.AMBER
+      : scoreRangeFor(all.score),
+    criticalGateFailures,
     levelBreakdown: { people, process: proc, company },
     underperforming,
   };
@@ -203,6 +232,7 @@ export async function loadScorecardInputs(
       level: true,
       maxScore: true,
       weightage: true,
+      criticalGateMinScorePct: true,
       answerScope: true,
     },
   });
