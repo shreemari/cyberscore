@@ -20,7 +20,13 @@ export async function POST(req: Request) {
 
   const parsed = await parseJson(req, MarkNaRequest);
   if (!parsed.ok) return parsed.response;
-  const { kpiId, justification, frameworkCode } = parsed.data;
+  const { kpiId, frameworkCode } = parsed.data;
+  const justification = parsed.data.justification.trim();
+  if (justification.length < 10) {
+    return problem(ErrorCodes.KPI_NO_MATCHING_TIER, {
+      detail: 'N/A justification must contain at least 10 non-whitespace characters.',
+    });
+  }
 
   try {
     const kpi = await prisma.kpi.findFirst({
