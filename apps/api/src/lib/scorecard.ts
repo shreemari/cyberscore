@@ -35,6 +35,7 @@ export interface ResponseLite {
   actualScore: number;
   weightedScore: number;
   isNa: boolean;
+  isUnknown?: boolean;
 }
 
 export interface LevelBreakdown {
@@ -51,6 +52,7 @@ export interface AggregatedScorecard {
   companyScore: number;
   overallScore: number;
   completeness: number;
+  unknownAnswerCount: number;
   colorBand: ScoreRange;
   // Must-pass controls are independent of the numerical weighted score.
   domainBreakdown: Record<'GV' | 'ID' | 'PR' | 'DE' | 'RS' | 'RC', LevelBreakdown>;
@@ -189,6 +191,7 @@ export function aggregate(kpis: KpiLite[], responses: ResponseLite[]): Aggregate
     companyScore: company.score,
     overallScore: all.score,
     completeness: round2(completeness),
+    unknownAnswerCount: [...byId.values()].filter(r => kpiIds.has(r.kpiId) && !r.isNa && r.isUnknown).length,
     colorBand: criticalGateFailures.length && scoreRangeFor(all.score) === ScoreRange.GREEN
       ? ScoreRange.AMBER
       : scoreRangeFor(all.score),
@@ -265,6 +268,7 @@ export async function loadScorecardInputs(
             actualScore: true,
             weightedScore: true,
             isNa: true,
+            isUnknown: true,
             submittedById: true,
           },
         });
@@ -300,6 +304,7 @@ export function rollupResponses(args: {
           actualScore: r.actualScore,
           weightedScore: r.weightedScore,
           isNa: r.isNa,
+          isUnknown: r.isUnknown,
         });
       }
     }
@@ -331,6 +336,7 @@ export function rollupResponses(args: {
           actualScore: adminRow.actualScore,
           weightedScore: adminRow.weightedScore,
           isNa: adminRow.isNa,
+          isUnknown: adminRow.isUnknown,
         });
       }
       continue;
@@ -342,6 +348,7 @@ export function rollupResponses(args: {
       out.push({ kpiId, actualScore: 0, weightedScore: 0, isNa: true });
       continue;
     }
+    const anyUnknown = counted.some(r => r.isUnknown);
     const actual =
       counted.reduce((sum, r) => sum + r.actualScore, 0) / counted.length;
     const weighted =
@@ -351,6 +358,7 @@ export function rollupResponses(args: {
       actualScore: actual,
       weightedScore: weighted,
       isNa: false,
+      isUnknown: anyUnknown,
     });
   }
   return out;
