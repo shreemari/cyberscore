@@ -58,8 +58,14 @@ export async function POST(req: Request) {
       });
     }
 
-    const response = await withTenant(auth.orgId, (tx) =>
-      tx.response.upsert({
+    const saved = await withTenant(auth.orgId, async tx => {
+      const previous = await tx.response.findUnique({
+        where: { orgId_kpiId_submittedById: {
+          orgId: auth.orgId, kpiId, submittedById: auth.userId,
+        } },
+        select: { inputValue: true, actualScore: true, weightedScore: true, isNa: true, naJustification: true },
+      });
+      const response = await tx.response.upsert({
         where: {
           orgId_kpiId_submittedById: {
             orgId: auth.orgId,
@@ -88,14 +94,17 @@ export async function POST(req: Request) {
           isNa: true,
           naJustification: justification,
         },
-      }),
-    );
+      });
+      return { response, previous };
+    });
+    const response = saved.response;
 
     void audit({
       action: AuditActions.KPI_NA_MARKED,
       resource: `kpi:${kpiId}`,
       actorId: auth.userId,
       orgId: auth.orgId,
+      before: saved.previous,
       after: { responseId: response.id, justification },
       req,
     });
