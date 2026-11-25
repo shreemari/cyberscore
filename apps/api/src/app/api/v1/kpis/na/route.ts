@@ -4,6 +4,9 @@ import { prisma, withTenant } from '@/lib/prisma';
 import { parseJson, problem, internalError } from '@/lib/problem';
 import { requireAuth } from '@/lib/require-auth';
 import { audit, AuditActions } from '@/lib/audit';
+import { canAssessLevel } from '@/lib/access';
+import { enqueueSnapshot } from '@/lib/queue';
+import { logger } from '@/lib/logger';
 
 // POST /api/v1/kpis/na
 //
@@ -26,11 +29,27 @@ export async function POST(req: Request) {
         isActive: true,
         deletedAt: null,
       },
-      select: { id: true, version: true },
+      select: { id: true, version: true, level: true },
     });
     // A framework mismatch is reported as KPI_NOT_FOUND, just like an
     // unknown or inactive KPI.
     if (!kpi) return problem(ErrorCodes.KPI_NOT_FOUND);
+
+    // N/A is still an assessment response. Enforce the same per-user
+    // level restrictions as the normal submit endpoint.
+    const caller = await prisma.user.findUnique({
+      where: { id: auth.userId },
+      select: { role: true, allowedLevels: true, org: { select: { mode: true } } },
+    });
+    if (!caller) return problem(ErrorCodes.AUTH_TOKEN_INVALID);
+    if (!canAssessLevel(
+      { role: caller.role, orgMode: caller.org.mode, allowedLevels: caller.allowedLevels },
+      kpi.level,
+    )) {
+      return problem(ErrorCodes.FORBIDDEN, {
+        detail: `You don't have access to ${kpi.level} assessments. Ask your admin.`,
+      });
+    }
 
     const response = await withTenant(auth.orgId, (tx) =>
       tx.response.upsert({
@@ -72,6 +91,10 @@ export async function POST(req: Request) {
       orgId: auth.orgId,
       after: { responseId: response.id, justification },
       req,
+    });
+
+    enqueueSnapshot({ orgId: auth.orgId, reason: 'KPI_SUBMITTED' }).catch((err) => {
+      logger.warn({ err, orgId: auth.orgId }, 'snapshot enqueue failed');
     });
 
     return NextResponse.json({
