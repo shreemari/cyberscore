@@ -623,7 +623,7 @@
       },
       {
         "tierLabel": "Increasing",
-        "scoreValue": -25,
+        "scoreValue": 0,
         "condition": {
           "op": "eq",
           "value": "Increasing"
@@ -735,7 +735,7 @@
       },
       {
         "tierLabel": "Increasing",
-        "scoreValue": -25,
+        "scoreValue": 0,
         "condition": {
           "op": "eq",
           "value": "Increasing"
@@ -865,7 +865,7 @@
       },
       {
         "tierLabel": "In weeks",
-        "scoreValue": -25,
+        "scoreValue": 0,
         "condition": {
           "op": "eq",
           "value": "In weeks"
@@ -987,7 +987,7 @@
       },
       {
         "tierLabel": "≥7 & <10 days",
-        "scoreValue": 50,
+        "scoreValue": 25,
         "condition": {
           "op": "range",
           "min": 7,
@@ -2666,7 +2666,7 @@
     "kpiName": "Average Incident Cost (M2M trend)",
     "level": "COMPANY",
     "category": "MGMT REPORTING",
-    "maxScore": 200,
+    "maxScore": 50,
     "weightage": 1,
     "inputType": "RADIO",
     "infoText": "Direction of average incident cost month-on-month. Declining is best.",
@@ -2697,7 +2697,7 @@
       },
       {
         "tierLabel": "Increasing",
-        "scoreValue": -25,
+        "scoreValue": 0,
         "condition": {
           "op": "eq",
           "value": "Increasing"
@@ -2710,7 +2710,7 @@
     "kpiName": "Budget vs Actual Spend",
     "level": "COMPANY",
     "category": "MGMT REPORTING",
-    "maxScore": 200,
+    "maxScore": 50,
     "weightage": 1,
     "inputType": "RADIO",
     "infoText": "How closely actual security spend tracked the approved budget.",
@@ -2741,7 +2741,7 @@
       },
       {
         "tierLabel": "Overrun 26-50%",
-        "scoreValue": 25,
+        "scoreValue": 15,
         "condition": {
           "op": "eq",
           "value": "Overrun 26-50%"
@@ -2750,7 +2750,7 @@
       },
       {
         "tierLabel": "Overrun >50%",
-        "scoreValue": -25,
+        "scoreValue": 0,
         "condition": {
           "op": "eq",
           "value": "Overrun >50%"
@@ -2763,7 +2763,7 @@
     "kpiName": "AI Impact in Security (vs peer adoption)",
     "level": "COMPANY",
     "category": "MGMT REPORTING",
-    "maxScore": 200,
+    "maxScore": 100,
     "weightage": 0.5,
     "inputType": "RADIO",
     "infoText": "How your AI-in-security adoption compares to industry peers.",
@@ -2803,7 +2803,7 @@
       },
       {
         "tierLabel": "No plans",
-        "scoreValue": -50,
+        "scoreValue": 0,
         "condition": {
           "op": "eq",
           "value": "No plans"
