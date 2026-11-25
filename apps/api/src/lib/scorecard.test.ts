@@ -93,4 +93,35 @@ describe('CyMetric KPI Scorecard', () => {
 
     expect(result.completeness).toBe(33.33);
   });
+
+  it('uses the documented 50% and 80% score band boundaries', () => {
+    const single = [kpis[0]!];
+    for (const [percentage, expected] of [
+      [49, ScoreRange.RED],
+      [50, ScoreRange.AMBER],
+      [79, ScoreRange.AMBER],
+      [80, ScoreRange.GREEN],
+    ] as const) {
+      const result = aggregate(single, [{
+        kpiId: single[0]!.id,
+        actualScore: (percentage / 100) * 4,
+        weightedScore: (percentage / 100) * 4,
+        isNa: false,
+      }]);
+      expect(result.colorBand).toBe(expected);
+      expect(result.underperforming[0]?.scoreRange ?? ScoreRange.GREEN).toBe(expected);
+    }
+  });
+
+  it('does not repeat underperforming KPIs when duplicate rows are present', () => {
+    const repeated: ResponseLite = {
+      kpiId: 'KPI-001',
+      actualScore: 1,
+      weightedScore: 1,
+      isNa: false,
+    };
+    const result = aggregate(kpis, [repeated, repeated]);
+    expect(result.underperforming).toHaveLength(1);
+    expect(result.underperforming[0]?.kpiId).toBe('KPI-001');
+  });
 });
