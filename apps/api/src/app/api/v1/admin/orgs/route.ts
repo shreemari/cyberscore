@@ -10,7 +10,7 @@ import { internalError } from '@/lib/problem';
 // Uses the latest ScorecardSnapshot as the score pointer so we don't recompute
 // 46-KPI aggregates N times per page load.
 export async function GET(req: Request) {
-  const auth = requirePlatformAdmin(req);
+  const auth = await requirePlatformAdmin(req);
   if ('response' in auth) return auth.response;
 
   const url = new URL(req.url);
