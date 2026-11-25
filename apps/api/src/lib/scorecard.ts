@@ -195,7 +195,7 @@ export async function loadScorecardInputs(
       isActive: true,
       deletedAt: null,
       status: 'PUBLISHED',
-      ...frameworkKpiFilter(framework as Framework | null | undefined ?? null),
+      ...frameworkKpiFilter((framework ?? null) as Framework | null),
     },
     select: {
       id: true,
