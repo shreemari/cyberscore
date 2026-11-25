@@ -135,6 +135,7 @@ export async function GET(req: Request) {
       overallScore: payload.agg.overallScore,
       completeness: payload.agg.completeness,
       colorBand: payload.agg.colorBand,
+      criticalGateFailures: payload.agg.criticalGateFailures,
       levelBreakdown: payload.agg.levelBreakdown,
       improvementSuggestions,
       latestSnapshot: payload.latestSnapshot
