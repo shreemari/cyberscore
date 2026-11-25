@@ -5,6 +5,7 @@ import { parseJson, problem, internalError } from '@/lib/problem';
 import { requireAuth } from '@/lib/require-auth';
 import { audit, AuditActions } from '@/lib/audit';
 import { canAssessLevel } from '@/lib/access';
+import { frameworkKpiFilter } from '@/lib/framework-kpis';
 import { enqueueSnapshot } from '@/lib/queue';
 import { logger } from '@/lib/logger';
 
@@ -25,7 +26,7 @@ export async function POST(req: Request) {
     const kpi = await prisma.kpi.findFirst({
       where: {
         id: kpiId,
-        frameworkCode,
+        ...frameworkKpiFilter(frameworkCode),
         isActive: true,
         deletedAt: null,
       },
