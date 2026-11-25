@@ -4,7 +4,7 @@ import { resolve } from 'node:path';
 import { Framework, InputType, Level } from '@prisma/client';
 import type { ScoreRange, SuggestionPriority } from '@cymetric/types';
 import { prisma } from '@/lib/prisma';
-import { requireAdmin } from '@/lib/require-admin';
+import { requirePlatformAdmin } from '@/lib/require-admin';
 import { problem, internalError } from '@/lib/problem';
 import { ErrorCodes } from '@cymetric/types';
 import { logger } from '@/lib/logger';
@@ -42,7 +42,7 @@ interface KpiSeed {
 }
 
 export async function POST(req: Request) {
-  const auth = requireAdmin(req);
+  const auth = requirePlatformAdmin(req);
   if ('response' in auth) return auth.response;
 
   try {
