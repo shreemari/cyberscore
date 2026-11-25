@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { EvidencePresignRequest, ErrorCodes } from '@cymetric/types';
 import { parseJson, problem, internalError } from '@/lib/problem';
 import { requireAuth } from '@/lib/require-auth';
+import { withTenant } from '@/lib/prisma';
 import {
   buildEvidenceKey,
   isAllowedMime,
