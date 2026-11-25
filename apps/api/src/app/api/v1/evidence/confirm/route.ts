@@ -39,7 +39,7 @@ export async function POST(req: Request) {
   try {
     const result = await withTenant(auth.orgId, async (tx) => {
       const response = await tx.response.findFirst({
-        where: { orgId: auth.orgId, kpiId },
+        where: { orgId: auth.orgId, kpiId, submittedById: auth.userId },
       });
       if (!response) return null;
 
