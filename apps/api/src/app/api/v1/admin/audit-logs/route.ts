@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { requireAdmin } from '@/lib/require-admin';
+import { requirePlatformAdmin } from '@/lib/require-admin';
 import { internalError } from '@/lib/problem';
 
 // GET /api/v1/admin/audit-logs
@@ -15,7 +15,7 @@ import { internalError } from '@/lib/problem';
 // audit_logs is append-only (CHECK constraint in migration), so "latest first"
 // ordering by (createdAt DESC, id DESC) is stable and index-backed.
 export async function GET(req: Request) {
-  const auth = requireAdmin(req);
+  const auth = requirePlatformAdmin(req);
   if ('response' in auth) return auth.response;
 
   const url = new URL(req.url);
