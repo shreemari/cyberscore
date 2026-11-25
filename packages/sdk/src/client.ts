@@ -342,9 +342,10 @@ export class CyMetricClient {
       }),
 
     // kpiId is carried in the presign body — the API route is flat under /evidence.
-    evidencePresign: (_kpiId: string, body: EvidencePresignRequest) =>
+    evidencePresign: (kpiId: string, body: EvidencePresignRequest) =>
       this.request<EvidencePresignResponse>('/api/v1/evidence/presign', {
         method: 'POST',
+        query: { kpiId },
         body,
       }),
 
