@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { resolvePublicShare } from '@/lib/share';
+import { rateLimit, clientIp } from '@/lib/rate-limit';
 import { pdfReport, xlsxReport, type ReportTable } from '@/lib/report-export';
 
 // A share token explicitly grants access to the *summary* scorecard only.
@@ -15,6 +16,8 @@ export async function GET(
     return NextResponse.json({ error: 'Use pdf or xlsx' }, { status: 400 });
   }
   const { token } = await params;
+  const rl = await rateLimit({ key: `share:export:${clientIp(req)}`, max: 15, windowMs: 15 * 60 * 1000 });
+  if (!rl.allowed) return NextResponse.json({ error: 'Too many downloads' }, { status: 429 });
   const payload = await resolvePublicShare(token);
   if (!payload) return NextResponse.json({ error: 'Link expired or invalid' }, { status: 404 });
   const table: ReportTable = {
