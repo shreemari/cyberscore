@@ -99,7 +99,7 @@ export default function Scorecard() {
   if (isLoading) {
     return (
       <Screen glow>
-        <TopBar title="SCORECARD" showBack />
+        <TopBar title="CYMETRIC" showBack />
         <View className="flex-1 items-center justify-center">
           <ActivityIndicator color={colors.brand[400]} />
           <Text className="text-text-muted mt-3">Computing scorecard…</Text>
