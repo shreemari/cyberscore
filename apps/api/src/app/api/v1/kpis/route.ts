@@ -97,7 +97,7 @@ export async function GET(req: Request) {
         weightage: k.weightage,
         inputType: k.inputType,
         infoText: k.infoText,
-        frameworkCode: k.frameworkCode,
+        frameworkCode: framework === 'all' ? k.frameworkCode : framework,
         nistControlIds: k.nistControlIds,
         isoControlIds: k.isoControlIds,
         isCustom: k.isCustom,
