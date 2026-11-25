@@ -9,6 +9,13 @@ export const ScorecardResponse = z.object({
   overallScore: z.number(),
   completeness: z.number(), // 0..100 — how many KPIs answered
   colorBand: z.nativeEnum(ScoreRange),
+  domainBreakdown: z.record(z.enum(['GV', 'ID', 'PR', 'DE', 'RS', 'RC']), z.object({
+    score: z.number(),
+    maxPossible: z.number(),
+    answered: z.number().int(),
+    total: z.number().int(),
+    colorBand: z.nativeEnum(ScoreRange),
+  })).optional(),
   criticalGateFailures: z.array(z.object({
     kpiId: z.string(),
     kpiName: z.string(),
