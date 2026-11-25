@@ -42,7 +42,7 @@ interface KpiSeed {
 }
 
 export async function POST(req: Request) {
-  const auth = requirePlatformAdmin(req);
+  const auth = await requirePlatformAdmin(req);
   if ('response' in auth) return auth.response;
 
   try {
