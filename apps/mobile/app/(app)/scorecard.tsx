@@ -187,6 +187,18 @@ export default function Scorecard() {
           </Text>
         </Card>
 
+        {(data?.unknownAnswerCount ?? 0) > 0 && (
+          <Card>
+            <Text className="text-text-primary font-bold">
+              Data quality: {data?.unknownAnswerCount ?? 0} uncertain answers
+            </Text>
+            <Text className="text-text-secondary text-sm mt-2">
+              “Not sure” indicates an uncertain assessment, not N/A.
+              These responses score zero and should be reviewed.
+            </Text>
+          </Card>
+        )}
+
         <View className="mt-5 mb-3">
           <Text className="text-text-primary font-bold text-lg">Category performance and weights</Text>
           <Text className="text-text-muted text-xs mt-1">Weights show each category's share of applicable maximum weighted points.</Text>
