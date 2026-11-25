@@ -8,6 +8,7 @@ export const ScorecardResponse = z.object({
   companyScore: z.number(),
   overallScore: z.number(),
   completeness: z.number(), // 0..100 — how many KPIs answered
+  unknownAnswerCount: z.number().int().nonnegative().optional(),
   colorBand: z.nativeEnum(ScoreRange),
   domainBreakdown: z.record(z.enum(['GV', 'ID', 'PR', 'DE', 'RS', 'RC']), z.object({
     score: z.number(),
