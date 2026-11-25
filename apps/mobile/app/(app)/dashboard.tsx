@@ -10,8 +10,7 @@ import { TopBar } from '@/components/TopBar';
 import { ScoreRing } from '@/components/ScoreRing';
 import { Card } from '@/components/Card';
 import { PressableGlow } from '@/components/PressableGlow';
-import { api, API_BASE_URL } from '@/lib/api';
-import { secureTokenStorage } from '@/lib/storage';
+import { api } from '@/lib/api';
 import { FRAMEWORKS, type FrameworkCode } from '@/lib/frameworks';
 import { useAuthStore } from '@/stores/auth';
 import { colors } from '@/theme/colors';
@@ -23,43 +22,20 @@ export default function Dashboard() {
   const isAdmin = me?.user.role === Role.ADMIN;
   const showTeamRollup = isEnterprise && isAdmin;
 
+  const selectedFramework = me?.org.selectedFramework ?? 'EXCEL';
   const { data, isLoading, isRefetching } = useQuery({
-    queryKey: ['scorecard'],
-    queryFn: () => api.scorecard.current(),
+    queryKey: ['scorecard', selectedFramework],
+    queryFn: () => api.scorecard.current(selectedFramework),
   });
 
   // Load each framework independently so every dashboard panel shows its own score.
   const frameworkScores = useQueries({
     queries: FRAMEWORKS.map((framework) => ({
       queryKey: ['scorecard', framework.code],
-      queryFn: async () => {
-        const tokens = await secureTokenStorage.getTokens();
-        const response = await fetch(
-          `${API_BASE_URL}/api/v1/scorecard?framework=${encodeURIComponent(framework.code)}`,
-          {
-            headers: {
-              Accept: 'application/json',
-              ...(tokens?.accessToken
-                ? { Authorization: `Bearer ${tokens.accessToken}` }
-                : {}),
-            },
-          },
-        );
-
-        if (!response.ok) {
-          throw new Error(`Unable to load ${framework.label}: HTTP ${response.status}`);
-        }
-
-        return (await response.json()) as {
-          framework: FrameworkCode;
-          overallScore: number | null;
-          completeness: number;
-        };
-      },
+      queryFn: () => api.scorecard.current(framework.code),
     })),
   });
   // Resume state belongs to the framework currently selected for assessment.
-  const selectedFramework = me?.org.selectedFramework ?? 'EXCEL';
   const { data: progress } = useQuery({
     queryKey: ['progress', selectedFramework],
     queryFn: () => api.progress.get(selectedFramework),
@@ -145,8 +121,8 @@ export default function Dashboard() {
                 fontSize: 12,
               }}
             >
-              System integrity within optimal parameters.{' '}
-              {Math.round(data?.completeness ?? 0)}% complete.
+              KPI performance: {Math.round(overall)}%.{' '}
+              Assessment completeness: {Math.round(data?.completeness ?? 0)}%. These measure different things.
             </Text>
           )}
         </View>
