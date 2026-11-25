@@ -108,7 +108,7 @@ export default function Scorecard() {
     );
   }
 
-  const overall = data?.overallScore ?? null;
+  const overall = data && data.completeness > 0 ? data.overallScore : null;
   const completeness = Math.round(data?.completeness ?? 0);
   const levelStats = data?.levelBreakdown;
   const totalKpis = (levelStats?.people.total ?? 0) + (levelStats?.process.total ?? 0) + (levelStats?.company.total ?? 0);
