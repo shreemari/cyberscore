@@ -81,12 +81,16 @@ export default function KpiQuestion() {
   const [selectedTierId, setSelectedTierId] = useState<string | null>(null);
   const [percentValue, setPercentValue] = useState('');
   const [infoOpen, setInfoOpen] = useState(false);
+  const [naOpen, setNaOpen] = useState(false);
+  const [naJustification, setNaJustification] = useState('');
 
   // Reset when navigating to a different KPI.
   useEffect(() => {
     setSelectedTierId(null);
     setPercentValue('');
     setInfoOpen(false);
+    setNaOpen(false);
+    setNaJustification('');
   }, [kpiId]);
 
   const submit = useMutation({
@@ -107,24 +111,15 @@ export default function KpiQuestion() {
       const nextIndex = index + 1;
       const status = nextIndex >= byLevel.length ? 'COMPLETED' : 'IN_PROGRESS';
 
-      // Fire both writes in parallel — `progress.save` doesn't depend on
-      // the response of `kpis.submit` (nextIndex is computed client-side),
-      // so we don't need to wait for the first before starting the second.
-      // Cuts the click-to-next latency roughly in half on warm Vercel and
-      // makes a much bigger difference under cold-start.
-      await Promise.all([
-        api.kpis.submit({
-          kpiId: kpi.id,
-          inputValue,
-          frameworkCode: framework,
-        }),
-        api.progress.save({
-          level,
-          lastQuestionIndex: nextIndex,
-          status,
-          frameworkCode: framework,
-        }),
-      ]);
+      // Persist the answer first. A failed submission must never advance the
+      // resume cursor, otherwise the assessment silently skips that KPI.
+      await api.kpis.submit({ kpiId: kpi.id, inputValue, frameworkCode: framework });
+      await api.progress.save({
+        level,
+        lastQuestionIndex: nextIndex,
+        status,
+        frameworkCode: framework,
+      });
       return { nextIndex, status };
     },
     onSuccess: ({ nextIndex, status }, vars) => {
@@ -152,6 +147,31 @@ export default function KpiQuestion() {
     onError: (err: any) => {
       Alert.alert('Could not save', err?.message ?? 'Please try again.');
     },
+  });
+
+  const markNa = useMutation({
+    mutationFn: async () => {
+      if (!kpi) throw new Error('KPI not loaded');
+      const justification = naJustification.trim();
+      if (justification.length < 10) throw new Error('Please provide at least 10 characters explaining N/A.');
+      await api.kpis.markNa({ kpiId: kpi.id, justification, frameworkCode: framework });
+      const nextIndex = index + 1;
+      const status = nextIndex >= byLevel.length ? 'COMPLETED' : 'IN_PROGRESS';
+      await api.progress.save({ level, lastQuestionIndex: nextIndex, status, frameworkCode: framework });
+      return { nextIndex, status };
+    },
+    onSuccess: ({ nextIndex, status }) => {
+      setNaOpen(false);
+      void qc.invalidateQueries({ queryKey: ['scorecard'] });
+      void qc.invalidateQueries({ queryKey: ['progress', framework] });
+      if (status === 'COMPLETED') {
+        router.replace(`/(app)/results?framework=${framework}`);
+      } else {
+        const next = byLevel[nextIndex];
+        if (next) router.replace(`/(app)/kpi/${next.id}?level=${level}&index=${nextIndex}&framework=${framework}`);
+      }
+    },
+    onError: (err: any) => Alert.alert('Could not mark N/A', err?.message ?? 'Please try again.'),
   });
 
   const canSubmit =
@@ -395,6 +415,17 @@ export default function KpiQuestion() {
 
       </ScrollView>
 
+      <Pressable
+        accessibilityRole="button"
+        onPress={() => setNaOpen(true)}
+        disabled={submit.isPending || markNa.isPending}
+        style={{ alignItems: 'center', paddingVertical: 9 }}
+      >
+        <Text style={{ color: colors.text.secondary, textDecorationLine: 'underline' }}>
+          Not applicable? Add justification
+        </Text>
+      </Pressable>
+
       {/* Sticky footer — always visible above safe area */}
       <View
         style={{
@@ -428,6 +459,32 @@ export default function KpiQuestion() {
           />
         </View>
       </View>
+
+      <Modal visible={naOpen} transparent animationType="slide" onRequestClose={() => setNaOpen(false)}>
+        <View style={{ flex: 1, justifyContent: 'center', padding: 24, backgroundColor: 'rgba(0,0,0,0.8)' }}>
+          <Card>
+            <Text style={{ color: colors.text.primary, fontSize: 18, fontWeight: '800', marginBottom: 8 }}>
+              Mark as Not Applicable
+            </Text>
+            <Text style={{ color: colors.text.secondary, marginBottom: 12 }}>
+              Explain why this KPI does not apply to your organisation (minimum 10 characters).
+            </Text>
+            <TextInput
+              value={naJustification}
+              onChangeText={setNaJustification}
+              multiline
+              maxLength={2000}
+              placeholder="Reason this KPI is not applicable"
+              placeholderTextColor={colors.text.muted}
+              style={{ color: colors.text.primary, backgroundColor: colors.bg.elevated, borderRadius: 12, minHeight: 100, padding: 12, textAlignVertical: 'top', marginBottom: 16 }}
+            />
+            <View style={{ gap: 10 }}>
+              <Button label="Confirm N/A and continue" onPress={() => markNa.mutate()} loading={markNa.isPending} disabled={naJustification.trim().length < 10 || markNa.isPending} />
+              <Button label="Cancel" variant="outline" onPress={() => setNaOpen(false)} disabled={markNa.isPending} />
+            </View>
+          </Card>
+        </View>
+      </Modal>
 
       <Modal
         visible={infoOpen}
