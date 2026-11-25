@@ -167,4 +167,23 @@ describe('CyMetric KPI Scorecard', () => {
     expect(aggregate(critical, responses).colorBand).toBe(ScoreRange.GREEN);
     expect(aggregate(kpis, responses).criticalGateFailures).toHaveLength(0);
   });
+
+  it('reports independent NIST CSF function weights without duplicating the overall score', () => {
+    const mapped = [
+      { ...kpis[0]!, nistControlIds: ['PR.AA-01', 'GV.OC-01'] },
+      { ...kpis[1]!, nistControlIds: ['DE.CM-01'] },
+      { ...kpis[2]!, nistControlIds: ['RC.RP-01'] },
+    ];
+    const result = aggregate(mapped, [
+      { kpiId: 'KPI-001', actualScore: 4, weightedScore: 4, isNa: false },
+      { kpiId: 'KPI-002', actualScore: 0, weightedScore: 0, isNa: false },
+      { kpiId: 'KPI-003', actualScore: 4, weightedScore: 4, isNa: false },
+    ]);
+    expect(result.domainBreakdown.PR.score).toBe(100);
+    expect(result.domainBreakdown.GV.score).toBe(100);
+    expect(result.domainBreakdown.DE.score).toBe(0);
+    expect(result.domainBreakdown.RC.score).toBe(100);
+    expect(result.domainBreakdown.ID.total).toBe(0);
+    expect(result.overallScore).toBe(66.67);
+  });
 });
