@@ -42,7 +42,7 @@ export default function Scorecard() {
   const selectedFrameworkLabel =
     FRAMEWORKS.find((item) => item.code === selectedFramework)?.label ?? 'KPI Scorecard';
 
-  const { data, isLoading, isRefetching } = useQuery({
+  const { data, isLoading, isRefetching, isError, error } = useQuery<ScorecardResponse>({
     queryKey: ['scorecard', selectedFramework],
     queryFn: async () => {
       const tokens = await secureTokenStorage.getTokens();
@@ -102,6 +102,10 @@ export default function Scorecard() {
 
   const overall = data?.overallScore ?? null;
   const completeness = Math.round(data?.completeness ?? 0);
+  const actions = [...(data?.improvementSuggestions ?? [])].sort((a, b) => {
+    if (a.scoreRange === b.scoreRange) return a.currentScore - b.currentScore;
+    return a.scoreRange === 'RED' ? -1 : 1;
+  });
 
   return (
     <Screen glow>
@@ -119,6 +123,16 @@ export default function Scorecard() {
           />
         }
       >
+        {isError && (
+          <Card>
+            <Text className="text-text-primary font-bold mb-2">Could not load scorecard</Text>
+            <Text className="text-text-secondary text-sm mb-3">
+              {error instanceof Error ? error.message : 'Please refresh to try again.'}
+            </Text>
+            <Button label="Try again" onPress={onRefresh} />
+          </Card>
+        )}
+
         <View className="items-center mt-2 mb-6">
           <Text className="text-text-secondary text-xs font-bold tracking-widest mb-3">{selectedFrameworkLabel}</Text>
           <ScoreRing score={overall} label="Overall · out of 100" />
@@ -136,16 +150,20 @@ export default function Scorecard() {
         <LevelSummary title="Company" stats={data?.levelBreakdown.company} full />
 
         <View className="mt-6">
-          <Text className="text-text-primary font-bold text-lg mb-3">Recommended actions</Text>
-          {(data?.improvementSuggestions ?? []).length === 0 ? (
+          <Text className="text-text-primary font-bold text-lg mb-3">Recommended actions ({actions.length})</Text>
+          {actions.length === 0 ? (
             <Card>
               <Text className="text-text-secondary text-sm">
-                No priority actions — keep up the momentum.
+                {isError
+                  ? 'Recommendations are unavailable while the scorecard is offline.'
+                  : completeness === 0
+                    ? 'Complete an assessment to receive recommendations.'
+                    : 'No priority actions for your answered KPIs.'}
               </Text>
             </Card>
           ) : (
             <View className="gap-3">
-              {(data?.improvementSuggestions ?? []).slice(0, 5).map((s: ScorecardResponse['improvementSuggestions'][number]) => {
+              {actions.map((s: ScorecardResponse['improvementSuggestions'][number]) => {
                 const colour = bandColor(s.scoreRange);
                 return (
                   <Card key={s.kpiId}>
