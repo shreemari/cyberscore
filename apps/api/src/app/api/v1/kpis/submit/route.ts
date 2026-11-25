@@ -8,6 +8,7 @@ import { audit, AuditActions } from '@/lib/audit';
 import { enqueueSnapshot } from '@/lib/queue';
 import { logger } from '@/lib/logger';
 import { canAssessLevel } from '@/lib/access';
+import { frameworkKpiFilter } from '@/lib/framework-kpis';
 
 // POST /api/v1/kpis/submit
 //
@@ -25,7 +26,7 @@ export async function POST(req: Request) {
     const kpi = await prisma.kpi.findFirst({
       where: {
         id: kpiId,
-        frameworkCode,
+        ...frameworkKpiFilter(frameworkCode),
         isActive: true,
         deletedAt: null,
       },
