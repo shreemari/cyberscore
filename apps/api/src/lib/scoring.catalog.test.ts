@@ -51,6 +51,10 @@ describe('the 46 canonical KPI functions', () => {
   for (const kpi of catalog) {
     it(`accepts every scoring option for ${kpi.kpiName}`, () => {
       const tiers = kpi.tiers.map((t, i) => ({ ...t, id: `tier-${i}` }));
+      expect(kpi.tiers.some(t => t.scoreValue === kpi.maxScore)).toBe(true);
+      expect(kpi.tiers.every(t => t.scoreValue >= 0 && t.scoreValue <= kpi.maxScore)).toBe(true);
+      const ordered = [...kpi.tiers].sort((a, b) => a.tierOrder - b.tierOrder);
+      expect(ordered.every((t, i) => i === 0 || t.scoreValue < ordered[i - 1]!.scoreValue)).toBe(true);
       expect(kpi.nistControlIds.length).toBeGreaterThan(0);
       expect(kpi.isoControlIds.length).toBeGreaterThan(0);
       Kpi.parse({
