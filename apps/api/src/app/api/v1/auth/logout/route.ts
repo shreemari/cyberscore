@@ -1,48 +1,42 @@
 import { NextResponse } from 'next/server';
 import bcrypt from 'bcrypt';
 import { LogoutRequest } from '@cymetric/types';
+import { refreshLookupKey } from '@/lib/auth';
 import { withBypassRls } from '@/lib/prisma';
 import { parseJson, internalError } from '@/lib/problem';
 import { audit, AuditActions } from '@/lib/audit';
 
-// POST /api/v1/auth/logout
-//
-// Revokes the caller's refresh token server-side. Mobile is responsible
-// for clearing its local expo-secure-store after this returns.
-//
-// Auth is NOT required — a valid refresh token is the proof. If the
-// access token has expired the mobile client can still log out.
-// We always return 204 to avoid leaking "was this token valid?" info.
+// A valid refresh token proves access even when the JWT has expired.
+// Returning 204 for missing/old credentials prevents token enumeration.
 export async function POST(req: Request) {
   const parsed = await parseJson(req, LogoutRequest);
   if (!parsed.ok) return parsed.response;
-
   try {
-    await withBypassRls(async (tx) => {
-      const candidates = await tx.refreshToken.findMany({
-        where: { revokedAt: null },
-        take: 200,
-        select: { id: true, orgId: true, tokenHash: true },
+    const revoked = await withBypassRls(async tx => {
+      const c = await tx.refreshToken.findUnique({
+        where: { lookupKey: refreshLookupKey(parsed.data.refreshToken) },
+        select: { id: true, orgId: true, userId: true, tokenHash: true, revokedAt: true },
       });
-      for (const c of candidates) {
-        if (await bcrypt.compare(parsed.data.refreshToken, c.tokenHash)) {
-          await tx.refreshToken.update({
-            where: { id: c.id },
-            data: { revokedAt: new Date() },
-          });
-          await audit({
-            action: AuditActions.LOGOUT,
-            resource: `refresh_token:${c.id}`,
-            orgId: c.orgId,
-            req,
-          });
-          break;
-        }
+      if (!c || c.revokedAt || !(await bcrypt.compare(parsed.data.refreshToken, c.tokenHash))) {
+        return null;
       }
+      await tx.refreshToken.update({
+        where: { id: c.id },
+        data: { revokedAt: new Date() },
+      });
+      return { id: c.id, orgId: c.orgId, userId: c.userId };
     });
+    if (revoked) {
+      await audit({
+        action: AuditActions.LOGOUT,
+        resource: `refresh_token:${revoked.id}`,
+        actorId: revoked.userId,
+        orgId: revoked.orgId,
+        req,
+      });
+    }
   } catch (err) {
     return internalError(err, { route: 'auth/logout' });
   }
-
   return new NextResponse(null, { status: 204 });
 }
