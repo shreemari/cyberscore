@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { withTenant } from '@/lib/prisma';
 import { internalError } from '@/lib/problem';
 import { verifyEvidenceTicket } from '@/lib/evidence-ticket';
-import { buildEvidenceKey, isAllowedMime, presignEvidenceUpload, publicUrlFor } from '@/lib/storage';
+import { buildEvidenceKey, isAllowedMime, presignEvidenceUpload, publicUrlFor, verifyEvidenceObject } from '@/lib/storage';
 import { audit, AuditActions } from '@/lib/audit';
 
 const RequestSchema = z.discriminatedUnion('stage', [
@@ -51,6 +51,7 @@ export async function POST(req: Request) {
     if (!input.fileKey.startsWith(`orgs/${ticket.orgId}/kpis/${ticket.kpiId}/`)) {
       return NextResponse.json({ error: 'Invalid evidence key' }, { status: 403 });
     }
+    const uploadedSize = await verifyEvidenceObject(input.fileKey, input.fileType);
     const item = await withTenant(ticket.orgId, async tx => {
       const attachment = await tx.evidenceAttachment.create({
         data: {
@@ -61,7 +62,7 @@ export async function POST(req: Request) {
           fileType: input.fileType,
           fileKey: input.fileKey,
           fileUrl: publicUrlFor(input.fileKey),
-          fileSize: 0,
+          fileSize: uploadedSize,
         },
       });
       await tx.response.update({
