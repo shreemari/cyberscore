@@ -44,8 +44,8 @@ export const Kpi = z.object({
       id: z.string(),
       tierLabel: z.string(),
       condition: TierCondition,
-      // The canonical workbook has intentional negative penalty tiers.
-      scoreValue: z.number().int(),
+      // All published KPI tiers must score within the nonnegative scale.
+      scoreValue: z.number().int().nonnegative(),
       tierOrder: z.number().int().positive(),
     }),
   ),
