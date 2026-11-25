@@ -5,6 +5,11 @@ on:
     branches:
       - fix/46-kpi-scorecard-improvements
 
+# Cancel obsolete checks as new commits arrive; keep the latest branch run.
+concurrency:
+  group: cymetric-kpi-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   checks:
     runs-on: ubuntu-latest
