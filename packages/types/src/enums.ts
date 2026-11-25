@@ -153,7 +153,7 @@ export function isFreeEmailDomain(domain: string): boolean {
 
 // Score thresholds per spec §1.3
 export const SCORE_THRESHOLDS = {
-  GREEN: 75,
+  GREEN: 80,
   AMBER: 50,
 } as const;
 

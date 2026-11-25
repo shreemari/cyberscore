@@ -9,7 +9,14 @@ export const TierCondition = z.discriminatedUnion('op', [
   z.object({ op: z.literal('gte'), value: z.number() }),
   z.object({ op: z.literal('gt'), value: z.number() }),
   z.object({ op: z.literal('eq'), value: z.union([z.number(), z.string(), z.boolean()]) }),
-  z.object({ op: z.literal('range'), min: z.number(), max: z.number() }),
+  z.object({
+    op: z.literal('range'),
+    min: z.number(),
+    max: z.number(),
+    exclusive: z.boolean().optional(),
+    exclusiveMin: z.boolean().optional(),
+    exclusiveMax: z.boolean().optional(),
+  }),
   z.object({ op: z.literal('in'), values: z.array(z.union([z.string(), z.number()])) }),
 ]);
 export type TierCondition = z.infer<typeof TierCondition>;
@@ -23,6 +30,12 @@ export const Kpi = z.object({
   weightage: z.number().positive(),
   inputType: z.nativeEnum(InputType),
   infoText: z.string(),
+  measureOwner: z.string().nullable().optional(),
+  measureSource: z.string().nullable().optional(),
+  measureFrequency: z.string().nullable().optional(),
+  measureTarget: z.string().nullable().optional(),
+  measureFormula: z.string().nullable().optional(),
+  criticalGateMinScorePct: z.number().int().min(0).max(100).nullable().optional(),
   frameworkCode: z.nativeEnum(Framework),
   nistControlIds: z.array(z.string()),
   isoControlIds: z.array(z.string()),
@@ -37,6 +50,7 @@ export const Kpi = z.object({
       id: z.string(),
       tierLabel: z.string(),
       condition: TierCondition,
+      // All published KPI tiers must score within the nonnegative scale.
       scoreValue: z.number().int().nonnegative(),
       tierOrder: z.number().int().positive(),
     }),

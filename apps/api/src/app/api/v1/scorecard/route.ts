@@ -88,7 +88,8 @@ export async function GET(req: Request) {
                   actualScore: true,
                   weightedScore: true,
                   isNa: true,
-                },
+                  isUnknown: true,
+                }
               });
         scopedResponses = personal;
       }
@@ -134,7 +135,10 @@ export async function GET(req: Request) {
       companyScore: payload.agg.companyScore,
       overallScore: payload.agg.overallScore,
       completeness: payload.agg.completeness,
+      unknownAnswerCount: payload.agg.unknownAnswerCount,
       colorBand: payload.agg.colorBand,
+      criticalGateFailures: payload.agg.criticalGateFailures,
+      domainBreakdown: payload.agg.domainBreakdown,
       levelBreakdown: payload.agg.levelBreakdown,
       improvementSuggestions,
       latestSnapshot: payload.latestSnapshot

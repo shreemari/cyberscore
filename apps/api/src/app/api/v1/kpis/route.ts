@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
-import type { Level } from '@cymetric/types';
+import { Framework, Level } from '@cymetric/types';
+import { frameworkKpiFilter } from '@/lib/framework-kpis';
 import { prisma } from '@/lib/prisma';
 import { redis } from '@/lib/redis';
 import { requireAuth } from '@/lib/require-auth';
@@ -31,6 +32,12 @@ export async function GET(req: Request) {
   const url = new URL(req.url);
   const level = url.searchParams.get('level')?.trim() ?? 'all';
   const framework = url.searchParams.get('framework')?.trim() ?? 'all';
+  if (level !== 'all' && !Object.values(Level).includes(level as Level)) {
+    return NextResponse.json({ error: 'Invalid level' }, { status: 400 });
+  }
+  if (framework !== 'all' && !Object.values(Framework).includes(framework as Framework)) {
+    return NextResponse.json({ error: 'Invalid framework' }, { status: 400 });
+  }
   const cacheKey = `${KPI_CACHE_PREFIX}${level}:${framework}`;
 
   // Resolve caller's effective allowed levels — used to gate the response
@@ -73,7 +80,7 @@ export async function GET(req: Request) {
         deletedAt: null,
         status: 'PUBLISHED',
         ...(level !== 'all' && { level: level as never }),
-        ...(framework !== 'all' && { frameworkCode: framework as never }),
+        ...frameworkKpiFilter(framework === 'all' ? null : framework as Framework),
       },
       orderBy: [{ displayOrder: 'asc' }, { kpiName: 'asc' }],
       include: {
@@ -90,7 +97,13 @@ export async function GET(req: Request) {
         weightage: k.weightage,
         inputType: k.inputType,
         infoText: k.infoText,
-        frameworkCode: k.frameworkCode,
+        measureOwner: k.measureOwner,
+        measureSource: k.measureSource,
+        measureFrequency: k.measureFrequency,
+        measureTarget: k.measureTarget,
+        measureFormula: k.measureFormula,
+        criticalGateMinScorePct: k.criticalGateMinScorePct,
+        frameworkCode: framework === 'all' ? k.frameworkCode : framework,
         nistControlIds: k.nistControlIds,
         isoControlIds: k.isoControlIds,
         isCustom: k.isCustom,

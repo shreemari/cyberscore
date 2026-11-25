@@ -1,5 +1,6 @@
 import type { Prisma } from '@prisma/client';
-import { AnswerScope, Level, OrgMode, Role, ScoreRange, scoreRangeFor } from '@cymetric/types';
+import { AnswerScope, Framework, Level, OrgMode, Role, ScoreRange, scoreRangeFor } from '@cymetric/types';
+import { frameworkKpiFilter } from './framework-kpis';
 
 // Score aggregation — the single source of truth for every scorecard number
 // the API returns. Keep this pure; it takes the raw KPI catalogue + response
@@ -22,6 +23,8 @@ export interface KpiLite {
   level: Level;
   maxScore: number;
   weightage: number;
+  criticalGateMinScorePct?: number | null;
+  nistControlIds?: string[];
   // Optional — defaults to ORG for backwards-compat with callers that
   // haven't been refreshed past the enterprise-mode migration.
   answerScope?: AnswerScope;
@@ -32,6 +35,7 @@ export interface ResponseLite {
   actualScore: number;
   weightedScore: number;
   isNa: boolean;
+  isUnknown?: boolean;
 }
 
 export interface LevelBreakdown {
@@ -48,7 +52,16 @@ export interface AggregatedScorecard {
   companyScore: number;
   overallScore: number;
   completeness: number;
+  unknownAnswerCount: number;
   colorBand: ScoreRange;
+  // Must-pass controls are independent of the numerical weighted score.
+  domainBreakdown: Record<'GV' | 'ID' | 'PR' | 'DE' | 'RS' | 'RC', LevelBreakdown>;
+  criticalGateFailures: Array<{
+    kpiId: string;
+    kpiName: string;
+    minimumScorePct: number;
+    actualScorePct: number | null;
+  }>;
   levelBreakdown: {
     people: LevelBreakdown;
     process: LevelBreakdown;
@@ -85,7 +98,9 @@ function computeLevel(
       maxWeighted += kpi.maxScore * kpi.weightage;
     }
   }
-  const score = maxWeighted === 0 ? 0 : (weighted / maxWeighted) * 100;
+  // Negative penalty tiers exist in the workbook; expose scorecards on the
+  // documented 0–100 scale while keeping the underlying weights intact.
+  const score = maxWeighted === 0 ? 0 : Math.max(0, Math.min(100, (weighted / maxWeighted) * 100));
   return {
     score: round2(score),
     maxPossible: round2(maxWeighted),
@@ -112,6 +127,15 @@ export function aggregate(kpis: KpiLite[], responses: ResponseLite[]): Aggregate
   const company = computeLevel(byLevel.company, byId);
 
   const all = computeLevel(kpis, byId);
+  // NIST CSF 2.0 reporting lens: a KPI may contribute to multiple functions.
+  // Each domain score is independently weighted, not part of an additional
+  // overall average (which would double-count cross-mapped measures).
+  const functions = ['GV', 'ID', 'PR', 'DE', 'RS', 'RC'] as const;
+  const domainBreakdown = Object.fromEntries(functions.map(domain => [
+    domain,
+    computeLevel(kpis.filter(k => (k.nistControlIds ?? []).some(id =>
+      id.startsWith(`${domain}.`))), byId),
+  ])) as AggregatedScorecard['domainBreakdown'];
 
   // Count only answered KPIs that belong to this scorecard's catalogue.
   // The response list may contain rows from other frameworks in the same org.
@@ -119,23 +143,42 @@ export function aggregate(kpis: KpiLite[], responses: ResponseLite[]): Aggregate
   const kpiIds = new Set(kpis.map((k) => k.id));
   const answeredKpiIds = new Set(
     responses
-      
       .filter((r) => kpiIds.has(r.kpiId))
       .map((r) => r.kpiId),
   );
   const completeness =
     kpis.length === 0 ? 0 : (answeredKpiIds.size / kpis.length) * 100;
 
-  const kpiNameById = new Map(kpis.map((k) => [k.id, k.kpiName]));
-  const underperforming = responses
+  // A must-pass control is not considered passed until it has a valid
+  // applicable answer at or above its configured threshold.
+  const criticalGateFailures = kpis
+    .filter(k => k.criticalGateMinScorePct != null)
+    .flatMap(k => {
+      const response = byId.get(k.id);
+      const actual = response && !response.isNa && k.maxScore > 0
+        ? round2(Math.max(0, Math.min(100, (response.actualScore / k.maxScore) * 100)))
+        : null;
+      const minimum = k.criticalGateMinScorePct!;
+      return actual !== null && actual >= minimum ? [] : [{
+        kpiId: k.id,
+        kpiName: k.kpiName,
+        minimumScorePct: minimum,
+        actualScorePct: actual,
+      }];
+    });
+
+  const kpiById = new Map(kpis.map((k) => [k.id, k]));
+  // The score aggregation already deduplicates by KPI. Recommendations must
+  // use that same set, otherwise stale duplicate rows repeat advice.
+  const underperforming = [...byId.values()]
     .filter((r) => !r.isNa)
     .map((r) => {
-      const kpi = kpis.find((k) => k.id === r.kpiId);
-      if (!kpi) return null;
-      const pct = (r.actualScore / kpi.maxScore) * 100;
+      const kpi = kpiById.get(r.kpiId);
+      if (!kpi || kpi.maxScore <= 0) return null;
+      const pct = Math.max(0, Math.min(100, (r.actualScore / kpi.maxScore) * 100));
       return {
         kpiId: r.kpiId,
-        kpiName: kpiNameById.get(r.kpiId) ?? 'Unknown',
+        kpiName: kpi.kpiName,
         currentScore: round2(pct),
         scoreRange: scoreRangeFor(pct),
       };
@@ -148,7 +191,12 @@ export function aggregate(kpis: KpiLite[], responses: ResponseLite[]): Aggregate
     companyScore: company.score,
     overallScore: all.score,
     completeness: round2(completeness),
-    colorBand: scoreRangeFor(all.score),
+    unknownAnswerCount: [...byId.values()].filter(r => kpiIds.has(r.kpiId) && !r.isNa && r.isUnknown).length,
+    colorBand: criticalGateFailures.length && scoreRangeFor(all.score) === ScoreRange.GREEN
+      ? ScoreRange.AMBER
+      : scoreRangeFor(all.score),
+    criticalGateFailures,
+    domainBreakdown,
     levelBreakdown: { people, process: proc, company },
     underperforming,
   };
@@ -191,7 +239,7 @@ export async function loadScorecardInputs(
       isActive: true,
       deletedAt: null,
       status: 'PUBLISHED',
-      ...(framework ? { frameworkCode: framework } : {}),
+      ...frameworkKpiFilter((framework ?? null) as Framework | null),
     },
     select: {
       id: true,
@@ -199,6 +247,8 @@ export async function loadScorecardInputs(
       level: true,
       maxScore: true,
       weightage: true,
+      criticalGateMinScorePct: true,
+      nistControlIds: true,
       answerScope: true,
     },
   });
@@ -218,6 +268,7 @@ export async function loadScorecardInputs(
             actualScore: true,
             weightedScore: true,
             isNa: true,
+            isUnknown: true,
             submittedById: true,
           },
         });
@@ -253,6 +304,7 @@ export function rollupResponses(args: {
           actualScore: r.actualScore,
           weightedScore: r.weightedScore,
           isNa: r.isNa,
+          isUnknown: r.isUnknown,
         });
       }
     }
@@ -284,6 +336,7 @@ export function rollupResponses(args: {
           actualScore: adminRow.actualScore,
           weightedScore: adminRow.weightedScore,
           isNa: adminRow.isNa,
+          isUnknown: adminRow.isUnknown,
         });
       }
       continue;
@@ -295,6 +348,7 @@ export function rollupResponses(args: {
       out.push({ kpiId, actualScore: 0, weightedScore: 0, isNa: true });
       continue;
     }
+    const anyUnknown = counted.some(r => r.isUnknown);
     const actual =
       counted.reduce((sum, r) => sum + r.actualScore, 0) / counted.length;
     const weighted =
@@ -304,6 +358,7 @@ export function rollupResponses(args: {
       actualScore: actual,
       weightedScore: weighted,
       isNa: false,
+      isUnknown: anyUnknown,
     });
   }
   return out;

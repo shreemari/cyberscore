@@ -66,6 +66,12 @@ enum SuggestionPriority {
   MEDIUM
 }
 
+enum ActionStatus {
+  OPEN
+  IN_PROGRESS
+  COMPLETED
+}
+
 enum SubscriptionStatus {
   ACTIVE
   TRIALING
@@ -161,6 +167,8 @@ model Organisation {
   auditLogs           AuditLog[]
   invites             Invite[]
   chatThreads         ChatThread[]
+  improvementActions  ImprovementAction[]
+  riskRecords         RiskRecord[]
 
   @@unique([emailDomain])
   @@index([email])
@@ -199,6 +207,7 @@ model User {
   invitesSent         Invite[]             @relation("InviteCreator")
   invitesAccepted     Invite[]             @relation("InviteAcceptor")
   assessmentProgress  AssessmentProgress[]
+  improvementActions  ImprovementAction[] @relation("ActionOwner")
   chatThreads         ChatThread[]
 
   @@index([orgId])
@@ -251,6 +260,7 @@ model RefreshToken {
   orgId     String
   userId    String
   tokenHash String    @unique // bcrypt hash — never store the raw token
+  lookupKey String?   @unique @db.VarChar(64) // SHA-256 locator; nullable for legacy tokens
   expiresAt DateTime
   revokedAt DateTime?
   userAgent String?   @db.VarChar(512)
@@ -294,6 +304,15 @@ model Kpi {
   weightage      Float     @default(1.0)
   inputType      InputType
   infoText       String    @db.Text
+  // Measurement governance (NIST SP 800-55) is configured by an authorized admin.
+  measureOwner     String? @db.VarChar(200)
+  measureSource    String? @db.VarChar(500)
+  measureFrequency String? @db.VarChar(100)
+  measureTarget    String? @db.VarChar(200)
+  measureFormula   String? @db.Text
+  // A must-pass KPI whose response falls below this percentage caps the band.
+  // NULL = gate disabled until security owners explicitly configure it.
+  criticalGateMinScorePct Int?
   frameworkCode  Framework @default(EXCEL)
   nistControlIds String[]  @default([])
   isoControlIds  String[]  @default([])
@@ -317,6 +336,7 @@ model Kpi {
   suggestions KpiSuggestion[]
   responses   Response[]
   benchmarks  IndustryBenchmark[]
+  improvementActions ImprovementAction[]
 
   @@index([level])
   @@index([frameworkCode])
@@ -374,6 +394,7 @@ model Response {
   evidenceUrl     String? @db.VarChar(1024)
   naJustification String? @db.Text
   isNa            Boolean @default(false)
+  isUnknown       Boolean @default(false) // separately tracks uncertain data-quality answers
   // Idempotency — mobile sends a UUID per logical submission to de-dup offline replays.
   idempotencyKey  String? @db.Uuid
 
@@ -637,6 +658,7 @@ model ShareToken {
   id           String    @id @default(cuid())
   orgId        String
   tokenHash    String    @unique // bcrypt — raw token only ever returned once at creation
+  lookupKey    String?   @unique @db.VarChar(64) // indexed random-token SHA-256
   label        String?   @db.VarChar(200)
   expiresAt    DateTime
   viewCount    Int       @default(0)
@@ -715,4 +737,53 @@ model ChatMessage {
 
   @@index([threadId, createdAt])
   @@map("chat_messages")
+}
+
+// Organisation-specific corrective-action assignment for a scored KPI.
+model ImprovementAction {
+  id            String       @id @default(cuid())
+  orgId         String
+  kpiId         String
+  ownerId       String?
+  dueDate       DateTime?
+  status        ActionStatus @default(OPEN)
+  notes         String?      @db.Text
+  completedAt   DateTime?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  org   Organisation @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  kpi   Kpi          @relation(fields: [kpiId], references: [id], onDelete: Cascade)
+  owner User?        @relation("ActionOwner", fields: [ownerId], references: [id], onDelete: SetNull)
+
+  @@unique([orgId, kpiId])
+  @@index([orgId, status, dueDate])
+  @@map("improvement_actions")
+}
+
+// Organisation-owned risk assessment register (ISO 27001 risk treatment).
+// Acceptance and exceptions must have a documented justification and expiry.
+model RiskRecord {
+  id              String   @id @default(cuid())
+  orgId           String
+  title           String   @db.VarChar(200)
+  description     String   @db.Text
+  likelihood      Int      // 1–5
+  impact          Int      // 1–5
+  riskScore       Int      // likelihood × impact
+  status          String   @default("OPEN") @db.VarChar(32)
+  treatment       String   @default("MITIGATE") @db.VarChar(32)
+  ownerId         String?
+  dueDate         DateTime?
+  exceptionReason String?  @db.Text
+  acceptedUntil   DateTime?
+  createdById     String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  org Organisation @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  @@index([orgId, status, dueDate])
+  @@index([orgId, riskScore])
+  @@map("risk_records")
 }

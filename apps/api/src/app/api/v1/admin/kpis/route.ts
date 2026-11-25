@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { Framework, InputType, Level, TierCondition } from '@cymetric/types';
 import { prisma } from '@/lib/prisma';
-import { requireAdmin } from '@/lib/require-admin';
+import { requirePlatformAdmin } from '@/lib/require-admin';
 import { parseJson, internalError } from '@/lib/problem';
 import { audit, AuditActions } from '@/lib/audit';
 import { invalidateKpiCache } from '../../kpis/route';
@@ -21,6 +21,12 @@ const CreateKpiRequest = z.object({
   weightage: z.number().positive().max(10),
   inputType: z.nativeEnum(InputType),
   infoText: z.string().min(1).max(2000),
+  measureOwner: z.string().max(200).nullable().optional(),
+  measureSource: z.string().max(500).nullable().optional(),
+  measureFrequency: z.string().max(100).nullable().optional(),
+  measureTarget: z.string().max(200).nullable().optional(),
+  measureFormula: z.string().max(2000).nullable().optional(),
+  criticalGateMinScorePct: z.number().int().min(0).max(100).nullable().optional(),
   frameworkCode: z.nativeEnum(Framework).default(Framework.EXCEL),
   nistControlIds: z.array(z.string()).default([]),
   isoControlIds: z.array(z.string()).default([]),
@@ -38,7 +44,7 @@ const CreateKpiRequest = z.object({
 });
 
 export async function POST(req: Request) {
-  const auth = requireAdmin(req);
+  const auth = await requirePlatformAdmin(req);
   if ('response' in auth) return auth.response;
 
   const parsed = await parseJson(req, CreateKpiRequest);
@@ -54,6 +60,12 @@ export async function POST(req: Request) {
         weightage: body.weightage,
         inputType: body.inputType,
         infoText: body.infoText,
+        measureOwner: body.measureOwner,
+        measureSource: body.measureSource,
+        measureFrequency: body.measureFrequency,
+        measureTarget: body.measureTarget,
+        measureFormula: body.measureFormula,
+        criticalGateMinScorePct: body.criticalGateMinScorePct,
         frameworkCode: body.frameworkCode,
         nistControlIds: body.nistControlIds,
         isoControlIds: body.isoControlIds,

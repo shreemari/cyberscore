@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { requireAdmin } from '@/lib/require-admin';
+import { requirePlatformAdmin } from '@/lib/require-admin';
 import { internalError } from '@/lib/problem';
 
 // GET /api/v1/admin/orgs
@@ -10,7 +10,7 @@ import { internalError } from '@/lib/problem';
 // Uses the latest ScorecardSnapshot as the score pointer so we don't recompute
 // 46-KPI aggregates N times per page load.
 export async function GET(req: Request) {
-  const auth = requireAdmin(req);
+  const auth = await requirePlatformAdmin(req);
   if ('response' in auth) return auth.response;
 
   const url = new URL(req.url);

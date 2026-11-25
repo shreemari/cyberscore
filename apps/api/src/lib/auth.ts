@@ -5,6 +5,7 @@ import { createHash } from 'node:crypto';
 import type { JwtPayload, TokenPair, Role } from '@cymetric/types';
 import { env } from './env';
 import { prisma } from './prisma';
+import type { Prisma } from '@prisma/client';
 import { randomToken } from './crypto';
 
 // ============================================================
@@ -100,15 +101,17 @@ export async function issueTokenPair(args: {
   role: Role;
   userAgent?: string;
   ipAddress?: string;
+  tx?: Prisma.TransactionClient;
 }): Promise<TokenPair> {
   const access = signAccessToken({ sub: args.userId, orgId: args.orgId, role: args.role });
   const refresh = await issueRefreshToken();
 
-  await prisma.refreshToken.create({
+  await (args.tx ?? prisma).refreshToken.create({
     data: {
       orgId: args.orgId,
       userId: args.userId,
       tokenHash: refresh.hash,
+      lookupKey: refreshLookupKey(refresh.raw),
       expiresAt: refresh.expiresAt,
       userAgent: args.userAgent?.slice(0, 512),
       ipAddress: args.ipAddress?.slice(0, 64),

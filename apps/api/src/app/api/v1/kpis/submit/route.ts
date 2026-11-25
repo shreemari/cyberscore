@@ -1,13 +1,14 @@
 import { NextResponse } from 'next/server';
-import { SubmitKpiRequest, ErrorCodes } from '@cymetric/types';
+import { SubmitKpiRequest, ErrorCodes, InputType } from '@cymetric/types';
 import { prisma, withTenant } from '@/lib/prisma';
 import { parseJson, problem, internalError } from '@/lib/problem';
 import { requireAuth } from '@/lib/require-auth';
-import { scoreResponse } from '@/lib/scoring';
+import { parseNumericInput, scoreResponse } from '@/lib/scoring';
 import { audit, AuditActions } from '@/lib/audit';
 import { enqueueSnapshot } from '@/lib/queue';
 import { logger } from '@/lib/logger';
 import { canAssessLevel } from '@/lib/access';
+import { frameworkKpiFilter } from '@/lib/framework-kpis';
 
 // POST /api/v1/kpis/submit
 //
@@ -25,7 +26,7 @@ export async function POST(req: Request) {
     const kpi = await prisma.kpi.findFirst({
       where: {
         id: kpiId,
-        frameworkCode,
+        ...frameworkKpiFilter(frameworkCode ?? 'EXCEL'),
         isActive: true,
         deletedAt: null,
       },
@@ -53,6 +54,15 @@ export async function POST(req: Request) {
       });
     }
 
+    if (kpi.inputType === InputType.PERCENTAGE) {
+      const value = parseNumericInput(inputValue);
+      if (value === null || !Number.isInteger(value) || value < 0 || value > 100) {
+        return problem(ErrorCodes.KPI_NO_MATCHING_TIER, {
+          detail: 'Enter an integer percentage from 0 to 100.',
+        });
+      }
+    }
+
     const scored = scoreResponse({
       inputValue,
       tiers: kpi.tiers,
@@ -60,18 +70,28 @@ export async function POST(req: Request) {
       weightage: kpi.weightage,
     });
     if (!scored) return problem(ErrorCodes.KPI_NO_MATCHING_TIER);
+    const selectedTier = kpi.tiers.find(tier => tier.id === scored.matchedTierId);
+    const isUnknown = /^(unknown|not sure|unsure)$/i.test(selectedTier?.tierLabel.trim() ?? '');
 
-    const response = await withTenant(auth.orgId, async (tx) => {
+    const saved = await withTenant(auth.orgId, async (tx) => {
+      const previous = await tx.response.findUnique({
+        where: {
+          orgId_kpiId_submittedById: {
+            orgId: auth.orgId, kpiId, submittedById: auth.userId,
+          },
+        },
+        select: { inputValue: true, actualScore: true, weightedScore: true, isNa: true },
+      });
       if (idempotencyKey) {
         const existing = await tx.response.findFirst({
           where: { orgId: auth.orgId, idempotencyKey },
         });
-        if (existing) return existing;
+        if (existing) return { response: existing, previous, replay: true };
       }
       // Per-user uniqueness: each submitter has their own row. Same shape
       // works for SOLO (single user -> single row) and ENTERPRISE (admin row
       // + employee rows aggregated at score time by loadScorecardInputs).
-      return tx.response.upsert({
+      const response = await tx.response.upsert({
         where: {
           orgId_kpiId_submittedById: {
             orgId: auth.orgId,
@@ -90,6 +110,7 @@ export async function POST(req: Request) {
           matchedTierId: scored.matchedTierId,
           idempotencyKey: idempotencyKey ?? null,
           isNa: false,
+          isUnknown,
           naJustification: null,
         },
         update: {
@@ -100,16 +121,20 @@ export async function POST(req: Request) {
           matchedTierId: scored.matchedTierId,
           idempotencyKey: idempotencyKey ?? null,
           isNa: false,
+          isUnknown,
           naJustification: null,
         },
       });
+      return { response, previous, replay: false };
     });
+    const response = saved.response;
 
-    void audit({
+    if (!saved.replay) void audit({
       action: AuditActions.KPI_SUBMITTED,
       resource: `kpi:${kpiId}`,
       actorId: auth.userId,
       orgId: auth.orgId,
+      before: saved.previous,
       after: {
         responseId: response.id,
         actualScore: response.actualScore,

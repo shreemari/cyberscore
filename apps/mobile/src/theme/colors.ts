@@ -1,3 +1,5 @@
+import { scoreRangeFor } from '@cymetric/types';
+
 // Design tokens — imported by non-Tailwind call sites (SVG fills, gradients,
 // status bars). Keep in sync with tailwind.config.js:theme.extend.colors.
 //
@@ -47,9 +49,7 @@ export function scoreColor(band: ScoreBand): string {
 }
 
 export function scoreColorForValue(score: number): string {
-  if (score >= 75) return colors.score.green;
-  if (score >= 50) return colors.score.amber;
-  return colors.score.red;
+  return scoreColor(scoreRangeFor(score));
 }
 
 // Drop-in iOS glow shadow. React Native shadows are opinionated: only iOS

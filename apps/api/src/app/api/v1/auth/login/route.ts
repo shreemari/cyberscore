@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { createHash } from 'node:crypto';
 import { LoginRequest, ErrorCodes, type Role } from '@cymetric/types';
 import { verifyPassword, issueTokenPair } from '@/lib/auth';
 import { verifyTotpCode } from '@/lib/totp';
@@ -34,6 +35,19 @@ export async function POST(req: Request) {
   const parsed = await parseJson(req, LoginRequest);
   if (!parsed.ok) return parsed.response;
   const { email, password, totpCode } = parsed.data;
+  // Independent per-account throttle prevents distributed password guessing.
+  // Hash the email so the identifier is not exposed in Redis rate-limit keys.
+  const accountKey = createHash('sha256').update(email.trim().toLowerCase()).digest('hex');
+  const accountLimit = await rateLimit({
+    key: `login:account:${accountKey}`,
+    max: 8,
+    windowMs: 15 * 60 * 1000,
+  });
+  if (!accountLimit.allowed) {
+    return problem(ErrorCodes.AUTH_RATE_LIMITED, {
+      headers: { 'Retry-After': String(accountLimit.retryAfterSec) },
+    });
+  }
 
   try {
     // Bypass RLS for the cross-tenant user lookup (pre-auth — we don't know orgId yet).

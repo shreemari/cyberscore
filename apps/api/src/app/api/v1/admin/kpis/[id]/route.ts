@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { InputType, KpiStatus, Level, TierCondition, ErrorCodes } from '@cymetric/types';
 import { prisma } from '@/lib/prisma';
-import { requireAdmin } from '@/lib/require-admin';
+import { requirePlatformAdmin } from '@/lib/require-admin';
 import { parseJson, problem, internalError } from '@/lib/problem';
 import { audit, AuditActions } from '@/lib/audit';
 import { invalidateKpiCache } from '../../../kpis/route';
@@ -21,6 +21,12 @@ const UpdateKpiRequest = z.object({
   weightage: z.number().positive().max(10).optional(),
   inputType: z.nativeEnum(InputType).optional(),
   infoText: z.string().min(1).max(2000).optional(),
+  measureOwner: z.string().max(200).nullable().optional(),
+  measureSource: z.string().max(500).nullable().optional(),
+  measureFrequency: z.string().max(100).nullable().optional(),
+  measureTarget: z.string().max(200).nullable().optional(),
+  measureFormula: z.string().max(2000).nullable().optional(),
+  criticalGateMinScorePct: z.number().int().min(0).max(100).nullable().optional(),
   nistControlIds: z.array(z.string()).optional(),
   isoControlIds: z.array(z.string()).optional(),
   displayOrder: z.number().int().nonnegative().optional(),
@@ -43,7 +49,7 @@ export async function PATCH(
   req: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  const auth = requireAdmin(req);
+  const auth = await requirePlatformAdmin(req);
   if ('response' in auth) return auth.response;
 
   const { id } = await params;
@@ -110,7 +116,7 @@ export async function DELETE(
   req: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  const auth = requireAdmin(req);
+  const auth = await requirePlatformAdmin(req);
   if ('response' in auth) return auth.response;
 
   const { id } = await params;

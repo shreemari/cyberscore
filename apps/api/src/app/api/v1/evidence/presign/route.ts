@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { EvidencePresignRequest, ErrorCodes } from '@cymetric/types';
 import { parseJson, problem, internalError } from '@/lib/problem';
 import { requireAuth } from '@/lib/require-auth';
+import { withTenant } from '@/lib/prisma';
 import {
   buildEvidenceKey,
   isAllowedMime,
@@ -36,6 +37,15 @@ export async function POST(req: Request) {
   if (!isAllowedMime(fileType)) return problem(ErrorCodes.EVIDENCE_INVALID_TYPE);
 
   try {
+    const ownResponse = await withTenant(auth.orgId, (tx) => tx.response.findFirst({
+      where: { orgId: auth.orgId, kpiId, submittedById: auth.userId },
+      select: { id: true },
+    }));
+    if (!ownResponse) {
+      return problem(ErrorCodes.NOT_FOUND, {
+        detail: 'Submit your KPI answer before uploading evidence.',
+      });
+    }
     const fileKey = buildEvidenceKey(auth.orgId, kpiId, fileName);
     const { url: uploadUrl, headers, expiresAt } = await presignEvidenceUpload({
       key: fileKey,

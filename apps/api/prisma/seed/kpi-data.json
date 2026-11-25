@@ -4,7 +4,7 @@
     "level": "PEOPLE",
     "category": "PEOPLE",
     "maxScore": 200,
-    "weightage": 1.0,
+    "weightage": 1,
     "inputType": "PERCENTAGE",
     "infoText": "Percentage of employees who have completed mandatory security awareness training.",
     "nistControlIds": [
@@ -19,7 +19,7 @@
         "scoreValue": 200,
         "condition": {
           "op": "eq",
-          "value": 100.0
+          "value": 100
         },
         "tierOrder": 1
       },
@@ -58,7 +58,7 @@
         "scoreValue": 0,
         "condition": {
           "op": "lte",
-          "value": 25.0
+          "value": 25
         },
         "tierOrder": 5
       }
@@ -69,7 +69,7 @@
     "level": "PEOPLE",
     "category": "PEOPLE",
     "maxScore": 200,
-    "weightage": 1.0,
+    "weightage": 1,
     "inputType": "PERCENTAGE",
     "infoText": "Percentage of employees who clicked on a simulated phishing email. Lower is better.",
     "nistControlIds": [
@@ -84,7 +84,7 @@
         "scoreValue": 200,
         "condition": {
           "op": "lte",
-          "value": 5.0
+          "value": 5
         },
         "tierOrder": 1
       },
@@ -123,7 +123,7 @@
         "scoreValue": 0,
         "condition": {
           "op": "gt",
-          "value": 25.0
+          "value": 25
         },
         "tierOrder": 5
       }
@@ -134,7 +134,7 @@
     "level": "PEOPLE",
     "category": "PEOPLE",
     "maxScore": 200,
-    "weightage": 1.0,
+    "weightage": 1,
     "inputType": "PERCENTAGE",
     "infoText": "Percentage of employees who failed a social engineering simulation. Lower is better.",
     "nistControlIds": [
@@ -149,7 +149,7 @@
         "scoreValue": 200,
         "condition": {
           "op": "lte",
-          "value": 3.0
+          "value": 3
         },
         "tierOrder": 1
       },
@@ -188,7 +188,7 @@
         "scoreValue": 0,
         "condition": {
           "op": "gt",
-          "value": 15.0
+          "value": 15
         },
         "tierOrder": 5
       }
@@ -199,7 +199,7 @@
     "level": "PEOPLE",
     "category": "PEOPLE",
     "maxScore": 200,
-    "weightage": 1.0,
+    "weightage": 1,
     "inputType": "PERCENTAGE",
     "infoText": "Percentage of employees who passed the security awareness quiz.",
     "nistControlIds": [
@@ -214,7 +214,7 @@
         "scoreValue": 200,
         "condition": {
           "op": "eq",
-          "value": 100.0
+          "value": 100
         },
         "tierOrder": 1
       },
@@ -253,7 +253,7 @@
         "scoreValue": 0,
         "condition": {
           "op": "lte",
-          "value": 25.0
+          "value": 25
         },
         "tierOrder": 5
       }
@@ -264,7 +264,7 @@
     "level": "PEOPLE",
     "category": "PEOPLE",
     "maxScore": 50,
-    "weightage": 1.0,
+    "weightage": 1,
     "inputType": "DROPDOWN",
     "infoText": "Number of times per month an employee stored company data in personal cloud, email, or device.",
     "nistControlIds": [
@@ -279,7 +279,7 @@
         "scoreValue": 50,
         "condition": {
           "op": "eq",
-          "value": 0.0
+          "value": 0
         },
         "tierOrder": 1
       },
@@ -304,11 +304,11 @@
         "tierOrder": 3
       },
       {
-        "tierLabel": "5-10/mon",
+        "tierLabel": "6-10/mon",
         "scoreValue": 20,
         "condition": {
           "op": "range",
-          "min": 5,
+          "min": 6,
           "max": 10
         },
         "tierOrder": 4
@@ -318,7 +318,7 @@
         "scoreValue": 0,
         "condition": {
           "op": "gt",
-          "value": 10.0
+          "value": 10
         },
         "tierOrder": 5
       }
@@ -329,7 +329,7 @@
     "level": "PEOPLE",
     "category": "PEOPLE",
     "maxScore": 50,
-    "weightage": 1.0,
+    "weightage": 1,
     "inputType": "DROPDOWN",
     "infoText": "Number of times per month data was mis-labelled (e.g. confidential marked public).",
     "nistControlIds": [
@@ -344,7 +344,7 @@
         "scoreValue": 50,
         "condition": {
           "op": "eq",
-          "value": 0.0
+          "value": 0
         },
         "tierOrder": 1
       },
@@ -369,11 +369,11 @@
         "tierOrder": 3
       },
       {
-        "tierLabel": "5-10/mon",
+        "tierLabel": "6-10/mon",
         "scoreValue": 20,
         "condition": {
           "op": "range",
-          "min": 5,
+          "min": 6,
           "max": 10
         },
         "tierOrder": 4
@@ -383,7 +383,7 @@
         "scoreValue": 0,
         "condition": {
           "op": "gt",
-          "value": 10.0
+          "value": 10
         },
         "tierOrder": 5
       }
@@ -394,7 +394,7 @@
     "level": "PEOPLE",
     "category": "PEOPLE",
     "maxScore": 50,
-    "weightage": 1.0,
+    "weightage": 1,
     "inputType": "DROPDOWN",
     "infoText": "Number of unauthorised software installs detected on company devices per month.",
     "nistControlIds": [
@@ -409,7 +409,7 @@
         "scoreValue": 50,
         "condition": {
           "op": "eq",
-          "value": 0.0
+          "value": 0
         },
         "tierOrder": 1
       },
@@ -434,11 +434,11 @@
         "tierOrder": 3
       },
       {
-        "tierLabel": "5-10/mon",
+        "tierLabel": "6-10/mon",
         "scoreValue": 20,
         "condition": {
           "op": "range",
-          "min": 5,
+          "min": 6,
           "max": 10
         },
         "tierOrder": 4
@@ -448,7 +448,7 @@
         "scoreValue": 0,
         "condition": {
           "op": "gt",
-          "value": 10.0
+          "value": 10
         },
         "tierOrder": 5
       }
@@ -459,7 +459,7 @@
     "level": "PEOPLE",
     "category": "PEOPLE",
     "maxScore": 50,
-    "weightage": 1.0,
+    "weightage": 1,
     "inputType": "DROPDOWN",
     "infoText": "Number of times removable media (USB, external drives) was used against policy per month.",
     "nistControlIds": [
@@ -475,7 +475,7 @@
         "scoreValue": 50,
         "condition": {
           "op": "eq",
-          "value": 0.0
+          "value": 0
         },
         "tierOrder": 1
       },
@@ -500,11 +500,11 @@
         "tierOrder": 3
       },
       {
-        "tierLabel": "5-10/mon",
+        "tierLabel": "6-10/mon",
         "scoreValue": 20,
         "condition": {
           "op": "range",
-          "min": 5,
+          "min": 6,
           "max": 10
         },
         "tierOrder": 4
@@ -514,7 +514,7 @@
         "scoreValue": 0,
         "condition": {
           "op": "gt",
-          "value": 10.0
+          "value": 10
         },
         "tierOrder": 5
       }
@@ -525,7 +525,7 @@
     "level": "PROCESS",
     "category": "PROCESS",
     "maxScore": 75,
-    "weightage": 1.0,
+    "weightage": 1,
     "inputType": "DROPDOWN",
     "infoText": "Mean time to detect a security incident, measured weekly. Lower is better.",
     "nistControlIds": [
@@ -540,49 +540,49 @@
         "scoreValue": 75,
         "condition": {
           "op": "lt",
-          "value": 1.0
+          "value": 1
         },
         "tierOrder": 1
       },
       {
-        "tierLabel": ">1 & <12 hrs",
+        "tierLabel": "≥1 & <12 hrs",
         "scoreValue": 50,
         "condition": {
           "op": "range",
           "min": 1,
           "max": 12,
-          "exclusive": true
+          "exclusiveMax": true
         },
         "tierOrder": 2
       },
       {
-        "tierLabel": ">12 & <24 hrs",
+        "tierLabel": "≥12 & <24 hrs",
         "scoreValue": 25,
         "condition": {
           "op": "range",
           "min": 12,
           "max": 24,
-          "exclusive": true
+          "exclusiveMax": true
         },
         "tierOrder": 3
       },
       {
-        "tierLabel": ">24 & <48 hrs",
+        "tierLabel": "≥24 & <48 hrs",
         "scoreValue": 10,
         "condition": {
           "op": "range",
           "min": 24,
           "max": 48,
-          "exclusive": true
+          "exclusiveMax": true
         },
         "tierOrder": 4
       },
       {
-        "tierLabel": ">48 hrs",
+        "tierLabel": "≥48 hrs",
         "scoreValue": 0,
         "condition": {
-          "op": "gt",
-          "value": 48.0
+          "op": "gte",
+          "value": 48
         },
         "tierOrder": 5
       }
@@ -593,7 +593,7 @@
     "level": "PROCESS",
     "category": "PROCESS",
     "maxScore": 25,
-    "weightage": 1.0,
+    "weightage": 1,
     "inputType": "RADIO",
     "infoText": "Direction of MTTD over the last month. Declining (getting faster) is best.",
     "nistControlIds": [
@@ -623,7 +623,7 @@
       },
       {
         "tierLabel": "Increasing",
-        "scoreValue": -25,
+        "scoreValue": 0,
         "condition": {
           "op": "eq",
           "value": "Increasing"
@@ -637,7 +637,7 @@
     "level": "PROCESS",
     "category": "PROCESS",
     "maxScore": 75,
-    "weightage": 1.0,
+    "weightage": 1,
     "inputType": "DROPDOWN",
     "infoText": "Mean time to respond to a detected incident, measured weekly. Lower is better.",
     "nistControlIds": [
@@ -652,49 +652,49 @@
         "scoreValue": 75,
         "condition": {
           "op": "lt",
-          "value": 1.0
+          "value": 1
         },
         "tierOrder": 1
       },
       {
-        "tierLabel": ">1 & <12 hrs",
+        "tierLabel": "≥1 & <12 hrs",
         "scoreValue": 50,
         "condition": {
           "op": "range",
           "min": 1,
           "max": 12,
-          "exclusive": true
+          "exclusiveMax": true
         },
         "tierOrder": 2
       },
       {
-        "tierLabel": ">12 & <24 hrs",
+        "tierLabel": "≥12 & <24 hrs",
         "scoreValue": 25,
         "condition": {
           "op": "range",
           "min": 12,
           "max": 24,
-          "exclusive": true
+          "exclusiveMax": true
         },
         "tierOrder": 3
       },
       {
-        "tierLabel": ">24 & <48 hrs",
+        "tierLabel": "≥24 & <48 hrs",
         "scoreValue": 10,
         "condition": {
           "op": "range",
           "min": 24,
           "max": 48,
-          "exclusive": true
+          "exclusiveMax": true
         },
         "tierOrder": 4
       },
       {
-        "tierLabel": ">48 hrs",
+        "tierLabel": "≥48 hrs",
         "scoreValue": 0,
         "condition": {
-          "op": "gt",
-          "value": 48.0
+          "op": "gte",
+          "value": 48
         },
         "tierOrder": 5
       }
@@ -705,7 +705,7 @@
     "level": "PROCESS",
     "category": "PROCESS",
     "maxScore": 25,
-    "weightage": 1.0,
+    "weightage": 1,
     "inputType": "RADIO",
     "infoText": "Direction of MTTR over the last month. Declining (getting faster) is best.",
     "nistControlIds": [
@@ -735,7 +735,7 @@
       },
       {
         "tierLabel": "Increasing",
-        "scoreValue": -25,
+        "scoreValue": 0,
         "condition": {
           "op": "eq",
           "value": "Increasing"
@@ -749,7 +749,7 @@
     "level": "PROCESS",
     "category": "PROCESS",
     "maxScore": 100,
-    "weightage": 1.0,
+    "weightage": 1,
     "inputType": "DROPDOWN",
     "infoText": "Average time between security incidents. Higher is better.",
     "nistControlIds": [
@@ -764,49 +764,49 @@
         "scoreValue": 100,
         "condition": {
           "op": "gt",
-          "value": 90.0
+          "value": 90
         },
         "tierOrder": 1
       },
       {
-        "tierLabel": ">60 & <90 days",
+        "tierLabel": ">60 & ≤90 days",
         "scoreValue": 75,
         "condition": {
           "op": "range",
           "min": 60,
           "max": 90,
-          "exclusive": true
+          "exclusiveMin": true
         },
         "tierOrder": 2
       },
       {
-        "tierLabel": ">30 & <60 days",
+        "tierLabel": ">30 & ≤60 days",
         "scoreValue": 50,
         "condition": {
           "op": "range",
           "min": 30,
           "max": 60,
-          "exclusive": true
+          "exclusiveMin": true
         },
         "tierOrder": 3
       },
       {
-        "tierLabel": ">10 & <30 days",
+        "tierLabel": ">10 & ≤30 days",
         "scoreValue": 25,
         "condition": {
           "op": "range",
           "min": 10,
           "max": 30,
-          "exclusive": true
+          "exclusiveMin": true
         },
         "tierOrder": 4
       },
       {
-        "tierLabel": "<10 days",
+        "tierLabel": "≤10 days",
         "scoreValue": 0,
         "condition": {
-          "op": "lt",
-          "value": 10.0
+          "op": "lte",
+          "value": 10
         },
         "tierOrder": 5
       }
@@ -817,7 +817,7 @@
     "level": "PROCESS",
     "category": "PROCESS",
     "maxScore": 100,
-    "weightage": 1.0,
+    "weightage": 1,
     "inputType": "DROPDOWN",
     "infoText": "Average time from detection to full containment. Faster is better.",
     "nistControlIds": [
@@ -865,7 +865,7 @@
       },
       {
         "tierLabel": "In weeks",
-        "scoreValue": -25,
+        "scoreValue": 0,
         "condition": {
           "op": "eq",
           "value": "In weeks"
@@ -879,7 +879,7 @@
     "level": "PROCESS",
     "category": "PROCESS",
     "maxScore": 100,
-    "weightage": 1.0,
+    "weightage": 1,
     "inputType": "PERCENTAGE",
     "infoText": "Percentage of in-scope systems with all required patches applied.",
     "nistControlIds": [
@@ -894,7 +894,7 @@
         "scoreValue": 100,
         "condition": {
           "op": "eq",
-          "value": 100.0
+          "value": 100
         },
         "tierOrder": 1
       },
@@ -933,7 +933,7 @@
         "scoreValue": 0,
         "condition": {
           "op": "lte",
-          "value": 25.0
+          "value": 25
         },
         "tierOrder": 5
       }
@@ -944,7 +944,7 @@
     "level": "PROCESS",
     "category": "PROCESS",
     "maxScore": 100,
-    "weightage": 1.0,
+    "weightage": 1,
     "inputType": "DROPDOWN",
     "infoText": "Time taken to deploy a critical security patch after release.",
     "nistControlIds": [
@@ -959,49 +959,49 @@
         "scoreValue": 100,
         "condition": {
           "op": "lt",
-          "value": 2.0
+          "value": 2
         },
         "tierOrder": 1
       },
       {
-        "tierLabel": ">2 & <4 days",
+        "tierLabel": "≥2 & <4 days",
         "scoreValue": 75,
         "condition": {
           "op": "range",
           "min": 2,
           "max": 4,
-          "exclusive": true
+          "exclusiveMax": true
         },
         "tierOrder": 2
       },
       {
-        "tierLabel": ">4 & <7 days",
+        "tierLabel": "≥4 & <7 days",
         "scoreValue": 50,
         "condition": {
           "op": "range",
           "min": 4,
           "max": 7,
-          "exclusive": true
+          "exclusiveMax": true
         },
         "tierOrder": 3
       },
       {
-        "tierLabel": ">7 & <10 days",
-        "scoreValue": 50,
+        "tierLabel": "≥7 & <10 days",
+        "scoreValue": 25,
         "condition": {
           "op": "range",
           "min": 7,
           "max": 10,
-          "exclusive": true
+          "exclusiveMax": true
         },
         "tierOrder": 4
       },
       {
-        "tierLabel": ">10 days",
+        "tierLabel": "≥10 days",
         "scoreValue": 0,
         "condition": {
-          "op": "gt",
-          "value": 10.0
+          "op": "gte",
+          "value": 10
         },
         "tierOrder": 5
       }
@@ -1012,7 +1012,7 @@
     "level": "PROCESS",
     "category": "PROCESS",
     "maxScore": 50,
-    "weightage": 1.0,
+    "weightage": 1,
     "inputType": "PERCENTAGE",
     "infoText": "Percentage of malicious login attempts that were successfully blocked.",
     "nistControlIds": [
@@ -1027,7 +1027,7 @@
         "scoreValue": 50,
         "condition": {
           "op": "eq",
-          "value": 100.0
+          "value": 100
         },
         "tierOrder": 1
       },
@@ -1066,7 +1066,7 @@
         "scoreValue": 0,
         "condition": {
           "op": "lte",
-          "value": 25.0
+          "value": 25
         },
         "tierOrder": 5
       }
@@ -1077,7 +1077,7 @@
     "level": "PROCESS",
     "category": "PROCESS",
     "maxScore": 50,
-    "weightage": 1.0,
+    "weightage": 1,
     "inputType": "PERCENTAGE",
     "infoText": "Percentage of malicious port scans that were successfully blocked.",
     "nistControlIds": [
@@ -1092,7 +1092,7 @@
         "scoreValue": 50,
         "condition": {
           "op": "eq",
-          "value": 100.0
+          "value": 100
         },
         "tierOrder": 1
       },
@@ -1131,7 +1131,7 @@
         "scoreValue": 0,
         "condition": {
           "op": "lte",
-          "value": 25.0
+          "value": 25
         },
         "tierOrder": 5
       }
@@ -1142,7 +1142,7 @@
     "level": "PROCESS",
     "category": "PROCESS",
     "maxScore": 50,
-    "weightage": 1.0,
+    "weightage": 1,
     "inputType": "PERCENTAGE",
     "infoText": "Percentage of known exploit payloads that were successfully blocked.",
     "nistControlIds": [
@@ -1157,7 +1157,7 @@
         "scoreValue": 50,
         "condition": {
           "op": "eq",
-          "value": 100.0
+          "value": 100
         },
         "tierOrder": 1
       },
@@ -1196,7 +1196,7 @@
         "scoreValue": 0,
         "condition": {
           "op": "lte",
-          "value": 25.0
+          "value": 25
         },
         "tierOrder": 5
       }
@@ -1207,7 +1207,7 @@
     "level": "PROCESS",
     "category": "PROCESS",
     "maxScore": 25,
-    "weightage": 1.0,
+    "weightage": 1,
     "inputType": "PERCENTAGE",
     "infoText": "Percentage of virus and ransomware attempts that were successfully blocked.",
     "nistControlIds": [
@@ -1222,7 +1222,7 @@
         "scoreValue": 25,
         "condition": {
           "op": "eq",
-          "value": 100.0
+          "value": 100
         },
         "tierOrder": 1
       },
@@ -1261,7 +1261,7 @@
         "scoreValue": 0,
         "condition": {
           "op": "lte",
-          "value": 25.0
+          "value": 25
         },
         "tierOrder": 5
       }
@@ -1272,7 +1272,7 @@
     "level": "PROCESS",
     "category": "PROCESS",
     "maxScore": 25,
-    "weightage": 1.0,
+    "weightage": 1,
     "inputType": "PERCENTAGE",
     "infoText": "Percentage of false positives correctly verified and whitelisted.",
     "nistControlIds": [
@@ -1287,7 +1287,7 @@
         "scoreValue": 25,
         "condition": {
           "op": "eq",
-          "value": 100.0
+          "value": 100
         },
         "tierOrder": 1
       },
@@ -1326,7 +1326,7 @@
         "scoreValue": 0,
         "condition": {
           "op": "lte",
-          "value": 25.0
+          "value": 25
         },
         "tierOrder": 5
       }
@@ -1352,7 +1352,7 @@
         "scoreValue": 100,
         "condition": {
           "op": "eq",
-          "value": 100.0
+          "value": 100
         },
         "tierOrder": 1
       },
@@ -1391,7 +1391,7 @@
         "scoreValue": 0,
         "condition": {
           "op": "lte",
-          "value": 25.0
+          "value": 25
         },
         "tierOrder": 5
       }
@@ -1417,7 +1417,7 @@
         "scoreValue": 100,
         "condition": {
           "op": "eq",
-          "value": 100.0
+          "value": 100
         },
         "tierOrder": 1
       },
@@ -1456,7 +1456,7 @@
         "scoreValue": 0,
         "condition": {
           "op": "lte",
-          "value": 25.0
+          "value": 25
         },
         "tierOrder": 5
       }
@@ -1482,7 +1482,7 @@
         "scoreValue": 100,
         "condition": {
           "op": "eq",
-          "value": 100.0
+          "value": 100
         },
         "tierOrder": 1
       },
@@ -1521,7 +1521,7 @@
         "scoreValue": 0,
         "condition": {
           "op": "lte",
-          "value": 25.0
+          "value": 25
         },
         "tierOrder": 5
       }
@@ -1547,7 +1547,7 @@
         "scoreValue": 100,
         "condition": {
           "op": "eq",
-          "value": 100.0
+          "value": 100
         },
         "tierOrder": 1
       },
@@ -1586,7 +1586,7 @@
         "scoreValue": 0,
         "condition": {
           "op": "lte",
-          "value": 25.0
+          "value": 25
         },
         "tierOrder": 5
       }
@@ -1597,7 +1597,7 @@
     "level": "PROCESS",
     "category": "PROCESS",
     "maxScore": 50,
-    "weightage": 1.0,
+    "weightage": 1,
     "inputType": "DROPDOWN",
     "infoText": "Number of high and critical severity incidents per month.",
     "nistControlIds": [
@@ -1612,7 +1612,7 @@
         "scoreValue": 50,
         "condition": {
           "op": "eq",
-          "value": 0.0
+          "value": 0
         },
         "tierOrder": 1
       },
@@ -1637,11 +1637,11 @@
         "tierOrder": 3
       },
       {
-        "tierLabel": "5-10/mon",
+        "tierLabel": "6-10/mon",
         "scoreValue": 20,
         "condition": {
           "op": "range",
-          "min": 5,
+          "min": 6,
           "max": 10
         },
         "tierOrder": 4
@@ -1651,7 +1651,7 @@
         "scoreValue": 0,
         "condition": {
           "op": "gt",
-          "value": 10.0
+          "value": 10
         },
         "tierOrder": 5
       }
@@ -1692,7 +1692,7 @@
       },
       {
         "tierLabel": "Not sure",
-        "scoreValue": -50,
+        "scoreValue": 0,
         "condition": {
           "op": "eq",
           "value": "Not sure"
@@ -1736,7 +1736,7 @@
       },
       {
         "tierLabel": "Not sure",
-        "scoreValue": -50,
+        "scoreValue": 0,
         "condition": {
           "op": "eq",
           "value": "Not sure"
@@ -1780,7 +1780,7 @@
       },
       {
         "tierLabel": "Not sure",
-        "scoreValue": -50,
+        "scoreValue": 0,
         "condition": {
           "op": "eq",
           "value": "Not sure"
@@ -1824,7 +1824,7 @@
       },
       {
         "tierLabel": "Not sure",
-        "scoreValue": -50,
+        "scoreValue": 0,
         "condition": {
           "op": "eq",
           "value": "Not sure"
@@ -1868,7 +1868,7 @@
       },
       {
         "tierLabel": "Not sure",
-        "scoreValue": -50,
+        "scoreValue": 0,
         "condition": {
           "op": "eq",
           "value": "Not sure"
@@ -1882,7 +1882,7 @@
     "level": "PROCESS",
     "category": "PROCESS",
     "maxScore": 100,
-    "weightage": 1.0,
+    "weightage": 1,
     "inputType": "PERCENTAGE",
     "infoText": "Percentage of failed logins out of total login attempts, weekly.",
     "nistControlIds": [
@@ -1897,7 +1897,7 @@
         "scoreValue": 100,
         "condition": {
           "op": "lte",
-          "value": 3.0
+          "value": 3
         },
         "tierOrder": 1
       },
@@ -1936,7 +1936,7 @@
         "scoreValue": 0,
         "condition": {
           "op": "gt",
-          "value": 15.0
+          "value": 15
         },
         "tierOrder": 5
       }
@@ -1947,7 +1947,7 @@
     "level": "PROCESS",
     "category": "PROCESS",
     "maxScore": 100,
-    "weightage": 1.0,
+    "weightage": 1,
     "inputType": "PERCENTAGE",
     "infoText": "Percentage of vulnerabilities that recurred after being closed.",
     "nistControlIds": [
@@ -1962,7 +1962,7 @@
         "scoreValue": 100,
         "condition": {
           "op": "lte",
-          "value": 3.0
+          "value": 3
         },
         "tierOrder": 1
       },
@@ -2001,7 +2001,7 @@
         "scoreValue": 0,
         "condition": {
           "op": "gt",
-          "value": 15.0
+          "value": 15
         },
         "tierOrder": 5
       }
@@ -2012,7 +2012,7 @@
     "level": "COMPANY",
     "category": "TECHNOLOGY",
     "maxScore": 200,
-    "weightage": 1.0,
+    "weightage": 1,
     "inputType": "PERCENTAGE",
     "infoText": "Percentage of endpoints with EDR (endpoint detection and response) agent installed.",
     "nistControlIds": [
@@ -2027,7 +2027,7 @@
         "scoreValue": 200,
         "condition": {
           "op": "eq",
-          "value": 100.0
+          "value": 100
         },
         "tierOrder": 1
       },
@@ -2066,7 +2066,7 @@
         "scoreValue": 0,
         "condition": {
           "op": "lte",
-          "value": 25.0
+          "value": 25
         },
         "tierOrder": 5
       }
@@ -2077,7 +2077,7 @@
     "level": "COMPANY",
     "category": "TECHNOLOGY",
     "maxScore": 200,
-    "weightage": 1.0,
+    "weightage": 1,
     "inputType": "PERCENTAGE",
     "infoText": "Percentage compliance with CIS hardening benchmarks across systems.",
     "nistControlIds": [
@@ -2092,7 +2092,7 @@
         "scoreValue": 200,
         "condition": {
           "op": "eq",
-          "value": 100.0
+          "value": 100
         },
         "tierOrder": 1
       },
@@ -2131,7 +2131,7 @@
         "scoreValue": 0,
         "condition": {
           "op": "lte",
-          "value": 25.0
+          "value": 25
         },
         "tierOrder": 5
       }
@@ -2142,7 +2142,7 @@
     "level": "COMPANY",
     "category": "TECHNOLOGY",
     "maxScore": 200,
-    "weightage": 1.0,
+    "weightage": 1,
     "inputType": "PERCENTAGE",
     "infoText": "Percentage of phishing emails blocked by the email gateway.",
     "nistControlIds": [
@@ -2157,7 +2157,7 @@
         "scoreValue": 200,
         "condition": {
           "op": "eq",
-          "value": 100.0
+          "value": 100
         },
         "tierOrder": 1
       },
@@ -2196,7 +2196,7 @@
         "scoreValue": 0,
         "condition": {
           "op": "lte",
-          "value": 25.0
+          "value": 25
         },
         "tierOrder": 5
       }
@@ -2207,7 +2207,7 @@
     "level": "COMPANY",
     "category": "TECHNOLOGY",
     "maxScore": 200,
-    "weightage": 1.0,
+    "weightage": 1,
     "inputType": "PERCENTAGE",
     "infoText": "Percentage of endpoints with browsers and apps fully patched.",
     "nistControlIds": [
@@ -2222,7 +2222,7 @@
         "scoreValue": 200,
         "condition": {
           "op": "eq",
-          "value": 100.0
+          "value": 100
         },
         "tierOrder": 1
       },
@@ -2261,7 +2261,7 @@
         "scoreValue": 0,
         "condition": {
           "op": "lte",
-          "value": 25.0
+          "value": 25
         },
         "tierOrder": 5
       }
@@ -2272,60 +2272,64 @@
     "level": "COMPANY",
     "category": "TECHNOLOGY",
     "maxScore": 100,
-    "weightage": 1.0,
+    "weightage": 1,
     "inputType": "DROPDOWN",
     "infoText": "Time to fully restore systems from the most recent backup.",
-    "nistControlIds": [],
-    "isoControlIds": [],
+    "nistControlIds": [
+      "RC.RP-01"
+    ],
+    "isoControlIds": [
+      "A.8.13"
+    ],
     "tiers": [
       {
         "tierLabel": "<1 hr",
         "scoreValue": 100,
         "condition": {
           "op": "lt",
-          "value": 1.0
+          "value": 1
         },
         "tierOrder": 1
       },
       {
-        "tierLabel": ">1 & <12 hrs",
+        "tierLabel": "≥1 & <12 hrs",
         "scoreValue": 50,
         "condition": {
           "op": "range",
           "min": 1,
           "max": 12,
-          "exclusive": true
+          "exclusiveMax": true
         },
         "tierOrder": 2
       },
       {
-        "tierLabel": ">12 & <24 hrs",
+        "tierLabel": "≥12 & <24 hrs",
         "scoreValue": 25,
         "condition": {
           "op": "range",
           "min": 12,
           "max": 24,
-          "exclusive": true
+          "exclusiveMax": true
         },
         "tierOrder": 3
       },
       {
-        "tierLabel": ">24 & <48 hrs",
+        "tierLabel": "≥24 & <48 hrs",
         "scoreValue": 10,
         "condition": {
           "op": "range",
           "min": 24,
           "max": 48,
-          "exclusive": true
+          "exclusiveMax": true
         },
         "tierOrder": 4
       },
       {
-        "tierLabel": ">48 hrs",
+        "tierLabel": "≥48 hrs",
         "scoreValue": 0,
         "condition": {
-          "op": "gt",
-          "value": 48.0
+          "op": "gte",
+          "value": 48
         },
         "tierOrder": 5
       }
@@ -2336,18 +2340,23 @@
     "level": "COMPANY",
     "category": "TECHNOLOGY",
     "maxScore": 50,
-    "weightage": 1.0,
+    "weightage": 1,
     "inputType": "PERCENTAGE",
     "infoText": "Percentage of privileged accounts under active monitoring.",
-    "nistControlIds": [],
-    "isoControlIds": [],
+    "nistControlIds": [
+      "DE.CM-03"
+    ],
+    "isoControlIds": [
+      "A.8.15",
+      "A.8.16"
+    ],
     "tiers": [
       {
         "tierLabel": "100%",
         "scoreValue": 50,
         "condition": {
           "op": "eq",
-          "value": 100.0
+          "value": 100
         },
         "tierOrder": 1
       },
@@ -2386,7 +2395,7 @@
         "scoreValue": 0,
         "condition": {
           "op": "lte",
-          "value": 25.0
+          "value": 25
         },
         "tierOrder": 5
       }
@@ -2397,18 +2406,22 @@
     "level": "COMPANY",
     "category": "TECHNOLOGY",
     "maxScore": 50,
-    "weightage": 1.0,
+    "weightage": 1,
     "inputType": "DROPDOWN",
     "infoText": "Average number of unresolved critical CVEs per month.",
-    "nistControlIds": [],
-    "isoControlIds": [],
+    "nistControlIds": [
+      "ID.RA-01"
+    ],
+    "isoControlIds": [
+      "A.8.8"
+    ],
     "tiers": [
       {
         "tierLabel": "0/none",
         "scoreValue": 50,
         "condition": {
           "op": "eq",
-          "value": 0.0
+          "value": 0
         },
         "tierOrder": 1
       },
@@ -2433,11 +2446,11 @@
         "tierOrder": 3
       },
       {
-        "tierLabel": "5-10/mon",
+        "tierLabel": "6-10/mon",
         "scoreValue": 20,
         "condition": {
           "op": "range",
-          "min": 5,
+          "min": 6,
           "max": 10
         },
         "tierOrder": 4
@@ -2447,7 +2460,7 @@
         "scoreValue": 0,
         "condition": {
           "op": "gt",
-          "value": 10.0
+          "value": 10
         },
         "tierOrder": 5
       }
@@ -2461,15 +2474,19 @@
     "weightage": 0.5,
     "inputType": "PERCENTAGE",
     "infoText": "Percentage of third-party vendors meeting security requirements.",
-    "nistControlIds": [],
-    "isoControlIds": [],
+    "nistControlIds": [
+      "GV.SC-07"
+    ],
+    "isoControlIds": [
+      "A.5.19"
+    ],
     "tiers": [
       {
         "tierLabel": "≥95%",
         "scoreValue": 50,
         "condition": {
           "op": "gte",
-          "value": 95.0
+          "value": 95
         },
         "tierOrder": 1
       },
@@ -2508,7 +2525,7 @@
         "scoreValue": 0,
         "condition": {
           "op": "lt",
-          "value": 50.0
+          "value": 50
         },
         "tierOrder": 5
       }
@@ -2519,7 +2536,7 @@
     "level": "COMPANY",
     "category": "TECHNOLOGY",
     "maxScore": 200,
-    "weightage": 1.0,
+    "weightage": 1,
     "inputType": "PERCENTAGE",
     "infoText": "Percentage of cloud resources with security misconfigurations.",
     "nistControlIds": [
@@ -2535,7 +2552,7 @@
         "scoreValue": 200,
         "condition": {
           "op": "lte",
-          "value": 5.0
+          "value": 5
         },
         "tierOrder": 1
       },
@@ -2574,7 +2591,7 @@
         "scoreValue": 0,
         "condition": {
           "op": "gt",
-          "value": 25.0
+          "value": 25
         },
         "tierOrder": 5
       }
@@ -2585,7 +2602,7 @@
     "level": "COMPANY",
     "category": "MGMT REPORTING",
     "maxScore": 200,
-    "weightage": 1.0,
+    "weightage": 1,
     "inputType": "PERCENTAGE",
     "infoText": "Percentage of scheduled security assessments completed on time.",
     "nistControlIds": [
@@ -2600,7 +2617,7 @@
         "scoreValue": 200,
         "condition": {
           "op": "eq",
-          "value": 100.0
+          "value": 100
         },
         "tierOrder": 1
       },
@@ -2639,7 +2656,7 @@
         "scoreValue": 0,
         "condition": {
           "op": "lte",
-          "value": 25.0
+          "value": 25
         },
         "tierOrder": 5
       }
@@ -2649,8 +2666,8 @@
     "kpiName": "Average Incident Cost (M2M trend)",
     "level": "COMPANY",
     "category": "MGMT REPORTING",
-    "maxScore": 200,
-    "weightage": 1.0,
+    "maxScore": 50,
+    "weightage": 1,
     "inputType": "RADIO",
     "infoText": "Direction of average incident cost month-on-month. Declining is best.",
     "nistControlIds": [
@@ -2680,7 +2697,7 @@
       },
       {
         "tierLabel": "Increasing",
-        "scoreValue": -25,
+        "scoreValue": 0,
         "condition": {
           "op": "eq",
           "value": "Increasing"
@@ -2693,8 +2710,8 @@
     "kpiName": "Budget vs Actual Spend",
     "level": "COMPANY",
     "category": "MGMT REPORTING",
-    "maxScore": 200,
-    "weightage": 1.0,
+    "maxScore": 50,
+    "weightage": 1,
     "inputType": "RADIO",
     "infoText": "How closely actual security spend tracked the approved budget.",
     "nistControlIds": [
@@ -2724,7 +2741,7 @@
       },
       {
         "tierLabel": "Overrun 26-50%",
-        "scoreValue": 25,
+        "scoreValue": 15,
         "condition": {
           "op": "eq",
           "value": "Overrun 26-50%"
@@ -2733,7 +2750,7 @@
       },
       {
         "tierLabel": "Overrun >50%",
-        "scoreValue": -25,
+        "scoreValue": 0,
         "condition": {
           "op": "eq",
           "value": "Overrun >50%"
@@ -2746,7 +2763,7 @@
     "kpiName": "AI Impact in Security (vs peer adoption)",
     "level": "COMPANY",
     "category": "MGMT REPORTING",
-    "maxScore": 200,
+    "maxScore": 100,
     "weightage": 0.5,
     "inputType": "RADIO",
     "infoText": "How your AI-in-security adoption compares to industry peers.",
@@ -2770,8 +2787,8 @@
         "tierLabel": ">50-90% of peers",
         "scoreValue": 50,
         "condition": {
-          "op": "gt",
-          "value": 50.0
+          "op": "eq",
+          "value": ">50-90% of peers"
         },
         "tierOrder": 2
       },
@@ -2779,14 +2796,14 @@
         "tierLabel": "<50% but plans",
         "scoreValue": 25,
         "condition": {
-          "op": "lt",
-          "value": 50.0
+          "op": "eq",
+          "value": "<50% but plans"
         },
         "tierOrder": 3
       },
       {
         "tierLabel": "No plans",
-        "scoreValue": -50,
+        "scoreValue": 0,
         "condition": {
           "op": "eq",
           "value": "No plans"

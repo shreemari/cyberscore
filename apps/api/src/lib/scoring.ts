@@ -42,7 +42,9 @@ function matches(cond: TierCondition, inputValue: string, asNumber: number | nul
     case 'gt':
       return asNumber !== null && asNumber > cond.value;
     case 'range':
-      return asNumber !== null && asNumber >= cond.min && asNumber <= cond.max;
+      return asNumber !== null &&
+        (cond.exclusive || cond.exclusiveMin ? asNumber > cond.min : asNumber >= cond.min) &&
+        (cond.exclusive || cond.exclusiveMax ? asNumber < cond.max : asNumber <= cond.max);
     case 'eq':
       if (typeof cond.value === 'number') return asNumber !== null && asNumber === cond.value;
       if (typeof cond.value === 'boolean') return inputValue === String(cond.value);

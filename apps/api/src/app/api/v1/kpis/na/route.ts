@@ -4,6 +4,10 @@ import { prisma, withTenant } from '@/lib/prisma';
 import { parseJson, problem, internalError } from '@/lib/problem';
 import { requireAuth } from '@/lib/require-auth';
 import { audit, AuditActions } from '@/lib/audit';
+import { canAssessLevel } from '@/lib/access';
+import { frameworkKpiFilter } from '@/lib/framework-kpis';
+import { enqueueSnapshot } from '@/lib/queue';
+import { logger } from '@/lib/logger';
 
 // POST /api/v1/kpis/na
 //
@@ -16,24 +20,52 @@ export async function POST(req: Request) {
 
   const parsed = await parseJson(req, MarkNaRequest);
   if (!parsed.ok) return parsed.response;
-  const { kpiId, justification, frameworkCode } = parsed.data;
+  const { kpiId, frameworkCode } = parsed.data;
+  const justification = parsed.data.justification.trim();
+  if (justification.length < 10) {
+    return problem(ErrorCodes.KPI_NO_MATCHING_TIER, {
+      detail: 'N/A justification must contain at least 10 non-whitespace characters.',
+    });
+  }
 
   try {
     const kpi = await prisma.kpi.findFirst({
       where: {
         id: kpiId,
-        frameworkCode,
+        ...frameworkKpiFilter(frameworkCode ?? 'EXCEL'),
         isActive: true,
         deletedAt: null,
       },
-      select: { id: true, version: true },
+      select: { id: true, version: true, level: true },
     });
     // A framework mismatch is reported as KPI_NOT_FOUND, just like an
     // unknown or inactive KPI.
     if (!kpi) return problem(ErrorCodes.KPI_NOT_FOUND);
 
-    const response = await withTenant(auth.orgId, (tx) =>
-      tx.response.upsert({
+    // N/A is still an assessment response. Enforce the same per-user
+    // level restrictions as the normal submit endpoint.
+    const caller = await prisma.user.findUnique({
+      where: { id: auth.userId },
+      select: { role: true, allowedLevels: true, org: { select: { mode: true } } },
+    });
+    if (!caller) return problem(ErrorCodes.AUTH_TOKEN_INVALID);
+    if (!canAssessLevel(
+      { role: caller.role, orgMode: caller.org.mode, allowedLevels: caller.allowedLevels },
+      kpi.level,
+    )) {
+      return problem(ErrorCodes.FORBIDDEN, {
+        detail: `You don't have access to ${kpi.level} assessments. Ask your admin.`,
+      });
+    }
+
+    const saved = await withTenant(auth.orgId, async tx => {
+      const previous = await tx.response.findUnique({
+        where: { orgId_kpiId_submittedById: {
+          orgId: auth.orgId, kpiId, submittedById: auth.userId,
+        } },
+        select: { inputValue: true, actualScore: true, weightedScore: true, isNa: true, naJustification: true },
+      });
+      const response = await tx.response.upsert({
         where: {
           orgId_kpiId_submittedById: {
             orgId: auth.orgId,
@@ -51,6 +83,7 @@ export async function POST(req: Request) {
           weightedScore: 0,
           matchedTierId: null,
           isNa: true,
+          isUnknown: false,
           naJustification: justification,
         },
         update: {
@@ -60,18 +93,26 @@ export async function POST(req: Request) {
           weightedScore: 0,
           matchedTierId: null,
           isNa: true,
+          isUnknown: false,
           naJustification: justification,
         },
-      }),
-    );
+      });
+      return { response, previous };
+    });
+    const response = saved.response;
 
     void audit({
       action: AuditActions.KPI_NA_MARKED,
       resource: `kpi:${kpiId}`,
       actorId: auth.userId,
       orgId: auth.orgId,
+      before: saved.previous,
       after: { responseId: response.id, justification },
       req,
+    });
+
+    enqueueSnapshot({ orgId: auth.orgId, reason: 'KPI_SUBMITTED' }).catch((err) => {
+      logger.warn({ err, orgId: auth.orgId }, 'snapshot enqueue failed');
     });
 
     return NextResponse.json({

@@ -8,6 +8,7 @@ import {
   TextInput,
   Alert,
   ActivityIndicator,
+  Linking,
 } from 'react-native';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { router, useLocalSearchParams } from 'expo-router';
@@ -20,7 +21,7 @@ import { PressableGlow } from '@/components/PressableGlow';
 import { api } from '@/lib/api';
 import { frameworkLabel } from '@/lib/frameworks';
 import { colors } from '@/theme/colors';
-import type { Framework, Kpi, Level, TierCondition } from '@cymetric/types';
+import { scoreRangeFor, type Framework, type Kpi, type Level, type TierCondition } from '@cymetric/types';
 
 // Per-KPI question screen — matches mock screenshot 2.
 // Routed as /(app)/kpi/[id]?level=PEOPLE&index=3
@@ -81,12 +82,16 @@ export default function KpiQuestion() {
   const [selectedTierId, setSelectedTierId] = useState<string | null>(null);
   const [percentValue, setPercentValue] = useState('');
   const [infoOpen, setInfoOpen] = useState(false);
+  const [naOpen, setNaOpen] = useState(false);
+  const [naJustification, setNaJustification] = useState('');
 
   // Reset when navigating to a different KPI.
   useEffect(() => {
     setSelectedTierId(null);
     setPercentValue('');
     setInfoOpen(false);
+    setNaOpen(false);
+    setNaJustification('');
   }, [kpiId]);
 
   const submit = useMutation({
@@ -95,7 +100,7 @@ export default function KpiQuestion() {
       let inputValue: string;
       if (kpi.inputType === 'PERCENTAGE') {
         const n = Number(percentValue);
-        if (!Number.isFinite(n) || n < 0 || n > 100) {
+        if (percentValue.trim() === '' || !Number.isFinite(n) || n < 0 || n > 100) {
           throw new Error('Enter a percentage between 0 and 100');
         }
         inputValue = String(Math.round(n));
@@ -107,24 +112,15 @@ export default function KpiQuestion() {
       const nextIndex = index + 1;
       const status = nextIndex >= byLevel.length ? 'COMPLETED' : 'IN_PROGRESS';
 
-      // Fire both writes in parallel — `progress.save` doesn't depend on
-      // the response of `kpis.submit` (nextIndex is computed client-side),
-      // so we don't need to wait for the first before starting the second.
-      // Cuts the click-to-next latency roughly in half on warm Vercel and
-      // makes a much bigger difference under cold-start.
-      await Promise.all([
-        api.kpis.submit({
-          kpiId: kpi.id,
-          inputValue,
-          frameworkCode: framework,
-        }),
-        api.progress.save({
-          level,
-          lastQuestionIndex: nextIndex,
-          status,
-          frameworkCode: framework,
-        }),
-      ]);
+      // Persist the answer first. A failed submission must never advance the
+      // resume cursor, otherwise the assessment silently skips that KPI.
+      await api.kpis.submit({ kpiId: kpi.id, inputValue, frameworkCode: framework });
+      await api.progress.save({
+        level,
+        lastQuestionIndex: nextIndex,
+        status,
+        frameworkCode: framework,
+      });
       return { nextIndex, status };
     },
     onSuccess: ({ nextIndex, status }, vars) => {
@@ -153,6 +149,59 @@ export default function KpiQuestion() {
       Alert.alert('Could not save', err?.message ?? 'Please try again.');
     },
   });
+
+  const markNa = useMutation({
+    mutationFn: async () => {
+      if (!kpi) throw new Error('KPI not loaded');
+      const justification = naJustification.trim();
+      if (justification.length < 10) throw new Error('Please provide at least 10 characters explaining N/A.');
+      await api.kpis.markNa({ kpiId: kpi.id, justification, frameworkCode: framework });
+      const nextIndex = index + 1;
+      const status = nextIndex >= byLevel.length ? 'COMPLETED' : 'IN_PROGRESS';
+      await api.progress.save({ level, lastQuestionIndex: nextIndex, status, frameworkCode: framework });
+      return { nextIndex, status };
+    },
+    onSuccess: ({ nextIndex, status }) => {
+      setNaOpen(false);
+      void qc.invalidateQueries({ queryKey: ['scorecard'] });
+      void qc.invalidateQueries({ queryKey: ['progress', framework] });
+      if (status === 'COMPLETED') {
+        router.replace(`/(app)/results?framework=${framework}`);
+      } else {
+        const next = byLevel[nextIndex];
+        if (next) router.replace(`/(app)/kpi/${next.id}?level=${level}&index=${nextIndex}&framework=${framework}`);
+      }
+    },
+    onError: (err: any) => Alert.alert('Could not mark N/A', err?.message ?? 'Please try again.'),
+  });
+
+  const [uploadingEvidence, setUploadingEvidence] = useState(false);
+  const onUploadEvidence = async () => {
+    if (!kpi || uploadingEvidence) return;
+    setUploadingEvidence(true);
+    try {
+      let inputValue: string;
+      if (kpi.inputType === 'PERCENTAGE') {
+        const n = Number(percentValue);
+        if (!percentValue.trim() || !Number.isInteger(n) || n < 0 || n > 100) {
+          throw new Error('Enter a percentage between 0 and 100 first.');
+        }
+        inputValue = String(n);
+      } else {
+        const tier = tiersSorted.find((t) => t.id === selectedTierId);
+        if (!tier) throw new Error('Select an answer before attaching evidence.');
+        inputValue = inputValueForTier(tier.condition, tier.tierLabel);
+      }
+      await api.kpis.submit({ kpiId: kpi.id, frameworkCode: framework, inputValue });
+      void qc.invalidateQueries({ queryKey: ['scorecard'] });
+      const upload = await api.kpis.evidenceBrowserLink(kpi.id);
+      await Linking.openURL(upload.url);
+    } catch (err: any) {
+      Alert.alert('Evidence upload unavailable', err?.message ?? 'Try again.');
+    } finally {
+      setUploadingEvidence(false);
+    }
+  };
 
   const canSubmit =
     !!kpi &&
@@ -310,9 +359,9 @@ export default function KpiQuestion() {
                   width: `${Math.min(Number(percentValue) || 0, 100)}%`,
                   height: '100%',
                   backgroundColor:
-                    (Number(percentValue) || 0) >= 75
+                    scoreRangeFor(Number(percentValue) || 0) === 'GREEN'
                       ? colors.score.green
-                      : (Number(percentValue) || 0) >= 50
+                      : scoreRangeFor(Number(percentValue) || 0) === 'AMBER'
                         ? colors.score.amber
                         : colors.score.red,
                   borderRadius: 999,
@@ -395,6 +444,28 @@ export default function KpiQuestion() {
 
       </ScrollView>
 
+      <Pressable
+        accessibilityRole="button"
+        onPress={() => setNaOpen(true)}
+        disabled={submit.isPending || markNa.isPending}
+        style={{ alignItems: 'center', paddingVertical: 9 }}
+      >
+        <Text style={{ color: colors.text.secondary, textDecorationLine: 'underline' }}>
+          Not applicable? Add justification
+        </Text>
+      </Pressable>
+
+      <Pressable
+        accessibilityRole="button"
+        onPress={onUploadEvidence}
+        disabled={!canSubmit || uploadingEvidence}
+        style={{ alignItems: 'center', paddingVertical: 9 }}
+      >
+        <Text style={{ color: canSubmit ? colors.brand[400] : colors.text.muted, fontWeight: '700' }}>
+          {uploadingEvidence ? 'Preparing evidence upload…' : 'Attach evidence (save answer first)'}
+        </Text>
+      </Pressable>
+
       {/* Sticky footer — always visible above safe area */}
       <View
         style={{
@@ -429,6 +500,32 @@ export default function KpiQuestion() {
         </View>
       </View>
 
+      <Modal visible={naOpen} transparent animationType="slide" onRequestClose={() => setNaOpen(false)}>
+        <View style={{ flex: 1, justifyContent: 'center', padding: 24, backgroundColor: 'rgba(0,0,0,0.8)' }}>
+          <Card>
+            <Text style={{ color: colors.text.primary, fontSize: 18, fontWeight: '800', marginBottom: 8 }}>
+              Mark as Not Applicable
+            </Text>
+            <Text style={{ color: colors.text.secondary, marginBottom: 12 }}>
+              Explain why this KPI does not apply to your organisation (minimum 10 characters).
+            </Text>
+            <TextInput
+              value={naJustification}
+              onChangeText={setNaJustification}
+              multiline
+              maxLength={2000}
+              placeholder="Reason this KPI is not applicable"
+              placeholderTextColor={colors.text.muted}
+              style={{ color: colors.text.primary, backgroundColor: colors.bg.elevated, borderRadius: 12, minHeight: 100, padding: 12, textAlignVertical: 'top', marginBottom: 16 }}
+            />
+            <View style={{ gap: 10 }}>
+              <Button label="Confirm N/A and continue" onPress={() => markNa.mutate()} loading={markNa.isPending} disabled={naJustification.trim().length < 10 || markNa.isPending} />
+              <Button label="Cancel" variant="outline" onPress={() => setNaOpen(false)} disabled={markNa.isPending} />
+            </View>
+          </Card>
+        </View>
+      </Modal>
+
       <Modal
         visible={infoOpen}
         transparent
@@ -450,6 +547,18 @@ export default function KpiQuestion() {
                 <Text className="text-text-primary font-bold ml-2 text-lg">About this KPI</Text>
               </View>
               <Text className="text-text-secondary leading-5 mb-4">{kpi.infoText}</Text>
+              <View style={{ marginBottom: 12 }}>
+                <Text style={{ color: colors.text.secondary, fontSize: 12, lineHeight: 21 }}>
+                  Measure owner: {kpi.measureOwner || 'Not configured'}{'\n'}
+                  Data source: {kpi.measureSource || 'Not configured'}{'\n'}
+                  Frequency: {kpi.measureFrequency || 'Not configured'}{'\n'}
+                  Target: {kpi.measureTarget || 'Not configured'}{'\n'}
+                  Formula: {kpi.measureFormula || 'Not configured'}{'\n'}
+                  Critical gate: {kpi.criticalGateMinScorePct == null
+                    ? 'Not enabled'
+                    : `Requires ≥${kpi.criticalGateMinScorePct}%`}
+                </Text>
+              </View>
               {(kpi.nistControlIds.length > 0 || kpi.isoControlIds.length > 0) && (
                 <View className="flex-row flex-wrap gap-2 mb-4">
                   {kpi.nistControlIds.map((c) => (
@@ -500,7 +609,7 @@ function inputValueForTier(cond: TierCondition, fallbackLabel: string): string {
     case 'gt':
       return String(cond.value + 1);
     case 'range':
-      return String(Math.floor((cond.min + cond.max) / 2));
+      return String((cond.min + cond.max) / 2);
     case 'in': {
       const first = cond.values[0];
       return first === undefined ? fallbackLabel : String(first);
@@ -519,7 +628,7 @@ function describeCondition(cond: Kpi['tiers'][number]['condition']): string {
     case 'gt':
       return `> ${cond.value}`;
     case 'range':
-      return `${cond.min} – ${cond.max}`;
+      return `${cond.exclusive || cond.exclusiveMin ? '>' : '≥'} ${cond.min} and ${cond.exclusive || cond.exclusiveMax ? '<' : '≤'} ${cond.max}`;
     case 'eq':
       return String(cond.value);
     case 'in':

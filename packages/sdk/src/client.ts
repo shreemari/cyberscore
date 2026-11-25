@@ -342,9 +342,10 @@ export class CyMetricClient {
       }),
 
     // kpiId is carried in the presign body — the API route is flat under /evidence.
-    evidencePresign: (_kpiId: string, body: EvidencePresignRequest) =>
+    evidencePresign: (kpiId: string, body: EvidencePresignRequest) =>
       this.request<EvidencePresignResponse>('/api/v1/evidence/presign', {
         method: 'POST',
+        query: { kpiId },
         body,
       }),
 
@@ -354,11 +355,100 @@ export class CyMetricClient {
         body,
       }),
 
+    evidenceBrowserLink: (kpiId: string) =>
+      this.request<{ url: string; expiresInSeconds: number }>('/api/v1/evidence/browser-link', {
+        method: 'POST',
+        body: { kpiId },
+      }),
+
     markNa: (body: MarkNaRequest) =>
       this.request<{ ok: true }>('/api/v1/kpis/na', {
         method: 'POST',
         body,
       }),
+  };
+
+  audit = {
+    assessments: () => this.request<{
+      items: Array<{
+        id: string;
+        action: string;
+        resource: string;
+        actorId: string | null;
+        createdAt: string;
+      }>;
+    }>('/api/v1/audit/assessments'),
+  };
+
+  // ------------------------------------------------------------
+  // Corrective action tracking — owner, due date, status
+  // ------------------------------------------------------------
+  actions = {
+    list: () => this.request<{
+      items: Array<{
+        kpiId: string;
+        ownerEmail: string | null;
+        ownerName: string | null;
+        dueDate: string | null;
+        status: 'OPEN' | 'IN_PROGRESS' | 'COMPLETED';
+        notes: string | null;
+      }>;
+    }>('/api/v1/actions'),
+    update: (body: {
+      kpiId: string;
+      ownerEmail: string | null;
+      dueDate: string | null;
+      status: 'OPEN' | 'IN_PROGRESS' | 'COMPLETED';
+      notes?: string | null;
+    }) => this.request<{ ok: true; kpiId: string; status: string }>('/api/v1/actions', {
+      method: 'PUT',
+      body,
+    }),
+  };
+
+  // ------------------------------------------------------------
+  // Governance risk register
+  // ------------------------------------------------------------
+  risks = {
+    list: () => this.request<{ items: Array<{
+      id: string;
+      title: string;
+      description: string;
+      likelihood: number;
+      impact: number;
+      riskScore: number;
+      status: 'OPEN' | 'IN_PROGRESS' | 'CLOSED';
+      treatment: 'MITIGATE' | 'AVOID' | 'TRANSFER' | 'ACCEPT';
+      ownerId: string | null;
+      dueDate: string | null;
+      exceptionReason: string | null;
+      acceptedUntil: string | null;
+    }> }>('/api/v1/risks'),
+    create: (body: {
+      title: string;
+      description: string;
+      likelihood: number;
+      impact: number;
+      status?: 'OPEN' | 'IN_PROGRESS' | 'CLOSED';
+      treatment?: 'MITIGATE' | 'AVOID' | 'TRANSFER' | 'ACCEPT';
+      ownerId?: string | null;
+      dueDate?: string | null;
+      exceptionReason?: string | null;
+      acceptedUntil?: string | null;
+    }) => this.request<{ id: string }>('/api/v1/risks', { method: 'POST', body }),
+    update: (body: {
+      id: string;
+      title: string;
+      description: string;
+      likelihood: number;
+      impact: number;
+      status?: 'OPEN' | 'IN_PROGRESS' | 'CLOSED';
+      treatment?: 'MITIGATE' | 'AVOID' | 'TRANSFER' | 'ACCEPT';
+      ownerId?: string | null;
+      dueDate?: string | null;
+      exceptionReason?: string | null;
+      acceptedUntil?: string | null;
+    }) => this.request<{ id: string }>('/api/v1/risks', { method: 'PATCH', body }),
   };
 
   // ------------------------------------------------------------

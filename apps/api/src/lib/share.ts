@@ -1,4 +1,5 @@
 import bcrypt from 'bcrypt';
+import { createHash } from 'node:crypto';
 import { prisma, withBypassRls } from './prisma';
 import { aggregate, loadScorecardInputs } from './scorecard';
 import type { ScoreRange } from '@cymetric/types';
@@ -30,22 +31,14 @@ export async function resolvePublicShare(
 ): Promise<PublicSharePayload | null> {
   if (!token || token.length < 16) return null;
 
-  const candidates = await prisma.shareToken.findMany({
-    where: {
-      revokedAt: null,
-      expiresAt: { gt: new Date() },
-    },
-    select: { id: true, orgId: true, tokenHash: true, expiresAt: true },
+  // Indexed lookup is independent of the bcrypt verification step. This
+  // avoids enumerating and comparing every active share link across tenants.
+  const matched = await prisma.shareToken.findUnique({
+    where: { lookupKey: createHash('sha256').update(token).digest('hex') },
+    select: { id: true, orgId: true, tokenHash: true, expiresAt: true, revokedAt: true },
   });
-
-  let matched: (typeof candidates)[number] | null = null;
-  for (const row of candidates) {
-    if (await bcrypt.compare(token, row.tokenHash)) {
-      matched = row;
-      break;
-    }
-  }
-  if (!matched) return null;
+  if (!matched || matched.revokedAt || matched.expiresAt <= new Date() ||
+      !(await bcrypt.compare(token, matched.tokenHash))) return null;
 
   const { agg, org } = await withBypassRls(async (tx) => {
     await tx.shareToken.update({

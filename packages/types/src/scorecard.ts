@@ -8,7 +8,21 @@ export const ScorecardResponse = z.object({
   companyScore: z.number(),
   overallScore: z.number(),
   completeness: z.number(), // 0..100 — how many KPIs answered
+  unknownAnswerCount: z.number().int().nonnegative().optional(),
   colorBand: z.nativeEnum(ScoreRange),
+  domainBreakdown: z.record(z.enum(['GV', 'ID', 'PR', 'DE', 'RS', 'RC']), z.object({
+    score: z.number(),
+    maxPossible: z.number(),
+    answered: z.number().int(),
+    total: z.number().int(),
+    colorBand: z.nativeEnum(ScoreRange),
+  })).optional(),
+  criticalGateFailures: z.array(z.object({
+    kpiId: z.string(),
+    kpiName: z.string(),
+    minimumScorePct: z.number(),
+    actualScorePct: z.number().nullable(),
+  })).optional(),
   levelBreakdown: z.object({
     people: z.object({
       score: z.number(),

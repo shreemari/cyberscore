@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { requireAdmin } from '@/lib/require-admin';
+import { requirePlatformAdmin } from '@/lib/require-admin';
 import { internalError } from '@/lib/problem';
 
 // GET /api/v1/admin/billing
@@ -10,7 +10,7 @@ import { internalError } from '@/lib/problem';
 //   ?status=PAST_DUE    — exact SubscriptionStatus match
 //   ?plan=GROWTH        — plan tier
 export async function GET(req: Request) {
-  const auth = requireAdmin(req);
+  const auth = await requirePlatformAdmin(req);
   if ('response' in auth) return auth.response;
 
   const url = new URL(req.url);
