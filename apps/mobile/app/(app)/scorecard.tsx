@@ -196,6 +196,29 @@ export default function Scorecard() {
         </View>
         <LevelSummary title="Company" stats={data?.levelBreakdown.company} totalWeight={totalWeight} full />
 
+        <View className="mt-6 mb-3">
+          <Text className="text-text-primary font-bold text-lg">NIST CSF 2.0 functions</Text>
+          <Text className="text-text-muted text-xs mt-1">
+            Independent weighted views of mapped measures; multi-mapped KPIs can appear in more than one function.
+          </Text>
+        </View>
+        <Card>
+          {([
+            ['GV', 'Govern'], ['ID', 'Identify'], ['PR', 'Protect'],
+            ['DE', 'Detect'], ['RS', 'Respond'], ['RC', 'Recover'],
+          ] as const).map(([code, label]) => {
+            const stats = data?.domainBreakdown?.[code];
+            return (
+              <View key={code} className="flex-row justify-between py-2">
+                <Text className="text-text-secondary text-sm">{label}</Text>
+                <Text className="text-text-primary font-bold text-sm">
+                  {stats && stats.total > 0 ? `${Math.round(stats.score)}% · ${stats.answered}/${stats.total}` : 'No mapped KPIs'}
+                </Text>
+              </View>
+            );
+          })}
+        </Card>
+
         <View className="mt-6">
           <Text className="text-text-primary font-bold text-lg mb-3">Recommended actions ({actions.length})</Text>
           {actions.length === 0 ? (
