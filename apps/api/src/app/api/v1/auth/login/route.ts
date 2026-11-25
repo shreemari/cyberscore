@@ -98,14 +98,6 @@ export async function POST(req: Request) {
 
     if (!user.org.isVerified) return problem(ErrorCodes.AUTH_EMAIL_NOT_VERIFIED);
 
-    // Platform administrators must enrol phishing-resistant or TOTP MFA
-    // before operating customer-wide administration APIs.
-    const platformAdmins = new Set((process.env.PLATFORM_ADMIN_USER_IDS ?? '')
-      .split(',').map(id => id.trim()).filter(Boolean));
-    if (platformAdmins.has(user.id) && !user.totpEnabled) {
-      return problem(ErrorCodes.AUTH_TOTP_REQUIRED);
-    }
-
     if (user.totpEnabled) {
       if (!totpCode) return problem(ErrorCodes.AUTH_TOTP_REQUIRED);
       if (!user.totpSecret || !verifyTotpCode(user.totpSecret, totpCode)) {
