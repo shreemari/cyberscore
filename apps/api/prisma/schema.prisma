@@ -303,6 +303,15 @@ model Kpi {
   weightage      Float     @default(1.0)
   inputType      InputType
   infoText       String    @db.Text
+  // Measurement governance (NIST SP 800-55) is configured by an authorized admin.
+  measureOwner     String? @db.VarChar(200)
+  measureSource    String? @db.VarChar(500)
+  measureFrequency String? @db.VarChar(100)
+  measureTarget    String? @db.VarChar(200)
+  measureFormula   String? @db.Text
+  // A must-pass KPI whose response falls below this percentage caps the band.
+  // NULL = gate disabled until security owners explicitly configure it.
+  criticalGateMinScorePct Int?
   frameworkCode  Framework @default(EXCEL)
   nistControlIds String[]  @default([])
   isoControlIds  String[]  @default([])
