@@ -38,7 +38,7 @@ const CreateKpiRequest = z.object({
 });
 
 export async function POST(req: Request) {
-  const auth = requirePlatformAdmin(req);
+  const auth = await requirePlatformAdmin(req);
   if ('response' in auth) return auth.response;
 
   const parsed = await parseJson(req, CreateKpiRequest);
