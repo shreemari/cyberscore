@@ -54,7 +54,19 @@ async function main() {
     if (orders.size !== kpi.tiers.length) {
       throw new Error(`Duplicate tier order: ${kpi.kpiName}`);
     }
-    for (const tier of kpi.tiers) TierCondition.parse(tier.condition);
+    const ordered = [...kpi.tiers].sort((a, b) => a.tierOrder - b.tierOrder);
+    if (!ordered.some((tier) => tier.scoreValue === kpi.maxScore)) {
+      throw new Error(`Unattainable maximum score: ${kpi.kpiName}`);
+    }
+    for (const [index, tier] of ordered.entries()) {
+      TierCondition.parse(tier.condition);
+      if (tier.scoreValue < 0 || tier.scoreValue > kpi.maxScore) {
+        throw new Error(`Out-of-range tier score: ${kpi.kpiName}`);
+      }
+      if (index > 0 && tier.scoreValue >= ordered[index - 1]!.scoreValue) {
+        throw new Error(`Tier scores must decrease strictly: ${kpi.kpiName}`);
+      }
+    }
   }
 
   console.log(`Seeding ${kpis.length} KPIs…`);
