@@ -21,3 +21,20 @@ export function requireAdmin(
   }
   return auth;
 }
+
+
+// Platform administrators are distinct from organisation administrators.
+// Provision IDs through PLATFORM_ADMIN_USER_IDS on the API runtime. A missing
+// allow-list fails closed: normal customer admins cannot access global data.
+export function requirePlatformAdmin(
+  req: Request,
+): AuthContext | { response: NextResponse } {
+  const auth = requireAdmin(req);
+  if ('response' in auth) return auth;
+  const ids = new Set((process.env.PLATFORM_ADMIN_USER_IDS ?? '')
+    .split(',').map(id => id.trim()).filter(Boolean));
+  if (!ids.has(auth.userId)) {
+    return { response: problem(ErrorCodes.FORBIDDEN) };
+  }
+  return auth;
+}
