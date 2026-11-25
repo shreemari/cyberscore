@@ -85,7 +85,9 @@ function computeLevel(
       maxWeighted += kpi.maxScore * kpi.weightage;
     }
   }
-  const score = maxWeighted === 0 ? 0 : (weighted / maxWeighted) * 100;
+  // Negative penalty tiers exist in the workbook; expose scorecards on the
+  // documented 0–100 scale while keeping the underlying weights intact.
+  const score = maxWeighted === 0 ? 0 : Math.max(0, Math.min(100, (weighted / maxWeighted) * 100));
   return {
     score: round2(score),
     maxPossible: round2(maxWeighted),
@@ -133,7 +135,7 @@ export function aggregate(kpis: KpiLite[], responses: ResponseLite[]): Aggregate
     .map((r) => {
       const kpi = kpiById.get(r.kpiId);
       if (!kpi || kpi.maxScore <= 0) return null;
-      const pct = (r.actualScore / kpi.maxScore) * 100;
+      const pct = Math.max(0, Math.min(100, (r.actualScore / kpi.maxScore) * 100));
       return {
         kpiId: r.kpiId,
         kpiName: kpi.kpiName,
