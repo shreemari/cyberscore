@@ -20,7 +20,7 @@ import { PressableGlow } from '@/components/PressableGlow';
 import { api } from '@/lib/api';
 import { frameworkLabel } from '@/lib/frameworks';
 import { colors } from '@/theme/colors';
-import type { Framework, Kpi, Level, TierCondition } from '@cymetric/types';
+import { scoreRangeFor, type Framework, type Kpi, type Level, type TierCondition } from '@cymetric/types';
 
 // Per-KPI question screen — matches mock screenshot 2.
 // Routed as /(app)/kpi/[id]?level=PEOPLE&index=3
@@ -95,7 +95,7 @@ export default function KpiQuestion() {
       let inputValue: string;
       if (kpi.inputType === 'PERCENTAGE') {
         const n = Number(percentValue);
-        if (!Number.isFinite(n) || n < 0 || n > 100) {
+        if (percentValue.trim() === '' || !Number.isFinite(n) || n < 0 || n > 100) {
           throw new Error('Enter a percentage between 0 and 100');
         }
         inputValue = String(Math.round(n));
@@ -310,9 +310,9 @@ export default function KpiQuestion() {
                   width: `${Math.min(Number(percentValue) || 0, 100)}%`,
                   height: '100%',
                   backgroundColor:
-                    (Number(percentValue) || 0) >= 75
+                    scoreRangeFor(Number(percentValue) || 0) === 'GREEN'
                       ? colors.score.green
-                      : (Number(percentValue) || 0) >= 50
+                      : scoreRangeFor(Number(percentValue) || 0) === 'AMBER'
                         ? colors.score.amber
                         : colors.score.red,
                   borderRadius: 999,
