@@ -1,4 +1,4 @@
-import { prisma } from './prisma';
+import { prisma, withTenant } from './prisma';
 import { logger } from './logger';
 import { clientIp } from './rate-limit';
 
@@ -53,6 +53,24 @@ export interface AuditArgs {
 
 export async function audit(args: AuditArgs): Promise<void> {
   try {
+    const record = {
+      actorId: args.actorId ?? null,
+      orgId: args.orgId ?? null,
+      action: args.action,
+      resource: args.resource.slice(0, 200),
+      before: args.before as never,
+      after: args.after as never,
+      ipAddress: args.req ? clientIp(args.req) : null,
+      userAgent: args.req?.headers.get('user-agent')?.slice(0, 512) ?? null,
+      traceId: args.traceId ?? null,
+    };
+    if (args.orgId) {
+      await withTenant(args.orgId, tx => tx.auditLog.create({ data: record }));
+    } else {
+      await prisma.auditLog.create({ data: record });
+    }
+    /* original create payload follows */
+    /*
     await prisma.auditLog.create({
       data: {
         actorId: args.actorId ?? null,
@@ -66,6 +84,7 @@ export async function audit(args: AuditArgs): Promise<void> {
         traceId: args.traceId ?? null,
       },
     });
+    */
   } catch (err) {
     logger.error({ err, action: args.action }, 'audit write failed');
   }
