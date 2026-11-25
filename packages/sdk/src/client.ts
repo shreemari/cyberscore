@@ -361,6 +361,18 @@ export class CyMetricClient {
       }),
   };
 
+  audit = {
+    assessments: () => this.request<{
+      items: Array<{
+        id: string;
+        action: string;
+        resource: string;
+        actorId: string | null;
+        createdAt: string;
+      }>;
+    }>('/api/v1/audit/assessments'),
+  };
+
   // ------------------------------------------------------------
   // Corrective action tracking — owner, due date, status
   // ------------------------------------------------------------
