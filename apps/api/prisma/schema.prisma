@@ -66,6 +66,12 @@ enum SuggestionPriority {
   MEDIUM
 }
 
+enum ActionStatus {
+  OPEN
+  IN_PROGRESS
+  COMPLETED
+}
+
 enum SubscriptionStatus {
   ACTIVE
   TRIALING
@@ -161,6 +167,7 @@ model Organisation {
   auditLogs           AuditLog[]
   invites             Invite[]
   chatThreads         ChatThread[]
+  improvementActions  ImprovementAction[]
 
   @@unique([emailDomain])
   @@index([email])
@@ -199,6 +206,7 @@ model User {
   invitesSent         Invite[]             @relation("InviteCreator")
   invitesAccepted     Invite[]             @relation("InviteAcceptor")
   assessmentProgress  AssessmentProgress[]
+  improvementActions  ImprovementAction[] @relation("ActionOwner")
   chatThreads         ChatThread[]
 
   @@index([orgId])
@@ -317,6 +325,7 @@ model Kpi {
   suggestions KpiSuggestion[]
   responses   Response[]
   benchmarks  IndustryBenchmark[]
+  improvementActions ImprovementAction[]
 
   @@index([level])
   @@index([frameworkCode])
@@ -715,4 +724,26 @@ model ChatMessage {
 
   @@index([threadId, createdAt])
   @@map("chat_messages")
+}
+
+// Organisation-specific corrective-action assignment for a scored KPI.
+model ImprovementAction {
+  id            String       @id @default(cuid())
+  orgId         String
+  kpiId         String
+  ownerId       String?
+  dueDate       DateTime?
+  status        ActionStatus @default(OPEN)
+  notes         String?      @db.Text
+  completedAt   DateTime?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  org   Organisation @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  kpi   Kpi          @relation(fields: [kpiId], references: [id], onDelete: Cascade)
+  owner User?        @relation("ActionOwner", fields: [ownerId], references: [id], onDelete: SetNull)
+
+  @@unique([orgId, kpiId])
+  @@index([orgId, status, dueDate])
+  @@map("improvement_actions")
 }
