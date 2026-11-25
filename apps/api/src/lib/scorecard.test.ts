@@ -124,4 +124,47 @@ describe('CyMetric KPI Scorecard', () => {
     expect(result.underperforming).toHaveLength(1);
     expect(result.underperforming[0]?.kpiId).toBe('KPI-001');
   });
+
+  it('caps GREEN to AMBER when a must-pass KPI fails its configured threshold', () => {
+    const critical = [{ ...kpis[0]!, criticalGateMinScorePct: 80 }, ...kpis.slice(1)];
+    const result = aggregate(critical, [
+      { kpiId: 'KPI-001', actualScore: 2, weightedScore: 2, isNa: false },
+      { kpiId: 'KPI-002', actualScore: 4, weightedScore: 4, isNa: false },
+      { kpiId: 'KPI-003', actualScore: 4, weightedScore: 4, isNa: false },
+    ]);
+    expect(result.overallScore).toBe(83.33);
+    expect(result.colorBand).toBe(ScoreRange.AMBER);
+    expect(result.criticalGateFailures).toEqual([{
+      kpiId: 'KPI-001',
+      kpiName: 'Security Awareness',
+      minimumScorePct: 80,
+      actualScorePct: 50,
+    }]);
+  });
+
+  it('requires an applicable answer to pass a configured critical gate', () => {
+    const critical = [{ ...kpis[0]!, criticalGateMinScorePct: 80 }, ...kpis.slice(1)];
+    const otherAnswers = kpis.slice(1).map(kpi => ({
+      kpiId: kpi.id, actualScore: 4, weightedScore: 4, isNa: false,
+    }));
+    for (const response of [
+      undefined,
+      { kpiId: 'KPI-001', actualScore: 0, weightedScore: 0, isNa: true },
+    ]) {
+      const result = aggregate(critical, response ? [...otherAnswers, response] : otherAnswers);
+      expect(result.colorBand).toBe(ScoreRange.AMBER);
+      expect(result.criticalGateFailures).toHaveLength(1);
+      expect(result.criticalGateFailures[0]?.actualScorePct).toBeNull();
+    }
+  });
+
+  it('restores GREEN when the critical control passes, or when no gate is configured', () => {
+    const responses = kpis.map(kpi => ({
+      kpiId: kpi.id, actualScore: 4, weightedScore: 4, isNa: false,
+    }));
+    const critical = [{ ...kpis[0]!, criticalGateMinScorePct: 80 }, ...kpis.slice(1)];
+    expect(aggregate(critical, responses).criticalGateFailures).toHaveLength(0);
+    expect(aggregate(critical, responses).colorBand).toBe(ScoreRange.GREEN);
+    expect(aggregate(kpis, responses).criticalGateFailures).toHaveLength(0);
+  });
 });
