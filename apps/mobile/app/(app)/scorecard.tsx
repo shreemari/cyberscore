@@ -122,7 +122,7 @@ export default function Scorecard() {
 
   return (
     <Screen glow>
-      <TopBar title={`${selectedFrameworkLabel.toUpperCase()} SCORECARD`} showBack />
+      <TopBar title="KPI SCORECARD" showBack />
       <ScrollView
         style={{ flex: 1 }}
         contentContainerStyle={{ flexGrow: 1, padding: 20, paddingBottom: 140 }}
@@ -215,6 +215,7 @@ export default function Scorecard() {
                         </Text>
                       </View>
                     </View>
+                    <Text className="text-text-muted text-xs mb-1">Severity: {s.scoreRange} · KPI score: {Math.round(s.currentScore)}%</Text>
                     {s.suggestions.map((suggestion: ScorecardResponse['improvementSuggestions'][number]['suggestions'][number], i: number) => (
                       <View key={i} className="flex-row mt-1">
                         <Ionicons
@@ -224,7 +225,7 @@ export default function Scorecard() {
                           style={{ marginTop: 3, marginRight: 6 }}
                         />
                         <Text className="text-text-secondary text-sm flex-1 leading-5">
-                          {suggestion.text}
+                          <Text className="font-bold">{suggestion.priority} priority: </Text>{suggestion.text}
                         </Text>
                       </View>
                     ))}
