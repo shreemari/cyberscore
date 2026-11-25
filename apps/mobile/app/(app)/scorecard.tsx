@@ -9,10 +9,11 @@ import {
   Share,
   ActivityIndicator,
   Alert,
+  TextInput,
 } from 'react-native';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 import { Ionicons } from '@expo/vector-icons';
-import type { ScorecardResponse } from '@cymetric/types';
+import { Role, type ScorecardResponse } from '@cymetric/types';
 import { Screen } from '@/components/Screen';
 import { TopBar } from '@/components/TopBar';
 import { ScoreRing } from '@/components/ScoreRing';
@@ -47,6 +48,11 @@ export default function Scorecard() {
     queryFn: () => api.scorecard.current(selectedFramework),
   });
   const [sharing, setSharing] = useState(false);
+  const canManageActions = me?.user.role === Role.ADMIN; 
+  const { data: actionData } = useQuery({
+    queryKey: ['corrective-actions'],
+    queryFn: () => api.actions.list(),
+  });
 
   const onRefresh = useCallback(
     () => qc.invalidateQueries({ queryKey: ['scorecard', selectedFramework] }),
@@ -201,6 +207,11 @@ export default function Scorecard() {
                         </Text>
                       </View>
                     ))}
+                    <ActionTracker
+                      kpiId={s.kpiId}
+                      canEdit={canManageActions}
+                      action={actionData?.items.find((a) => a.kpiId === s.kpiId)}
+                    />
                   </Card>
                 );
               })}
@@ -290,4 +301,91 @@ function formatDate(iso: string): string {
   } catch {
     return '—';
   }
+}
+
+type TrackedAction = Awaited<ReturnType<typeof api.actions.list>>['items'][number];
+
+function ActionTracker({
+  kpiId, canEdit, action,
+}: {
+  kpiId: string;
+  canEdit: boolean;
+  action?: TrackedAction;
+}) {
+  const qc = useQueryClient();
+  const [editing, setEditing] = useState(false);
+  const [ownerEmail, setOwnerEmail] = useState(action?.ownerEmail ?? '');
+  const [dueDate, setDueDate] = useState(action?.dueDate ?? '');
+  const [status, setStatus] = useState<'OPEN' | 'IN_PROGRESS' | 'COMPLETED'>(action?.status ?? 'OPEN');
+  const [notes, setNotes] = useState(action?.notes ?? '');
+  const saving = useMutation({
+    mutationFn: () => api.actions.update({
+      kpiId, ownerEmail: ownerEmail.trim() || null,
+      dueDate: dueDate.trim() || null, status, notes: notes.trim() || null,
+    }),
+    onSuccess: () => {
+      setEditing(false);
+      void qc.invalidateQueries({ queryKey: ['corrective-actions'] });
+    },
+    onError: (err: any) => Alert.alert('Action not saved', err?.message ?? 'Try again.'),
+  });
+
+  return (
+    <View style={{ marginTop: 14, borderTopWidth: 1, borderTopColor: colors.border.subtle, paddingTop: 12 }}>
+      <Text style={{ color: colors.text.primary, fontWeight: '700', marginBottom: 6 }}>Action tracking</Text>
+      <Text style={{ color: colors.text.secondary, fontSize: 12 }}>
+        Owner: {action?.ownerName ?? action?.ownerEmail ?? 'Unassigned'} ·
+        Due: {action?.dueDate ?? 'Not set'} ·
+        Status: {action?.status?.replace('_', ' ') ?? 'OPEN'}
+      </Text>
+      {canEdit && !editing && (
+        <Pressable onPress={() => {
+          setOwnerEmail(action?.ownerEmail ?? '');
+          setDueDate(action?.dueDate ?? '');
+          setStatus(action?.status ?? 'OPEN');
+          setNotes(action?.notes ?? '');
+          setEditing(true);
+        }} style={{ marginTop: 8 }}>
+          <Text style={{ color: colors.brand[400], fontWeight: '700' }}>Assign or update action</Text>
+        </Pressable>
+      )}
+      {canEdit && editing && (
+        <View style={{ gap: 10, marginTop: 12 }}>
+          <Text style={{ color: colors.text.secondary, fontSize: 12 }}>Owner email (existing team member)</Text>
+          <TextInput
+            value={ownerEmail} onChangeText={setOwnerEmail} autoCapitalize="none"
+            keyboardType="email-address" placeholder="owner@example.com"
+            placeholderTextColor={colors.text.muted}
+            style={{ backgroundColor: colors.bg.elevated, color: colors.text.primary, padding: 12, borderRadius: 10 }}
+          />
+          <Text style={{ color: colors.text.secondary, fontSize: 12 }}>Target date (YYYY-MM-DD)</Text>
+          <TextInput
+            value={dueDate} onChangeText={setDueDate} placeholder="2026-12-31"
+            placeholderTextColor={colors.text.muted}
+            style={{ backgroundColor: colors.bg.elevated, color: colors.text.primary, padding: 12, borderRadius: 10 }}
+          />
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+            {(['OPEN', 'IN_PROGRESS', 'COMPLETED'] as const).map((value) => (
+              <Pressable
+                key={value}
+                onPress={() => setStatus(value)}
+                style={{ borderWidth: 1, borderColor: status === value ? colors.brand[400] : colors.border.muted, borderRadius: 10, padding: 10 }}
+              >
+                <Text style={{ color: status === value ? colors.brand[400] : colors.text.secondary }}>
+                  {value.replace('_', ' ')}
+                </Text>
+              </Pressable>
+            ))}
+          </View>
+          <TextInput
+            value={notes} onChangeText={setNotes} multiline maxLength={2000}
+            placeholder="Progress notes" placeholderTextColor={colors.text.muted}
+            style={{ backgroundColor: colors.bg.elevated, color: colors.text.primary, padding: 12, borderRadius: 10, minHeight: 64 }}
+          />
+          <Button label="Save action" onPress={() => saving.mutate()} loading={saving.isPending} disabled={saving.isPending} />
+          <Button label="Cancel" variant="outline" onPress={() => setEditing(false)} />
+        </View>
+      )}
+    </View>
+  );
 }
