@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import bcrypt from 'bcrypt';
+import { createHash } from 'node:crypto';
 import { CreateShareRequest } from '@cymetric/types';
 import { withTenant } from '@/lib/prisma';
 import { requireAuth } from '@/lib/require-auth';
@@ -32,6 +33,7 @@ export async function POST(req: Request) {
         data: {
           orgId: auth.orgId,
           tokenHash,
+          lookupKey: createHash('sha256').update(raw).digest('hex'),
           label: feedbackText?.slice(0, 200) ?? null,
           expiresAt,
         },
