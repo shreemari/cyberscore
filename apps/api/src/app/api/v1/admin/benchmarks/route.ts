@@ -28,7 +28,7 @@ const UpsertBenchmarkRequest = z.object({
 // admins need visibility into below-threshold data to decide whether to
 // keep collecting; the k-anon gate is enforced at the user-facing read.
 export async function GET(req: Request) {
-  const auth = requirePlatformAdmin(req);
+  const auth = await requirePlatformAdmin(req);
   if ('response' in auth) return auth.response;
 
   const url = new URL(req.url);
@@ -73,7 +73,7 @@ export async function GET(req: Request) {
 // every write — the staleness signal feeds the admin "refresh benchmarks"
 // view.
 export async function POST(req: Request) {
-  const auth = requirePlatformAdmin(req);
+  const auth = await requirePlatformAdmin(req);
   if ('response' in auth) return auth.response;
 
   const parsed = await parseJson(req, UpsertBenchmarkRequest);
