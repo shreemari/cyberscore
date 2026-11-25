@@ -407,6 +407,51 @@ export class CyMetricClient {
   };
 
   // ------------------------------------------------------------
+  // Governance risk register
+  // ------------------------------------------------------------
+  risks = {
+    list: () => this.request<{ items: Array<{
+      id: string;
+      title: string;
+      description: string;
+      likelihood: number;
+      impact: number;
+      riskScore: number;
+      status: 'OPEN' | 'IN_PROGRESS' | 'CLOSED';
+      treatment: 'MITIGATE' | 'AVOID' | 'TRANSFER' | 'ACCEPT';
+      ownerId: string | null;
+      dueDate: string | null;
+      exceptionReason: string | null;
+      acceptedUntil: string | null;
+    }> }>('/api/v1/risks'),
+    create: (body: {
+      title: string;
+      description: string;
+      likelihood: number;
+      impact: number;
+      status?: 'OPEN' | 'IN_PROGRESS' | 'CLOSED';
+      treatment?: 'MITIGATE' | 'AVOID' | 'TRANSFER' | 'ACCEPT';
+      ownerId?: string | null;
+      dueDate?: string | null;
+      exceptionReason?: string | null;
+      acceptedUntil?: string | null;
+    }) => this.request<{ id: string }>('/api/v1/risks', { method: 'POST', body }),
+    update: (body: {
+      id: string;
+      title: string;
+      description: string;
+      likelihood: number;
+      impact: number;
+      status?: 'OPEN' | 'IN_PROGRESS' | 'CLOSED';
+      treatment?: 'MITIGATE' | 'AVOID' | 'TRANSFER' | 'ACCEPT';
+      ownerId?: string | null;
+      dueDate?: string | null;
+      exceptionReason?: string | null;
+      acceptedUntil?: string | null;
+    }) => this.request<{ id: string }>('/api/v1/risks', { method: 'PATCH', body }),
+  };
+
+  // ------------------------------------------------------------
   // Scorecard & progress
   // ------------------------------------------------------------
   scorecard = {
