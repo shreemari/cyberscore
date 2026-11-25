@@ -156,6 +156,24 @@ export default function Scorecard() {
           </Text>
         </View>
 
+        {(data?.criticalGateFailures?.length ?? 0) > 0 && (
+          <Card>
+            <Text className="text-text-primary font-bold mb-2">
+              Critical controls need attention ({data?.criticalGateFailures?.length ?? 0})
+            </Text>
+            <Text className="text-text-secondary text-sm mb-2">
+              A must-pass control is below its required score or has not been assessed.
+              The overall status cannot be GREEN until all configured gates pass.
+            </Text>
+            {(data?.criticalGateFailures ?? []).map(gate => (
+              <Text key={gate.kpiId} className="text-text-secondary text-xs mb-1">
+                {gate.kpiName}: {gate.actualScorePct == null ? 'Not verified' : `${gate.actualScorePct}%`}
+                {' · '}Minimum {gate.minimumScorePct}%
+              </Text>
+            ))}
+          </Card>
+        )}
+
         <Card>
           <Text className="text-text-primary font-bold mb-3">Assessment completeness</Text>
           <Text className="text-text-primary text-xl font-bold">{completeness}% completed</Text>
