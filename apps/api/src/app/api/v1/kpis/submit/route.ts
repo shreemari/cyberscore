@@ -1,9 +1,9 @@
 import { NextResponse } from 'next/server';
-import { SubmitKpiRequest, ErrorCodes } from '@cymetric/types';
+import { SubmitKpiRequest, ErrorCodes, InputType } from '@cymetric/types';
 import { prisma, withTenant } from '@/lib/prisma';
 import { parseJson, problem, internalError } from '@/lib/problem';
 import { requireAuth } from '@/lib/require-auth';
-import { scoreResponse } from '@/lib/scoring';
+import { parseNumericInput, scoreResponse } from '@/lib/scoring';
 import { audit, AuditActions } from '@/lib/audit';
 import { enqueueSnapshot } from '@/lib/queue';
 import { logger } from '@/lib/logger';
@@ -52,6 +52,15 @@ export async function POST(req: Request) {
       return problem(ErrorCodes.FORBIDDEN, {
         detail: `You don't have access to ${kpi.level} assessments. Ask your admin.`,
       });
+    }
+
+    if (kpi.inputType === InputType.PERCENTAGE) {
+      const value = parseNumericInput(inputValue);
+      if (value === null || !Number.isInteger(value) || value < 0 || value > 100) {
+        return problem(ErrorCodes.KPI_NO_MATCHING_TIER, {
+          detail: 'Enter an integer percentage from 0 to 100.',
+        });
+      }
     }
 
     const scored = scoreResponse({
