@@ -57,7 +57,7 @@ export default function Dashboard() {
     ]);
   }, [qc, showTeamRollup]);
 
-  const overall = data?.overallScore ?? null;
+  const overall = data && data.completeness > 0 ? data.overallScore : null;
   const people = data?.levelBreakdown?.people;
   const proc = data?.levelBreakdown?.process;
   const company = data?.levelBreakdown?.company;
