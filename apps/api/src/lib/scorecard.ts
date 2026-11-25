@@ -1,5 +1,6 @@
 import type { Prisma } from '@prisma/client';
-import { AnswerScope, Level, OrgMode, Role, ScoreRange, scoreRangeFor } from '@cymetric/types';
+import { AnswerScope, Framework, Level, OrgMode, Role, ScoreRange, scoreRangeFor } from '@cymetric/types';
+import { frameworkKpiFilter } from './framework-kpis';
 
 // Score aggregation — the single source of truth for every scorecard number
 // the API returns. Keep this pure; it takes the raw KPI catalogue + response
@@ -194,7 +195,7 @@ export async function loadScorecardInputs(
       isActive: true,
       deletedAt: null,
       status: 'PUBLISHED',
-      ...(framework ? { frameworkCode: framework } : {}),
+      ...frameworkKpiFilter(framework as Framework | null | undefined ?? null),
     },
     select: {
       id: true,
