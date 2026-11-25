@@ -70,6 +70,8 @@ export async function POST(req: Request) {
       weightage: kpi.weightage,
     });
     if (!scored) return problem(ErrorCodes.KPI_NO_MATCHING_TIER);
+    const selectedTier = kpi.tiers.find(tier => tier.id === scored.matchedTierId);
+    const isUnknown = /^(unknown|not sure|unsure)$/i.test(selectedTier?.tierLabel.trim() ?? '');
 
     const saved = await withTenant(auth.orgId, async (tx) => {
       const previous = await tx.response.findUnique({
@@ -108,6 +110,7 @@ export async function POST(req: Request) {
           matchedTierId: scored.matchedTierId,
           idempotencyKey: idempotencyKey ?? null,
           isNa: false,
+          isUnknown,
           naJustification: null,
         },
         update: {
@@ -118,6 +121,7 @@ export async function POST(req: Request) {
           matchedTierId: scored.matchedTierId,
           idempotencyKey: idempotencyKey ?? null,
           isNa: false,
+          isUnknown,
           naJustification: null,
         },
       });
