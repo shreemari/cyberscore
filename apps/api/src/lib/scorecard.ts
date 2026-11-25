@@ -24,6 +24,7 @@ export interface KpiLite {
   maxScore: number;
   weightage: number;
   criticalGateMinScorePct?: number | null;
+  nistControlIds?: string[];
   // Optional — defaults to ORG for backwards-compat with callers that
   // haven't been refreshed past the enterprise-mode migration.
   answerScope?: AnswerScope;
@@ -52,6 +53,7 @@ export interface AggregatedScorecard {
   completeness: number;
   colorBand: ScoreRange;
   // Must-pass controls are independent of the numerical weighted score.
+  domainBreakdown: Record<'GV' | 'ID' | 'PR' | 'DE' | 'RS' | 'RC', LevelBreakdown>;
   criticalGateFailures: Array<{
     kpiId: string;
     kpiName: string;
@@ -123,6 +125,15 @@ export function aggregate(kpis: KpiLite[], responses: ResponseLite[]): Aggregate
   const company = computeLevel(byLevel.company, byId);
 
   const all = computeLevel(kpis, byId);
+  // NIST CSF 2.0 reporting lens: a KPI may contribute to multiple functions.
+  // Each domain score is independently weighted, not part of an additional
+  // overall average (which would double-count cross-mapped measures).
+  const functions = ['GV', 'ID', 'PR', 'DE', 'RS', 'RC'] as const;
+  const domainBreakdown = Object.fromEntries(functions.map(domain => [
+    domain,
+    computeLevel(kpis.filter(k => (k.nistControlIds ?? []).some(id =>
+      id.startsWith(`${domain}.`))), byId),
+  ])) as AggregatedScorecard['domainBreakdown'];
 
   // Count only answered KPIs that belong to this scorecard's catalogue.
   // The response list may contain rows from other frameworks in the same org.
@@ -182,6 +193,7 @@ export function aggregate(kpis: KpiLite[], responses: ResponseLite[]): Aggregate
       ? ScoreRange.AMBER
       : scoreRangeFor(all.score),
     criticalGateFailures,
+    domainBreakdown,
     levelBreakdown: { people, process: proc, company },
     underperforming,
   };
@@ -233,6 +245,7 @@ export async function loadScorecardInputs(
       maxScore: true,
       weightage: true,
       criticalGateMinScorePct: true,
+      nistControlIds: true,
       answerScope: true,
     },
   });
