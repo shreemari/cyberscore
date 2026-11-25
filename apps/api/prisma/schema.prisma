@@ -259,6 +259,7 @@ model RefreshToken {
   orgId     String
   userId    String
   tokenHash String    @unique // bcrypt hash — never store the raw token
+  lookupKey String?   @unique @db.VarChar(64) // SHA-256 locator; nullable for legacy tokens
   expiresAt DateTime
   revokedAt DateTime?
   userAgent String?   @db.VarChar(512)
@@ -646,6 +647,7 @@ model ShareToken {
   id           String    @id @default(cuid())
   orgId        String
   tokenHash    String    @unique // bcrypt — raw token only ever returned once at creation
+  lookupKey    String?   @unique @db.VarChar(64) // indexed random-token SHA-256
   label        String?   @db.VarChar(200)
   expiresAt    DateTime
   viewCount    Int       @default(0)
