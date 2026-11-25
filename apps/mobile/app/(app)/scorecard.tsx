@@ -51,6 +51,11 @@ export default function Scorecard() {
   const [sharing, setSharing] = useState(false);
   const [exporting, setExporting] = useState<'pdf' | 'xlsx' | null>(null);
   const canManageActions = me?.user.role === Role.ADMIN; 
+  const { data: auditData } = useQuery({
+    queryKey: ['assessment-audit'],
+    queryFn: () => api.audit.assessments(),
+    enabled: canManageActions,
+  });
   const { data: actionData } = useQuery({
     queryKey: ['corrective-actions'],
     queryFn: () => api.actions.list(),
@@ -235,6 +240,22 @@ export default function Scorecard() {
           )}
         </View>
 
+        {canManageActions && (
+          <View className="mt-7">
+            <Text className="text-text-primary font-bold text-lg mb-3">Assessment change history</Text>
+            <Card>
+              {(auditData?.items ?? []).length === 0 ? (
+                <Text className="text-text-secondary text-sm">No recorded changes yet.</Text>
+              ) : (
+                (auditData?.items ?? []).slice(0, 10).map((event) => (
+                  <Text key={event.id} className="text-text-secondary text-xs mb-2">
+                    {new Date(event.createdAt).toLocaleDateString()} · {event.action.replace(/_/g, ' ')} · {event.resource}
+                  </Text>
+                ))
+              )}
+            </Card>
+          </View>
+        )}
         <View className="mt-8" style={{ gap: 10 }}>
           <Text className="text-text-secondary text-xs">PDF and Excel downloads use a 24-hour summary-only sharing link. Detailed KPI exports require authenticated API access.</Text>
           <Button label="Download PDF" icon="document-text-outline" onPress={() => onExport('pdf')} loading={exporting === 'pdf'} disabled={exporting !== null} />
