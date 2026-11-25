@@ -10,7 +10,7 @@ import { internalError } from '@/lib/problem';
 //   ?status=PAST_DUE    — exact SubscriptionStatus match
 //   ?plan=GROWTH        — plan tier
 export async function GET(req: Request) {
-  const auth = requirePlatformAdmin(req);
+  const auth = await requirePlatformAdmin(req);
   if ('response' in auth) return auth.response;
 
   const url = new URL(req.url);
