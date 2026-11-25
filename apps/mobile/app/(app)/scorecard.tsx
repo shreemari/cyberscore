@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import {
   View,
   Text,
@@ -50,7 +50,8 @@ export default function Scorecard() {
   });
   const [sharing, setSharing] = useState(false);
   const [exporting, setExporting] = useState<'pdf' | 'xlsx' | null>(null);
-  const canManageActions = me?.user.role === Role.ADMIN; 
+  const canManageActions = me?.user.role === Role.ADMIN;
+  const canManageRisks = me?.user.role === Role.ADMIN || me?.user.role === Role.MANAGER; 
   const { data: auditData } = useQuery({
     queryKey: ['assessment-audit'],
     queryFn: () => api.audit.assessments(),
@@ -218,6 +219,13 @@ export default function Scorecard() {
             );
           })}
         </Card>
+
+        {canManageRisks && (
+          <View className="mt-5">
+            <Button variant="outline" label="Open risk register" icon="shield-checkmark-outline"
+              onPress={() => router.push('/(app)/risks')} />
+          </View>
+        )}
 
         <View className="mt-6">
           <Text className="text-text-primary font-bold text-lg mb-3">Recommended actions ({actions.length})</Text>
