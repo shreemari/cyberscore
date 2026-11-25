@@ -18,8 +18,7 @@ import { TopBar } from '@/components/TopBar';
 import { ScoreRing } from '@/components/ScoreRing';
 import { Card } from '@/components/Card';
 import { Button } from '@/components/Button';
-import { api, API_BASE_URL } from '@/lib/api';
-import { secureTokenStorage } from '@/lib/storage';
+import { api } from '@/lib/api';
 import { useAuthStore } from '@/stores/auth';
 import { FRAMEWORKS, type FrameworkCode } from '@/lib/frameworks';
 import { colors, scoreColorForValue } from '@/theme/colors';
@@ -44,26 +43,8 @@ export default function Scorecard() {
 
   const { data, isLoading, isRefetching, isError, error } = useQuery<ScorecardResponse>({
     queryKey: ['scorecard', selectedFramework],
-    queryFn: async () => {
-      const tokens = await secureTokenStorage.getTokens();
-      const response = await fetch(
-        `${API_BASE_URL}/api/v1/scorecard?framework=${encodeURIComponent(selectedFramework)}`,
-        {
-          headers: {
-            Accept: 'application/json',
-            ...(tokens?.accessToken
-              ? { Authorization: `Bearer ${tokens.accessToken}` }
-              : {}),
-          },
-        },
-      );
-
-      if (!response.ok) {
-        throw new Error(`Unable to load ${selectedFrameworkLabel}: HTTP ${response.status}`);
-      }
-
-      return response.json();
-    },
+    // SDK automatically refreshes expired tokens, including this screen.
+    queryFn: () => api.scorecard.current(selectedFramework),
   });
   const [sharing, setSharing] = useState(false);
 
