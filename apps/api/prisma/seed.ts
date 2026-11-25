@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { PrismaClient, Framework, InputType, Level } from '@prisma/client';
-import type { ScoreRange, SuggestionPriority } from '@cymetric/types';
+import { TierCondition, type ScoreRange, type SuggestionPriority } from '@cymetric/types';
 import {
   SUGGESTIONS_BY_KPI,
   GENERIC_SUGGESTIONS,
@@ -12,10 +12,9 @@ import {
 //
 //   npm run db:seed
 //
-// Idempotent: re-running wipes and re-creates each KPI's tiers + suggestions
-// from scratch. Safe in dev; in prod it preserves existing Response rows
-// because Kpi rows are matched by (kpiName + frameworkCode) and only
-// updated, never deleted.
+// Idempotent: re-running updates KPI scoring tiers in place, preserving
+// matchedTierId references on historical responses. Review and back up data
+// before applying any seed to a production database.
 
 interface KpiSeed {
   kpiName: string;
@@ -43,6 +42,20 @@ async function main() {
     'utf-8',
   );
   const kpis: KpiSeed[] = JSON.parse(raw);
+
+  if (kpis.length !== 46 || new Set(kpis.map((k) => k.kpiName)).size !== 46) {
+    throw new Error('Expected exactly 46 uniquely named canonical KPI records.');
+  }
+  for (const kpi of kpis) {
+    if (kpi.maxScore <= 0 || kpi.weightage <= 0 || !kpi.tiers.length) {
+      throw new Error(`Invalid scoring weights or missing tiers: ${kpi.kpiName}`);
+    }
+    const orders = new Set(kpi.tiers.map((tier) => tier.tierOrder));
+    if (orders.size !== kpi.tiers.length) {
+      throw new Error(`Duplicate tier order: ${kpi.kpiName}`);
+    }
+    for (const tier of kpi.tiers) TierCondition.parse(tier.condition);
+  }
 
   console.log(`Seeding ${kpis.length} KPIs…`);
 
@@ -81,16 +94,22 @@ async function main() {
     if (existing) updated++;
     else created++;
 
-    // Replace tiers wholesale — cheaper than diffing and keeps ordering clean.
-    await prisma.scoringTier.deleteMany({ where: { kpiId: kpi.id } });
-    await prisma.scoringTier.createMany({
-      data: seed.tiers.map((t) => ({
-        kpiId: kpi.id,
-        tierLabel: t.tierLabel,
-        condition: t.condition as object,
-        scoreValue: t.scoreValue,
-        tierOrder: t.tierOrder,
-      })),
+    // Keep tier IDs stable for stored Response.matchedTierId references.
+    // Deleting/recreating tiers would erase those references via ON DELETE SET NULL.
+    for (const tier of seed.tiers) {
+      const tierData = {
+        tierLabel: tier.tierLabel,
+        condition: tier.condition as object,
+        scoreValue: tier.scoreValue,
+      };
+      await prisma.scoringTier.upsert({
+        where: { kpiId_tierOrder: { kpiId: kpi.id, tierOrder: tier.tierOrder } },
+        create: { kpiId: kpi.id, tierOrder: tier.tierOrder, ...tierData },
+        update: tierData,
+      });
+    }
+    await prisma.scoringTier.deleteMany({
+      where: { kpiId: kpi.id, tierOrder: { notIn: seed.tiers.map((t) => t.tierOrder) } },
     });
     tierCount += seed.tiers.length;
 
